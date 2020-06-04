@@ -1,0 +1,52 @@
+##
+#
+# CHeck if the check for recorse Directory entries works.
+# Let A;B;C is directory entry. There cannot be directory or file entry with
+# keywords in form A;B;C;<another_keyword> - this can lead cache corruption.
+#
+
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+PROJECT(BIMCM_ARCHIVE_TEST)
+
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
+FIND_PACKAGE(BIMCM)
+
+SET(GIT_DOWNLOAD_URI "ssh://git@stash.bimproject.cz:7999/bpcomm/cmake-lib-test.git")
+
+SET(TEST_CACHE_FILE_RECURSE)
+SET(TEST_CACHE_DIRECTORY_RECURSE)
+
+
+
+#
+# Download zip as FILE
+# Comment out OUTPUT_PATH_VAR --> function omit error
+#
+BIMCM_DEPENDENCY(
+	KEYWORDS DIRECTORY MESSY A
+	TYPE DIRECTORY
+	URI "${GIT_DOWNLOAD_URI}"
+	OUTPUT_PATH_VAR output_path
+)
+
+IF(TEST_CACHE_DIRECTORY_RECURSE)
+	BIMCM_DEPENDENCY(
+		KEYWORDS DIRECTORY MESSY A NOTALLOWED
+		TYPE DIRECTORY
+		URI "${GIT_DOWNLOAD_URI}"
+		OUTPUT_PATH_VAR output_path
+	)
+	BIMCM_CACHE_DELETE(KEYWORDS DIRECTORY MESSY A)
+ELSEIF(TEST_CACHE_FILE_RECURSE)
+	BIMCM_DEPENDENCY(
+		KEYWORDS DIRECTORY MESSY A NOTALLOWED
+		TYPE FILE
+		URI "${GIT_DOWNLOAD_URI}"
+		URI_PATH "TEST_MODULE.cmake"
+		OUTPUT_PATH_VAR output_path
+	)
+	BIMCM_CACHE_DELETE(KEYWORDS DIRECTORY MESSY A NOTALLOWED)
+ELSE()
+	MESSAGE(FATAL_ERROR "Test not choosen! Error!")
+ENDIF()
+

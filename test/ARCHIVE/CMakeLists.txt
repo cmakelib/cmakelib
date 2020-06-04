@@ -1,0 +1,57 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+PROJECT(BIMCM_ARCHIVE_TEST)
+
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
+FIND_PACKAGE(BIMCM)
+
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../TEST.cmake")
+
+
+
+FUNCTION(TEST_EXTRACT archive_name archive_type)
+	SET(output_dir "${CMAKE_CURRENT_BINARY_DIR}/${archive_name}/")
+	FILE(MAKE_DIRECTORY ${output_dir})
+
+	SET(archive_type_arg)
+	IF(archive_type)
+		SET(archive_type_arg ARCHIVE_TYPE ${archive_type})
+	ENDIF()
+
+	BIMCM_ARCHIVE_EXTRACT(
+		ARCHIVE_PATH "${CMAKE_CURRENT_LIST_DIR}/archive/${archive_name}"
+		${archive_type_arg}
+		OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/${archive_name}/"
+	)
+	BIMCM_ARCHIVE_EXTRACT(
+		ARCHIVE_PATH "${CMAKE_CURRENT_LIST_DIR}/archive/${archive_name}"
+		${archive_type_arg}
+		OUTPUT_PATH_VAR var
+	)
+	_BIMCM_LIBRARY_DEBUG_MESSAGE("Output path for archive: ${var}")	
+	TEST_VAR_PATH_EXISTS(var)
+ENDFUNCTION()
+
+FUNCTION(TEST_INVALID_TYPE)
+	TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/invalid_archive_type_test/")
+ENDFUNCTION()
+
+FUNCTION(TEST_INVALID_OUTPUT_ARG)
+	TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/invalid_output_var/")
+ENDFUNCTION()
+
+
+
+TEST_INVALID_TYPE()
+TEST_INVALID_OUTPUT_ARG()
+
+TEST_EXTRACT(archive.zip "")
+TEST_EXTRACT(archive.bz2 "")
+TEST_EXTRACT(archive.gz "")
+TEST_EXTRACT(archive_tar.tar "")
+TEST_EXTRACT(archive_tar.tar.bz2 "")
+
+TEST_EXTRACT(archive_tar_bz2 TAR.BZ2)
+TEST_EXTRACT(archive_tar_gz TAR.GZ)
+TEST_EXTRACT(archive_zip ZIP)
+TEST_EXTRACT(archive_tar TAR)
+

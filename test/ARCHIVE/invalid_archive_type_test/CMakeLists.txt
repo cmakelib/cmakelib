@@ -1,0 +1,14 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+PROJECT(BIMCM_ARCHIVE_TEST)
+
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
+FIND_PACKAGE(BIMCM)
+
+SET(archive_name archive.bz2)
+SET(output_dir "${CMAKE_CURRENT_BINARY_DIR}/${archive_name}/")
+FILE(MAKE_DIRECTORY ${output_dir})
+BIMCM_ARCHIVE_EXTRACT(
+	ARCHIVE_PATH "${CMAKE_CURRENT_LIST_DIR}/../archive/${archive_name}"
+	ARCHIVE_TYPE "invalid_archive_type"
+	OUTPUT_DIRECTORY "${output_dir}"
+)

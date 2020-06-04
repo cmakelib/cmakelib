@@ -1,0 +1,57 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
+PROJECT(BIMCM_CACHE_TEST)
+
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
+FIND_PACKAGE(BIMCM)
+
+
+
+FUNCTION(TEST_PARSE options single multiple)
+	SET(arg)
+	SET(arg_required REQUIRED)
+	SET(options_arg)
+	IF(options_arg)
+		SET(options_arg OPTIONS TEST_OPTION)
+		LIST(APPEND arg_required TEST_OPTION)
+		LIST(APPEND arg OPTIONS
+			TEST_OPTION ON
+		)
+	ENDIF()
+
+	SET(single_arg)
+	IF(single)
+		SET(single_arg ONE_VALUE TEST_ONE_VALUE)
+		LIST(APPEND arg_required TEST_ONE_VALUE)
+		LIST(APPEND arg
+			TEST_ONE_VALUE "KRUTAA"
+		)
+	ENDIF()
+
+	SET(multi_arg)
+	IF(multiple)
+		SET(multi_arg MULTI_VALUE TEST_MULTIPLE_VALUE SMARJA MOJE)
+		LIST(APPEND arg_required TEST_MULTIPLE_VALUE)
+		LIST(APPEND arg
+				TEST_MULTIPLE_VALUE "KRUTAAATKO" "Kure podruhe!"
+				SMARJA MOJE
+		)
+	ENDIF()
+
+	BIMCM_PARSE_ARGUMENTS(
+		${options_arg}
+		${single_arg}
+		${multi_arg}
+		${arg_required}
+		P_ARGN
+			${arg}
+	)
+ENDFUNCTION()
+
+
+
+TEST_PARSE(ON ON ON)
+TEST_PARSE(ON ON OFF)
+TEST_PARSE(ON OFF OFF)
+TEST_PARSE(OFF ON OFF)
+TEST_PARSE(ON OFF ON)
+TEST_PARSE(OFF OFF OFF)
