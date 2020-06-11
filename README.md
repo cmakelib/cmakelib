@@ -1,10 +1,47 @@
 
 # BIMCM Library
 
-Soft and "tiny" library for C/C++.
+Soft and "tiny" CMake library for C/C++.
 
 BIMCM Library is dependency tracking library which allows
 user-programmer effectively track all needed dependencies.
+
+## Common
+
+![Scheme]
+
+Library consist from three main parts
+
+- **cmake-lib - dependency tracking (this repository)**
+- cmake-lib-storage - storage where the shared data (like URLs) are stored (configured by cmake-lib)
+- cmake-lib-basedef - base definitions
+
+Each component has own git repository.
+
+### API
+
+The library core is function
+
+	BIMCM_DEPENDENCY
+
+Which can track/cache various number of dependencies.
+
+Modules does not contain anything except what we need for `BIMCM_DEPENDENCY` implementation.
+
+Library consist from several modules
+
+- **[BIMCM_DEPENDENCY] - track and cache remote dependencies**
+- [BIMCM_REQUIRED_ENV] which init base environment for library needs
+- [BIMCM_CACHE] - cache files on host filesystem (represent persisten cache)
+- [BIMCM_FILE_DOWNLOAD] - download file from remote HTTP URl or GIT repository
+- [BIMCM_PARSE_ARGUMENTS] - wrapper around cmake_parse_arguments
+- [BIMCM_ARCHIVE] - extract files from archive
+- [BIMCM_STORAGE] - initialize [BIMCM_STORAGE], controlled by  STORAGE component (specified as component in FIND_PACKAGE).
+Can be overriden by BIMCM_USE_STORAGE env variable.
+
+Detailed documentation can be found in each module.
+
+There are examples for each modules in [example] directory.
 
 ## Installation
 
@@ -24,10 +61,10 @@ must be defined.
 - Choose directory where cmakelib will be stored. We will call this directory
 <bimcm_root>
 - Clone repository to local computer to <bimcm_root>
-- Define ENV var `BIMCM_DIR` as absolute path to already cloned repository
-- Define ENV var `BIMCM_REQUIRED_ENV_TMP_PATH` to path to existing directory. This variable represents
+- Define System ENV var `BIMCM_DIR` as absolute path to already cloned repository
+- Define System ENV var `BIMCM_REQUIRED_ENV_TMP_PATH` to path to existing directory. This variable represents
 Cache directory where the cache will be stored
-- Restart computer (due to ENV vars) and in given CMakeLists.txt
+- Restart computer (due to System ENV vars) and in given CMakeLists.txt
 call `FIND_PACKAGE(BIMCM [COMPONENTS STORAGE])`
 - Everything should works fine now
 
@@ -38,38 +75,13 @@ Examples for `BIMCM_DEPENDENCY` can be found at [example/DEPENDENCY]
 
 Just call "git pull" on repository root.
 
-## Common
-
-The library core is function
-
-	BIMCM_DEPENDENCY
-
-Which can track/cache various number of dependencies.
-
-Modules does not contain anything except what we need for `BIMCM_DEPENDENCY` implementation.
-
-Library consist from several modules
-
-- [BIMCM_REQUIRED_ENV] which init base environment for library needs
-- [BIMCM_CACHE] - cache files on host filesystem (represent persisten cache)
-- [BIMCM_FILE_DOWNLOAD] - download file from remote HTTP URl or GIT repository
-- [BIMCM_PARSE_ARGUMENTS] - wrapper around cmake_parse_arguments
-- [BIMCM_ARCHIVE] - extract files from archive
-- [BIMCM_DEPENDENCY] - track and cache remote dependencies
-- [BIMCM_STORAGE] - initialize [BIMSTORAGE], controlled by  STORAGE component (specified as component in FIND_PACKAGE).
-Can be overriden by BIMC_USE_STORAGE env variable.
-
-Detailed documentation can be found in each module.
-
-There are examples for each modules in [example] directory.
-
-### Environment settings
+### CMake environment settings
 
 All temporary files and outputs are stored in temporary directory
 
 Path to temporary directory is controlled by `BIMCM_REQUIRED_ENV_TMP_PATH`
 
-`BIMCM_REQUIRED_ENV_TMP_PATH` can be overriden be system ENV var named
+`BIMCM_REQUIRED_ENV_TMP_PATH` can be overridden be system ENV var named
 `BIMCM_REQUIRED_ENV_TMP_PATH`
 
 User define global ENV var to specify one, central cache storage which will be
@@ -105,6 +117,7 @@ For test go to the test/ directory and run
 
 
 
+
 [BIMCM_REQUIRED_ENV]:    ./system_modules/BIMCM_REQUIRED_ENV.cmake
 [BIMCM_CACHE]:           ./system_modules/BIMCM_CACHE.cmake
 [BIMCM_FILE_DOWNLOAD]:   ./system_modules/BIMCM_FILE_DOWNLOAD.cmake
@@ -114,5 +127,6 @@ For test go to the test/ directory and run
 [BIMCM_STORAGE]:         ./system_modules/BIMCM_STORAGE.cmake
 [example]:               ./example/
 [example/DEPENDENCY]:    ./example/DEPENDENCY
+[Scheme]:                ./doc/cmake-lib-img.png
 
 
