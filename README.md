@@ -30,7 +30,8 @@ Modules does not contain anything except what we need for `BIMCM_DEPENDENCY` imp
 
 Library consist from several modules
 
-- **[BIMCM_DEPENDENCY] - track and cache remote dependencies**
+- **[BIMCM_DEPENDENCY] - track and cache remote dependencies** (under remote dependency we assume dependency
+which is not 'directly' attached to the user CMake project)
 - [BIMCM_REQUIRED_ENV] which init base environment for library needs
 - [BIMCM_CACHE] - cache files on host filesystem (represent persisten cache)
 - [BIMCM_FILE_DOWNLOAD] - download file from remote HTTP URl or GIT repository
