@@ -14,7 +14,8 @@ Library consist from three main parts
 
 - **cmake-lib - dependency tracking (this repository)**
 - cmake-lib-storage - storage where the shared data (like URLs) are stored (configured by cmake-lib)
-- cmake-lib-basedef - base definitions
+- cmake-lib-basedef - base definitions and wrappers for standard Cmake functionality
+Contains component called "DEFAULTS" which reset CMake build env setting...
 
 Each component has own git repository.
 
@@ -76,6 +77,16 @@ Examples for `BIMCM_DEPENDENCY` can be found at [example/DEPENDENCY]
 
 Just call "git pull" on repository root.
 
+In case of cmake-generation problem reset cache.
+
+## Reset cache
+
+If the `BIMCM_REQUIRED_ENV_TMP_PATH` is set then the cache will be stored
+in the directory specified by `BIMCM_REQUIRED_ENV_TMP_PATH`.
+
+If the cache reset is needed, just delete directory which path is stored
+in `BIMCM_REQUIRED_ENV_TMP_PATH` env variable.
+
 ### CMake environment settings
 
 All temporary files and outputs are stored in temporary directory
@@ -115,6 +126,10 @@ Local variables can be named as lowercase.
 For test go to the test/ directory and run
 
 	cmake .
+
+then just clean up all intermediate files by
+
+    git clean -xfd
 
 
 
