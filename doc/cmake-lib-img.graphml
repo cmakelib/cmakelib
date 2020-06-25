@@ -13,10 +13,9 @@
   <key attr.name="description" attr.type="string" for="edge" id="d9"/>
   <key for="edge" id="d10" yfiles.type="edgegraphics"/>
   <graph edgedefault="directed" id="G">
-    <data key="d0"/>
+    <data key="d0" xml:space="preserve"/>
     <node id="n0">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="67.42399999999998" width="155.83999999999992" x="222.92047619047622" y="-148.42399999999998"/>
@@ -33,7 +32,6 @@
     </node>
     <node id="n1">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLClassNode>
           <y:Geometry height="32.48000000000002" width="172.32000000000005" x="20.000317460317433" y="-51.74000000000001"/>
@@ -65,7 +63,6 @@
     </node>
     <node id="n3">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLNoteNode>
           <y:Geometry height="32.48000000000002" width="291.0" x="-270.99968253968257" y="-61.339999999999975"/>
@@ -77,13 +74,12 @@
     </node>
     <node id="n4">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLNoteNode>
           <y:Geometry height="75.0" width="269.0" x="378.7604761904761" y="-186.39999999999998"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="73.84375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="261.513671875" x="3.743164062499943" xml:space="preserve" y="0.578125">Base definitions and defaults
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="73.84375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="261.513671875" x="3.7431640625" xml:space="preserve" y="0.578125">Base definitions and defaults
 Provide easy way to create
 packages, executables, libraries...
 Can Define compile/link options and global
@@ -109,7 +105,6 @@ wide definitions/macros<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:
     </node>
     <node id="n6">
       <data key="d4" xml:space="preserve"/>
-      <data key="d5"/>
       <data key="d6">
         <y:UMLNoteNode>
           <y:Geometry height="75.0" width="305.4000000000001" x="-270.99968253968257" y="-182.0"/>
@@ -122,9 +117,21 @@ from cmake-lib-storage<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:L
         </y:UMLNoteNode>
       </data>
     </node>
+    <node id="n7">
+      <data key="d4" xml:space="preserve"/>
+      <data key="d5"/>
+      <data key="d6">
+        <y:UMLNoteNode>
+          <y:Geometry height="50.0" width="211.0" x="292.5003968253968" y="-250.5"/>
+          <y:Fill color="#FFCC00" transparent="false"/>
+          <y:BorderStyle color="#000000" type="line" width="1.0"/>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="192.724609375" x="9.1376953125" xml:space="preserve" y="9.03125">Represents any CMake project
+which uses BIM CMake libraries<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:LabelModel><y:ModelParameter><y:SmartNodeLabelModelParameter labelRatioX="0.0" labelRatioY="0.0" nodeRatioX="0.0" nodeRatioY="0.0" offsetX="0.0" offsetY="0.0" upX="0.0" upY="-1.0"/></y:ModelParameter></y:NodeLabel>
+        </y:UMLNoteNode>
+      </data>
+    </node>
     <edge id="e0" source="n5" target="n1">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="33.71199999999999" tx="0.0" ty="-16.24000000000001"/>
@@ -136,7 +143,6 @@ from cmake-lib-storage<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:L
     </edge>
     <edge id="e1" source="n2" target="n5">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="-44.5" sy="19.0" tx="0.0" ty="-33.71199999999999">
@@ -151,7 +157,6 @@ from cmake-lib-storage<y:LabelModel><y:SmartNodeLabelModel distance="4.0"/></y:L
     </edge>
     <edge id="e2" source="n2" target="n0">
       <data key="d8" xml:space="preserve"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="44.5" sy="19.0" tx="0.0" ty="-33.71199999999999">
