@@ -70,8 +70,14 @@ ENDMACRO()
 # )
 #
 FUNCTION(TEST_INVALID_CMAKE_RUN working_directory)
+	SET(arg)
+	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+		SET(arg .)
+	ELSE()
+		SET(arg -P "./CMakeLists.txt")
+	ENDIF()
 	EXECUTE_PROCESS(
-		COMMAND "cmake" -DBIMCM_DEBUG=ON .
+		COMMAND "cmake" -DBIMCM_DEBUG=ON ${arg}
 		WORKING_DIRECTORY "${working_directory}"
 		RESULT_VARIABLE result_var
 		ERROR_VARIABLE errout
