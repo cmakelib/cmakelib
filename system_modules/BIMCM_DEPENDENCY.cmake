@@ -15,6 +15,11 @@ ENDIF()
 # Flag that REQUIRED_DEPENDENCY is already included
 SET(BIMCM_DEPENDENCY_INCLUDED "1")
 
+SET(BIMCM_DEPENDENCY_CONTROL_FILE_KEYDELIM "|"
+	CACHE INTERNAL
+	"Delimiter for keywords in control file"
+)
+
 _BIMCM_LIBRARY_MANAGER(BIMCM_REQUIRED_ENV)
 _BIMCM_LIBRARY_MANAGER(BIMCM_FILE_DOWNLOAD)
 _BIMCM_LIBRARY_MANAGER(BIMCM_ARCHIVE)
@@ -91,8 +96,16 @@ FUNCTION(BIMCM_DEPENDENCY)
 	)
 	_BIMCM_DEPENDENCY_VALIDATE_TYPE(${__TYPE})
 
+	_BIMCM_DEPENDENCY_DETERMINE_KEYWORDS(
+		ORIGINAL_KEYWORDS ${__KEYWORDS}
+		URI               "${__URI}"
+		GIT_PATH          "${__GIT_PATH}"
+		GIT_REVISION      "${__GIT_REVISION}"
+		KEYWORDS_VAR      hash_keyword
+	)
+
 	BIMCM_CACHE_GET(
-		KEYWORDS ${__KEYWORDS}
+		KEYWORDS ${hash_keyword}
 		CACHE_PATH_VAR dependency_cache_entry
 		TRY_REGENERATE ON
 	)
@@ -156,7 +169,7 @@ FUNCTION(BIMCM_DEPENDENCY)
 		ENDIF()
 
 		BIMCM_CACHE_ADD(
-			KEYWORDS ${__KEYWORDS}
+			KEYWORDS ${hash_keyword}
 			PATH "${downloaded_files}"
 			CACHE_PATH_VAR cache_var
 		)
@@ -277,6 +290,177 @@ FUNCTION(_BIMCM_DEPENDENCY_ARCHIVE archive_file archive_type output_var)
 	_BIMCM_LIBRARY_DEBUG_MESSAGE("No extracted archive found in cache - extracted, cache entry added")
 	BIMCM_ARCHIVE_CLEAN()
 	SET(${output_var} "${cache_var}" PARENT_SCOPE)
+ENDFUNCTION()
+
+
+
+## Helper
+#
+# Compute hash from string
+#	"${URI}|${GIT_PATH}|${GIT_REVISION}"
+# The hash uniquely identifies resource managed by
+# BIMCM_DEPENDENCY function.
+#
+# <function>(
+#		URI          <uri>
+#		[GIT_PATH     <git_path>]
+#		[GIT_REVISION <git_revision>]
+# )
+#
+FUNCTION(_BIMCM_DEPENDENCY_COMPUTE_HASH)
+	BIMCM_PARSE_ARGUMENTS(
+		ONE_VALUE
+			URI GIT_PATH GIT_REVISION
+			OUTPUT_HASH_VAR
+		REQUIRED
+			URI OUTPUT_HASH_VAR
+		P_ARGN ${ARGN}
+	)
+
+	SET(keywords_delim "${BIMCM_DEPENDENCY_CONTROL_FILE_KEYDELIM}")
+	SET(cache_string   "${__URI}${keywords_delim}${__GIT_PATH}${keywords_delim}${__GIT_REVISION}")
+	STRING(SHA3_512 hash "${cache_string}")
+
+	SET(regex_repeat "")
+	FOREACH(I RANGE 5)
+		SET(regex_repeat "${regex_repeat}[0-9A-Za-z]")
+	ENDFOREACH()
+	STRING(REGEX REPLACE "${regex_repeat}([0-9A-Za-z])" "\\1" each_e ${hash})
+
+	STRING(TOUPPER "${each_e}" hash_upper)
+	SET(${__OUTPUT_HASH_VAR} "${hash_upper}" PARENT_SCOPE)
+ENDFUNCTION()
+
+
+
+## Helper
+#
+# ORIGINAL_KEYWORDS are keywords obtained from user
+#
+# KEYWORDS_VAR is name of the variable which will hold processed keywords
+#
+# URI, GIT_PATH, GIT_REVISION has same meaning as for
+# BIMCM_DEPENDENCY function.
+#
+# <function>(
+#		URI                <uri>
+#		KEYWORDS_VAR       <keywords_var> M
+#		[GIT_PATH          <git_path>]
+#		[GIT_REVISION      <git_revision>]
+# )
+#
+FUNCTION(_BIMCM_DEPENDENCY_DETERMINE_KEYWORDS)
+	BIMCM_PARSE_ARGUMENTS(
+		ONE_VALUE
+			URI GIT_PATH GIT_REVISION
+			KEYWORDS_VAR
+		MULTI_VALUE
+			ORIGINAL_KEYWORDS
+		REQUIRED
+			URI KEYWORDS_VAR
+		P_ARGN ${ARGN}
+	)
+
+	SET(git_path "${__GIT_PATH}")
+	IF("${git_path}" STREQUAL "")
+		SET(git_path "./")
+	ENDIF()
+
+	SET(git_revision "${__GIT_REVISION}")
+	IF("${git_revision}" STREQUAL "")
+		SET(git_revision "master")
+	ENDIF()
+
+	SET(processed_keywords)
+	IF(BIMCM_DEBUG)
+		_BIMCM_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS in Debug mode")
+		GET_FILENAME_COMPONENT(stripped_uri "${__URI}" NAME_WE)
+		SET(keywords_list "${stripped_uri}" "${git_revision}" "${git_path}")
+		SET(keywords_list_normalized)
+		FOREACH(keyword IN LISTS keywords_list)
+			STRING(MAKE_C_IDENTIFIER "${keyword}" keyword_normalized_with_)
+			STRING(REPLACE "_" "" keyword_normalized_without_ "${keyword_normalized_with_}")
+			STRING(TOUPPER "${keyword_normalized_without_}" keyword_normalized)
+			_BIMCM_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS Keyword: ${keyword_normalized}")
+			LIST(APPEND keywords_list_normalized "${keyword_normalized}")
+		ENDFOREACH()
+		SET(processed_keywords ${keywords_list_normalized})
+		LIST(INSERT processed_keywords 0 "DEBUG")
+	ENDIF()
+
+	_BIMCM_DEPENDENCY_COMPUTE_HASH(
+		URI             "${__URI}"
+		GIT_PATH        "${git_path}"
+		GIT_REVISION    "${git_revision}"
+		OUTPUT_HASH_VAR hash_keyword
+	)
+
+	_BIMCM_DEPENDENCY_CONTROL_FILE_CHECK(
+		HASH              ${hash_keyword}
+		ORIGINAL_KEYWORDS "${__ORIGINAL_KEYWORDS}"
+	)
+
+	IF(__ORIGINAL_KEYWORDS)
+		SET(${__KEYWORDS_VAR} ${__ORIGINAL_KEYWORDS} PARENT_SCOPE)
+		_BIMCM_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS using ORIGINAL_KEYWORDS as cache keywords for ${__URI}")
+	ELSE()
+		_BIMCM_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS using HASH keywords for ${__URI}")
+		SET(processed_keywords "HASH" "${hash_keyword}")
+		SET(${__KEYWORDS_VAR} ${processed_keywords} PARENT_SCOPE)
+	ENDIF()
+ENDFUNCTION()
+
+
+
+## Helper
+#
+# Check if HASH and ORIGINAL_KEYWORDS are in sync.
+# Multiple invocation of this funct with same HASH must have
+# same ORIGINAL_KEYWORDS or error occurred.
+#
+# <function>(
+#		HASH              <hash>
+#		ORIGINAL_KEYWORDS <original_keywords>
+# )
+#
+FUNCTION(_BIMCM_DEPENDENCY_CONTROL_FILE_CHECK)
+	BIMCM_PARSE_ARGUMENTS(
+		ONE_VALUE
+			HASH
+		MULTI_VALUE
+			ORIGINAL_KEYWORDS
+		REQUIRED
+			HASH
+		P_ARGN ${ARGN}
+	)
+
+	SET(control_dir_path  "${BIMCM_REQUIRED_ENV_TMP_PATH}/cache_control")
+	SET(control_file_path "${control_dir_path}/${__HASH}")
+	SET(keywords_delim    "${BIMCM_DEPENDENCY_CONTROL_FILE_KEYDELIM}")
+
+	STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
+	SET(file_content "${keywords_string};${__URI};${__GIT_PATH};${__GIT_REVISION}")
+
+	IF(NOT EXISTS "${control_file_path}")
+		FILE(WRITE "${control_file_path}" "${file_content}")
+		RETURN()
+	ENDIF()
+
+	FILE(READ "${control_file_path}" real_file_content)
+	IF(NOT "${file_content}" STREQUAL "${real_file_content}")
+		STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]+);([0-9a-zA-Z;]+)$")
+		SET(cached_keywords "${CMAKE_MATCH_0}")
+		IF(NOT DEFINED __ORIGINAL_KEYWORDS)
+			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords
+				but keywords provided '${cached_keywords}'")
+		ELSE()
+			STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
+			MESSAGE(FATAL_ERROR
+				"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'
+				are not same as required keywords '${original_keywords_string}'"
+			)
+		ENDIF()
+	ENDIF()
 ENDFUNCTION()
 
 
