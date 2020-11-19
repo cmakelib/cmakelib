@@ -5,37 +5,37 @@
 # (Download files from remote to local filesystem)
 #
 ## Functions
-# - BIMCM_FILE_DOWNLOAD - download file or directory (git only).
+# - CMLIB_FILE_DOWNLOAD - download file or directory (git only).
 # Function supports download from HTTP server and GIT repository.
 # Each is represented by URI_TYPE. Supported URI_TYPE is from { HTTP, GIT }
 #
 ## Variables
-# - BIMCM_FILE_DOWNLOAD_SHOW_PROGRESS - show download progress
+# - CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS - show download progress
 #
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
-IF(DEFINED BIMCM_FILE_DOWNLOAD_INCLUDED)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMCM_FILE_DOWNLOAD already included")
+IF(DEFINED CMLIB_FILE_DOWNLOAD_INCLUDED)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_FILE_DOWNLOAD already included")
 	RETURN()
 ENDIF()
 
 # Flag that FILE_DOWNLOAD is already included
-SET(BIMCM_FILE_DOWNLOAD_INCLUDED "1")
+SET(CMLIB_FILE_DOWNLOAD_INCLUDED "1")
 
-_BIMCM_LIBRARY_MANAGER(BIMCM_REQUIRED_ENV)
+_CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
 
-SET(BIMCM_FILE_DOWNLOAD_TIMEOUT 100
+SET(CMLIB_FILE_DOWNLOAD_TIMEOUT 100
 	CACHE INTERNAL
 	"Inactivity timeout for File Downlad"
 )
 
-OPTION(BIMCM_FILE_DOWNLOAD_SHOW_PROGRESS
+OPTION(CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS
 	"Show download progress if ON. Do not show if OFF."
-	${BIMCM_DEBUG}
+	${CMLIB_DEBUG}
 )
 
-_BIMCM_LIBRARY_MANAGER(BIMCM_PARSE_ARGUMENTS)
+_CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
 
 
@@ -81,8 +81,8 @@ _BIMCM_LIBRARY_MANAGER(BIMCM_PARSE_ARGUMENTS)
 #		[URI_TYPE <GIT|HTTP>]
 # )
 #
-FUNCTION(BIMCM_FILE_DOWNLOAD)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(CMLIB_FILE_DOWNLOAD)
+	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			URI
 			OUTPUT_PATH
@@ -107,7 +107,7 @@ FUNCTION(BIMCM_FILE_DOWNLOAD)
 		IF(DEFINED __GIT_PATH)
 			SET(uri_type "GIT")
 		ELSE()
-			_BIMCM_FILE_DETERMINE_URI_TYPE(uri_type "${__URI}")
+			_CMLIB_FILE_DETERMINE_URI_TYPE(uri_type "${__URI}")
 		ENDIF()
 	ELSE()
 		SET(uri_type "${__URI_TYPE}")
@@ -128,7 +128,7 @@ FUNCTION(BIMCM_FILE_DOWNLOAD)
 			SET(git_path "./")
 		ENDIF()
 
-		_BIMCM_FILE_DOWNLOAD_FROM_GIT(
+		_CMLIB_FILE_DOWNLOAD_FROM_GIT(
 			URI        "${__URI}"
 			GIT_PATH   "${git_path}"
 			${git_revision_command}
@@ -136,7 +136,7 @@ FUNCTION(BIMCM_FILE_DOWNLOAD)
 			STATUS_VAR status
 		)
 	ELSEIF("${uri_type}" STREQUAL "HTTP")
-		_BIMCM_FILE_DOWNLOAD_FROM_HTTP(
+		_CMLIB_FILE_DOWNLOAD_FROM_HTTP(
 			URI        "${__URI}"
 			OUTPUT_VAR path
 			STATUS_VAR status
@@ -147,18 +147,18 @@ FUNCTION(BIMCM_FILE_DOWNLOAD)
 
 	IF(NOT status)
 		SET(${__STATUS_VAR} OFF PARENT_SCOPE)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Download from '${__URI}' failed")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Download from '${__URI}' failed")
 		RETURN()
 	ENDIF()
 
 	IF(IS_DIRECTORY "${path}")
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Copy Directory '${path}' --> '${__OUTPUT_PATH}'")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Copy Directory '${path}' --> '${__OUTPUT_PATH}'")
 		EXECUTE_PROCESS(
 			COMMAND ${CMAKE_COMMAND} -E copy_directory
 			${path} "${__OUTPUT_PATH}"
 		)
 	ELSE()
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Copy File '${path}' --> '${__OUTPUT_PATH}'")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Copy File '${path}' --> '${__OUTPUT_PATH}'")
 		EXECUTE_PROCESS(
 			COMMAND ${CMAKE_COMMAND} -E copy
 			${path} "${__OUTPUT_PATH}"
@@ -166,7 +166,7 @@ FUNCTION(BIMCM_FILE_DOWNLOAD)
 	ENDIF()
 
 	SET(${__STATUS_VAR} ON PARENT_SCOPE)
-	_BIMCM_FILE_TMP_DIR_CLEAN()
+	_CMLIB_FILE_TMP_DIR_CLEAN()
 ENDFUNCTION()
 
 
@@ -188,8 +188,8 @@ ENDFUNCTION()
 #		STATUS_VAR <status_var>
 # )
 #
-FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_HTTP)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_HTTP)
+	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			URI
 			OUTPUT_VAR
@@ -201,15 +201,15 @@ FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_HTTP)
 		P_ARGN ${ARGN}
 	)
 
-	_BIMCM_FILE_TMP_DIR_CLEAN()
-	_BIMCM_FILE_TMP_DIR_CREATE()
-	_BIMCM_FILE_TMP_DIR_GET(tmp_dir)
+	_CMLIB_FILE_TMP_DIR_CLEAN()
+	_CMLIB_FILE_TMP_DIR_CREATE()
+	_CMLIB_FILE_TMP_DIR_GET(tmp_dir)
 
-	_BIMCM_FILE_DETERMINE_FILENAME_FROM_URI("${__URI}" "HTTP" "" filename)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("HTTP Download: ${__URI} --> '${tmp_dir}/${filename}'")
+	_CMLIB_FILE_DETERMINE_FILENAME_FROM_URI("${__URI}" "HTTP" "" filename)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("HTTP Download: ${__URI} --> '${tmp_dir}/${filename}'")
 
 	SET(show_progress_arg)
-	IF(BIMCM_FILE_DOWNLOAD_SHOW_PROGRESS)
+	IF(CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS)
 		SET(show_progress_arg SHOW_PROGRESS)
 	ENDIF()
 
@@ -217,7 +217,7 @@ FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_HTTP)
 		"${__URI}"
 		"${tmp_dir}/${filename}"
 		${show_progress_arg}
-		INACTIVITY_TIMEOUT ${BIMCM_FILE_DOWNLOAD_TIMEOUT}
+		INACTIVITY_TIMEOUT ${CMLIB_FILE_DOWNLOAD_TIMEOUT}
 		STATUS download_status_list
 	)
 	LIST(GET download_status_list 0 status)
@@ -227,7 +227,7 @@ FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_HTTP)
 		SET(${__STATUS_VAR} ON PARENT_SCOPE)
 	ENDIF()
 	IF(NOT (status EQUAL 0))
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Download from '${__URI}' failed: ${download_status_list}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Download from '${__URI}' failed: ${download_status_list}")
 	ENDIF()
 
 	SET(${__OUTPUT_VAR} "${tmp_dir}/${filename}" PARENT_SCOPE)
@@ -252,8 +252,8 @@ ENDFUNCTION()
 #		STATUS_VAR <status_var>
 # )
 #
-FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_GIT)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
+	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			URI
 			GIT_PATH
@@ -271,11 +271,11 @@ FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_GIT)
 
 	SET(${__STATUS_VAR} OFF PARENT_SCOPE)
 
-	_BIMCM_FILE_TMP_DIR_CLEAN()
-	_BIMCM_FILE_TMP_DIR_CREATE()
-	_BIMCM_FILE_TMP_DIR_GET(tmp_dir)
+	_CMLIB_FILE_TMP_DIR_CLEAN()
+	_CMLIB_FILE_TMP_DIR_CREATE()
+	_CMLIB_FILE_TMP_DIR_GET(tmp_dir)
 
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("GIT Download: ${__URI} --> '${tmp_dir}/${__GIT_PATH}'")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Download: ${__URI} --> '${tmp_dir}/${__GIT_PATH}'")
 
 	SET(archive_path "${tmp_dir}/git_file.tar")
 	IF(EXISTS "${archive_path}")
@@ -283,7 +283,7 @@ FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_GIT)
 	ENDIF()
 
 	EXECUTE_PROCESS(
-		COMMAND "${BIMCM_REQUIRED_ENV_GIT_EXECUTABLE}" archive
+		COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" archive
 			--remote=${__URI}
 			-o "${archive_path}"
 			${__GIT_REVISION}
@@ -292,8 +292,8 @@ FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_GIT)
 		WORKING_DIRECTORY "${tmp_dir}"
 	)
 	IF(NOT file_not_found EQUAL 0)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${file_not_found}\n${git_stderr}")
-		_BIMCM_FILE_TMP_DIR_CLEAN()
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${file_not_found}\n${git_stderr}")
+		_CMLIB_FILE_TMP_DIR_CLEAN()
 		RETURN()
 	ENDIF()
 
@@ -303,7 +303,7 @@ FUNCTION(_BIMCM_FILE_DOWNLOAD_FROM_GIT)
 		RESULT_VARIABLE tar_not_valid
     )
 	IF(NOT tar_not_valid EQUAL 0)
-		_BIMCM_FILE_TMP_DIR_CLEAN()
+		_CMLIB_FILE_TMP_DIR_CLEAN()
 		RETURN()
 	ENDIF()
 
@@ -325,7 +325,7 @@ ENDFUNCTION()
 #		<output_var>
 # )
 #
-FUNCTION(_BIMCM_FILE_DETERMINE_FILENAME_FROM_URI uri uri_type git_path output_var)
+FUNCTION(_CMLIB_FILE_DETERMINE_FILENAME_FROM_URI uri uri_type git_path output_var)
 	SET(filename)
 	IF("${uri_type}" STREQUAL "GIT")
 		GET_FILENAME_COMPONENT(filename "${git_path}" NAME)
@@ -334,23 +334,23 @@ FUNCTION(_BIMCM_FILE_DETERMINE_FILENAME_FROM_URI uri uri_type git_path output_va
 	ENDIF()
 	IF("${filename}" STREQUAL "")
 		STRING(RANDOM LENGTH 16 filename)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Filename cannot be determined")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Filename cannot be determined")
 	ENDIF()
 	SET(${output_var} "${filename}" PARENT_SCOPE)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("Determined filename: ${filename}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("Determined filename: ${filename}")
 ENDFUNCTION()
 
 
 
 ## Helper
 #
-# Get BIMCM_FILE temporary directory
+# Get CMLIB_FILE temporary directory
 # <function>(
 #		<var>
 # )
 #
-MACRO(_BIMCM_FILE_TMP_DIR_GET var)
-	SET(${var} "${BIMCM_REQUIRED_ENV_TMP_PATH}/bimcm_file/")
+MACRO(_CMLIB_FILE_TMP_DIR_GET var)
+	SET(${var} "${CMLIB_REQUIRED_ENV_TMP_PATH}/bimcm_file/")
 ENDMACRO()
 
 
@@ -361,8 +361,8 @@ ENDMACRO()
 # <function>(
 # )
 #
-FUNCTION(_BIMCM_FILE_TMP_DIR_CREATE)
-	_BIMCM_FILE_TMP_DIR_GET(tmp_dir)
+FUNCTION(_CMLIB_FILE_TMP_DIR_CREATE)
+	_CMLIB_FILE_TMP_DIR_GET(tmp_dir)
 	IF(NOT EXISTS "${tmp_dir}")
 		FILE(MAKE_DIRECTORY "${tmp_dir}")
 	ENDIF()
@@ -375,8 +375,8 @@ ENDFUNCTION()
 # Clean the BIM_CM tmp directory.
 # <function>()
 #
-FUNCTION(_BIMCM_FILE_TMP_DIR_CLEAN)
-	_BIMCM_FILE_TMP_DIR_GET(tmp_dir)
+FUNCTION(_CMLIB_FILE_TMP_DIR_CLEAN)
+	_CMLIB_FILE_TMP_DIR_GET(tmp_dir)
 	IF(EXISTS "${tmp_dir}")
 		FILE(REMOVE_RECURSE "${tmp_dir}")
 	ENDIF()
@@ -391,7 +391,7 @@ ENDFUNCTION()
 #		<output_var> <uri>
 #)
 #
-FUNCTION(_BIMCM_FILE_DETERMINE_URI_TYPE var uri)
+FUNCTION(_CMLIB_FILE_DETERMINE_URI_TYPE var uri)
 	STRING(REGEX MATCH "^git://.*" git_uri "${uri}")
 	STRING(REGEX MATCH "^ssh://git@.*" git_ssh_uri "${uri}")
 	STRING(REGEX MATCH "^http[s]?://.*" http_uri "${uri}")

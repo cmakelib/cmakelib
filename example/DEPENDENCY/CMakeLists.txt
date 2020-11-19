@@ -1,17 +1,17 @@
 #
-# BIMCM_DEPENDENCY examples
+# CMLIB_DEPENDENCY examples
 #
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
-PROJECT(BIMCM_CACHE_TEST)
+PROJECT(CMLIB_CACHE_TEST)
 
 #
 # In production this may be omitted because
-# the path to the BIMCM library is stored in
+# the path to the CMLIB library is stored in
 # global variable. Look at the <git_root>/README
 #
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
-FIND_PACKAGE(BIMCM)
+FIND_PACKAGE(CMLIB)
 
 SET(HTTP_DOWNLOAD_URI_ZIP "http://bimproject.cz/data/plugins/release/AGC.AC.MAC.zip")
 SET(GIT_DOWNLOAD_URI "ssh://git@stash.bimproject.cz:7999/bpcomm/cmake-lib-test.git")
@@ -26,7 +26,7 @@ SET(GIT_CMAKE_MODULE_NAME "TEST_MODULE")
 # Cache file under keywords A;B;FILE
 # and store path to the file to 'output_path' variable
 #
-BIMCM_DEPENDENCY(
+CMLIB_DEPENDENCY(
 	KEYWORDS A B FILE
 	TYPE FILE
 	URI "${HTTP_DOWNLOAD_URI_ZIP}"
@@ -40,7 +40,7 @@ MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 # Return extracted archive path in 'output_path' variable
 #
 UNSET(output_path)
-BIMCM_DEPENDENCY(
+CMLIB_DEPENDENCY(
 	KEYWORDS A B ARCHIVE ZIP
 	TYPE ARCHIVE
 	URI "${HTTP_DOWNLOAD_URI_ZIP}"
@@ -54,7 +54,7 @@ MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 # Return directory path in 'output_path' variable
 #
 UNSET(output_path)
-BIMCM_DEPENDENCY(
+CMLIB_DEPENDENCY(
 	KEYWORDS A B DIRECTORY
 	TYPE DIRECTORY
 	URI "${GIT_DOWNLOAD_URI}"
@@ -70,10 +70,10 @@ MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 # will be used.
 # This is useful if we have dependency already registered but we want to
 # obtain only path from cache.
-# The TYPE is not used by BIMCM_DEPENDENCY but cannot be omitted.
+# The TYPE is not used by CMLIB_DEPENDENCY but cannot be omitted.
 #
 UNSET(output_path)
-BIMCM_DEPENDENCY(
+CMLIB_DEPENDENCY(
 	KEYWORDS A B DIRECTORY
 	TYPE DIRECTORY
 	OUTPUT_PATH_VAR output_path
@@ -85,7 +85,7 @@ MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 # Return directory path in 'output_path' variable
 #
 UNSET(output_path)
-BIMCM_DEPENDENCY(
+CMLIB_DEPENDENCY(
 	KEYWORDS A B TESTBRANCH
 	TYPE DIRECTORY
 	URI        "${GIT_DOWNLOAD_URI}"
@@ -104,7 +104,7 @@ MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 #
 UNSET(output_path)
 SET(_tmp_cmake_module_path ${CMAKE_MODULE_PATH})
-BIMCM_DEPENDENCY(
+CMLIB_DEPENDENCY(
 	KEYWORDS A B TESTMODULE
 	TYPE MODULE
 	URI        "${GIT_DOWNLOAD_URI}"
@@ -122,7 +122,7 @@ TEST_MODULE_MACRO()
 # If we do not specify GIT_REVISION the master branch is taken.
 #
 SET(CMAKE_MODULE_PATH "${_tmp_cmake_module_path}")
-BIMCM_DEPENDENCY(
+CMLIB_DEPENDENCY(
 	KEYWORDS A B MASTERTESTMODULE
 	TYPE MODULE
 	URI        "${GIT_DOWNLOAD_URI}"

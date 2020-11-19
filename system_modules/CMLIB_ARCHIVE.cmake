@@ -3,22 +3,22 @@
 # Unzip/extract archives by 7Zip.
 #
 # Functions:
-#	BIMCM_ARCHIVE_EXTRACT
-#	BIMCM_ARCHIVE_CLEAN
+#	CMLIB_ARCHIVE_EXTRACT
+#	CMLIB_ARCHIVE_CLEAN
 #
 #
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
-IF(DEFINED BIMCM_ARCHIVE_INCLUDED)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMCM_ARCHIVE already included")
+IF(DEFINED CMLIB_ARCHIVE_INCLUDED)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_ARCHIVE already included")
 	RETURN()
 ENDIF()
 
 # Flag that ARCHIVE is already included
-SET(BIMCM_ARCHIVE_INCLUDED "1")
+SET(CMLIB_ARCHIVE_INCLUDED "1")
 
-_BIMCM_LIBRARY_MANAGER(BIMCM_PARSE_ARGUMENTS)
+_CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
 
 
@@ -38,15 +38,15 @@ _BIMCM_LIBRARY_MANAGER(BIMCM_PARSE_ARGUMENTS)
 # If no ARCHIVE_TYPE is specified it will be determined
 # from archive_name (GIT_FILENAME_COMPONENT(archive_name "${ARCHIVE_PATH}" NAME))
 #
-# Let ARCHIVE_TMP = ${BIMCM_REQUIRED_ENV_TMP_PATH}/bimcm_archive
+# Let ARCHIVE_TMP = ${CMLIB_REQUIRED_ENV_TMP_PATH}/bimcm_archive
 # As tmp directory the ARCHIVE_TMP is served.
 #
-# Archive is unzipped to BIMCM_REQUIRED_ENV_TMP_PATH/. If the archive
+# Archive is unzipped to CMLIB_REQUIRED_ENV_TMP_PATH/. If the archive
 # needs a multiple steps for extract (tar.bz2 for example) that
-# intermediate archives will be stored to BIMCM_REQUIRED_ENV_TMP_PATH too.
+# intermediate archives will be stored to CMLIB_REQUIRED_ENV_TMP_PATH too.
 #
 # ARCHIVE_TMP Directory is cleaned (deleted) at the end of function call
-# (except one exception: If BIMCM is in debug mode, the ARCHIVE_TMP is not deleted
+# (except one exception: If CMLIB is in debug mode, the ARCHIVE_TMP is not deleted
 # at the anf of function call)
 #
 # <function>(
@@ -56,8 +56,8 @@ _BIMCM_LIBRARY_MANAGER(BIMCM_PARSE_ARGUMENTS)
 #		[ARCHIVE_TYPE <ZIP|7Z|BZ2|GZ|TAR.BZ2|TAR.GZ>]
 # )
 #
-FUNCTION(BIMCM_ARCHIVE_EXTRACT)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(CMLIB_ARCHIVE_EXTRACT)
+	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			ARCHIVE_PATH
 			ARCHIVE_TYPE
@@ -86,21 +86,21 @@ FUNCTION(BIMCM_ARCHIVE_EXTRACT)
 		ENDIF()
 	ENDIF()
 
-	_BIMCM_ARCHIVE_TMP_DIR_CLEAN()
-	_BIMCM_ARCHIVE_TMP_DIR_CREATE()
-	_BIMCM_ARCHIVE_TMP_DIR_GET(tmp_dir)
+	_CMLIB_ARCHIVE_TMP_DIR_CLEAN()
+	_CMLIB_ARCHIVE_TMP_DIR_CREATE()
+	_CMLIB_ARCHIVE_TMP_DIR_GET(tmp_dir)
 
 	SET(archive_type)
 	IF(DEFINED __ARCHIVE_TYPE)
-		_BIMCM_ARCHIVE_VALIDATE_ARCHIVE_TYPE(${__ARCHIVE_TYPE})
+		_CMLIB_ARCHIVE_VALIDATE_ARCHIVE_TYPE(${__ARCHIVE_TYPE})
 		SET(archive_type "${__ARCHIVE_TYPE}")
 	ELSE()
 		GET_FILENAME_COMPONENT(filename "${__ARCHIVE_PATH}" NAME)
-		_BIMCM_ARCHIVE_DETERMINE_ARCHIVE_TYPE("${filename}" archive_type)
-		_BIMCM_ARCHIVE_VALIDATE_ARCHIVE_TYPE(${archive_type})
+		_CMLIB_ARCHIVE_DETERMINE_ARCHIVE_TYPE("${filename}" archive_type)
+		_CMLIB_ARCHIVE_VALIDATE_ARCHIVE_TYPE(${archive_type})
 	ENDIF()
 
-	_BIMCM_ARCHIVE_GET_7ZIP_TYPE("${archive_type}" seven_zip_types)
+	_CMLIB_ARCHIVE_GET_7ZIP_TYPE("${archive_type}" seven_zip_types)
 	IF("${seven_zip_types}" STREQUAL "")
 		MESSAGE(FATAL_ERROR "cannot determine 7z archive types \"${archive_type}\"")
 	ENDIF()
@@ -116,7 +116,7 @@ FUNCTION(BIMCM_ARCHIVE_EXTRACT)
 			IF(files_length EQUAL 1)
 				SET(input_file "${files}")
 			ELSE()
-				_BIMCM_LIBRARY_DEBUG_MESSAGE("7Zip, Files in directory: ${files_length}")
+				_CMLIB_LIBRARY_DEBUG_MESSAGE("7Zip, Files in directory: ${files_length}")
 				MESSAGE(FATAL_ERROR "Cannot get intermediate archive")
 			ENDIF()
 		ELSE()
@@ -126,9 +126,9 @@ FUNCTION(BIMCM_ARCHIVE_EXTRACT)
 		SET(extracted_output_directory "${tmp_dir}/${seven_zip_type}")
 		FILE(MAKE_DIRECTORY "${extracted_output_directory}")
 		FILE(TO_NATIVE_PATH "${extracted_output_directory}" ext_dir_normalized)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("7Zip aguments: \"${BIMCM_REQUIRED_ENV_7ZIP}\" x -t${seven_zip_type} -o\"${extracted_output_directory}\" ${input_file}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("7Zip aguments: \"${CMLIB_REQUIRED_ENV_7ZIP}\" x -t${seven_zip_type} -o\"${extracted_output_directory}\" ${input_file}")
 		EXECUTE_PROCESS(
-			COMMAND "${BIMCM_REQUIRED_ENV_7ZIP}"
+			COMMAND "${CMLIB_REQUIRED_ENV_7ZIP}"
 				x -t${seven_zip_type}
 				-o${ext_dir_normalized}
 				"${input_file}"
@@ -150,8 +150,8 @@ FUNCTION(BIMCM_ARCHIVE_EXTRACT)
 		IF(NOT (result_var EQUAL 0))
 			MESSAGE(FATAL_ERROR "Cannot copy \"${extracted_output_directory}\" to \"${__OUTPUT_DIRECTORY}\"")
 		ENDIF()
-		IF(NOT BIMCM_DEBUG)
-			_BIMCM_ARCHIVE_TMP_DIR_CLEAN()
+		IF(NOT CMLIB_DEBUG)
+			_CMLIB_ARCHIVE_TMP_DIR_CLEAN()
 		ENDIF()
 	ENDIF()
 ENDFUNCTION()
@@ -164,16 +164,16 @@ ENDFUNCTION()
 #
 # All archive function will clean up automatically before return.
 # There are some option which forbid this like "OUTPUT_PATH_VAR"
-# in BIMCM_ARCHIVE_EXTRACT. In this situation call <function> if
+# in CMLIB_ARCHIVE_EXTRACT. In this situation call <function> if
 # You want to be sure that all tmp files are deleted.
 #
-# Warning: If you use OUTPUT_PATH_VAR in BIMCM_ARCHIVE_EXTRACT
+# Warning: If you use OUTPUT_PATH_VAR in CMLIB_ARCHIVE_EXTRACT
 # path stored  in given variable is removed too.
 # <function>(
 # )
 #
-FUNCTION(BIMCM_ARCHIVE_CLEAN)
-	_BIMCM_ARCHIVE_TMP_DIR_CLEAN()
+FUNCTION(CMLIB_ARCHIVE_CLEAN)
+	_CMLIB_ARCHIVE_TMP_DIR_CLEAN()
 ENDFUNCTION()
 
 
@@ -188,7 +188,7 @@ ENDFUNCTION()
 #		<archive_type>
 # )
 #
-FUNCTION(_BIMCM_ARCHIVE_VALIDATE_ARCHIVE_TYPE archive_type)
+FUNCTION(_CMLIB_ARCHIVE_VALIDATE_ARCHIVE_TYPE archive_type)
 	IF(("${archive_type}" STREQUAL "TAR.BZ2")     OR
 			("${archive_type}" STREQUAL "TAR.GZ") OR
 			("${archive_type}" STREQUAL "BZ2")    OR
@@ -212,7 +212,7 @@ ENDFUNCTION()
 #		<archive_type_out>
 # )
 #
-FUNCTION(_BIMCM_ARCHIVE_DETERMINE_ARCHIVE_TYPE filename archive_type_out)
+FUNCTION(_CMLIB_ARCHIVE_DETERMINE_ARCHIVE_TYPE filename archive_type_out)
 	STRING(TOUPPER "${filename}" filename_upper)
 	STRING(REGEX MATCH "((\\.TAR\\.BZ2)|(\\.TAR\\.GZ)|(\\.GZ)|(\\.BZ2)|(\\.TAR)|(\\.ZIP)|(\\.7Z))$" match_ok "${filename_upper}")
 	IF(match_ok)
@@ -228,13 +228,13 @@ ENDFUNCTION()
 
 ## Helper
 #
-# Map BIMCM_ARCHIVE type to 7Zip archive types.
+# Map CMLIB_ARCHIVE type to 7Zip archive types.
 # <function>(
 #		<archive_type>
 #		<seven_zip_archive_types>
 # )
 #
-FUNCTION(_BIMCM_ARCHIVE_GET_7ZIP_TYPE archive_type seven_zip_types_out)
+FUNCTION(_CMLIB_ARCHIVE_GET_7ZIP_TYPE archive_type seven_zip_types_out)
 	STRING(REPLACE "." ";" _tmp "${archive_type}")
 	SET(seven_zip_types_list)
 	FOREACH(type ${_tmp})
@@ -256,13 +256,13 @@ ENDFUNCTION()
 
 ## Helper
 #
-# Get BIMCM_ARCHIVE temporary directory
+# Get CMLIB_ARCHIVE temporary directory
 # <function>(
 #		<var>
 # )
 #
-MACRO(_BIMCM_ARCHIVE_TMP_DIR_GET var)
-	SET(${var} "${BIMCM_REQUIRED_ENV_TMP_PATH}/bimcm_archive/")
+MACRO(_CMLIB_ARCHIVE_TMP_DIR_GET var)
+	SET(${var} "${CMLIB_REQUIRED_ENV_TMP_PATH}/bimcm_archive/")
 ENDMACRO()
 
 
@@ -273,8 +273,8 @@ ENDMACRO()
 # <function>(
 # )
 #
-FUNCTION(_BIMCM_ARCHIVE_TMP_DIR_CREATE)
-	_BIMCM_ARCHIVE_TMP_DIR_GET(tmp_dir)
+FUNCTION(_CMLIB_ARCHIVE_TMP_DIR_CREATE)
+	_CMLIB_ARCHIVE_TMP_DIR_GET(tmp_dir)
 	IF(NOT EXISTS "${tmp_dir}")
 		FILE(MAKE_DIRECTORY "${tmp_dir}")
 	ENDIF()
@@ -284,11 +284,11 @@ ENDFUNCTION()
 
 ## Helper
 #
-# Clean the BIMCM_ARCHIVE tmp directory.
+# Clean the CMLIB_ARCHIVE tmp directory.
 # <function>()
 #
-FUNCTION(_BIMCM_ARCHIVE_TMP_DIR_CLEAN)
-	_BIMCM_ARCHIVE_TMP_DIR_GET(tmp_dir)
+FUNCTION(_CMLIB_ARCHIVE_TMP_DIR_CLEAN)
+	_CMLIB_ARCHIVE_TMP_DIR_GET(tmp_dir)
 	IF(EXISTS "${tmp_dir}")
 		FILE(REMOVE_RECURSE "${tmp_dir}")
 	ENDIF()

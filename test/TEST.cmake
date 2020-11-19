@@ -77,12 +77,12 @@ FUNCTION(TEST_INVALID_CMAKE_RUN working_directory)
 		SET(arg -P "./CMakeLists.txt")
 	ENDIF()
 	EXECUTE_PROCESS(
-		COMMAND "cmake" -DBIMCM_DEBUG=ON ${arg}
+		COMMAND "cmake" -DCMLIB_DEBUG=ON ${arg}
 		WORKING_DIRECTORY "${working_directory}"
 		RESULT_VARIABLE result_var
 		ERROR_VARIABLE errout
 		OUTPUT_VARIABLE stdout
 	)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("Invalid type result: ${result_var}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("Invalid type result: ${result_var}")
 	TEST_VAR_TRUE(result_var)
 ENDFUNCTION()

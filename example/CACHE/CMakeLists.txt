@@ -4,16 +4,16 @@
 #
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
-PROJECT(BIMCM_CACHE_TEST)
+PROJECT(CMLIB_CACHE_TEST)
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
-FIND_PACKAGE(BIMCM)
+FIND_PACKAGE(CMLIB)
 
 
 #
 # We can check that the cache file exist
 #
-BIMCM_CACHE_HAS_FILE(
+CMLIB_CACHE_HAS_FILE(
 	KEYWORDS A C B
 	PATH_VAR path_var
 )
@@ -26,7 +26,7 @@ IF(DEFINED path_var)
 	# CACHE_ADD can be called after CMAke cache is deleted
 	# --> cache is regenerated if there are cache files for given keywords set.
 	#
-	BIMCM_CACHE_ADD(
+	CMLIB_CACHE_ADD(
 		KEYWORDS A C B
 		PATH "${CMAKE_CURRENT_LIST_DIR}/A_B_C.txt"
 		CACHE_PATH_VAR var_a_c_b
@@ -37,13 +37,13 @@ IF(DEFINED path_var)
 	# Delete cache entry because we cannot call CACHE_ADD
 	# for same keywords set two times.
 	#
-	BIMCM_CACHE_DELETE(KEYWORDS A C B)
+	CMLIB_CACHE_DELETE(KEYWORDS A C B)
 ENDIF()
 
 #
 # Add A,B,C Cache entry
 #
-BIMCM_CACHE_ADD(
+CMLIB_CACHE_ADD(
 	KEYWORDS A B C
 	PATH "${CMAKE_CURRENT_LIST_DIR}/A_B_C.txt"
 	CACHE_PATH_VAR var_a_b_c
@@ -56,7 +56,7 @@ MESSAGE(STATUS "A_B_C Cache: ${var_a_b_c}")
 # but return existing one in CACHE_PATH_VAR (CACHE_PATH_VAR is not mandatory).
 #
 UNSET(path_var)
-BIMCM_CACHE_ADD(
+CMLIB_CACHE_ADD(
 	KEYWORDS A B C
 	PATH "${CMAKE_CURRENT_LIST_DIR}/Directory/A.txt"
 	GET_IF_EXISTS ON
@@ -68,7 +68,7 @@ BIMCM_CACHE_ADD(
 # this call omit error. (because we cannot have
 # two permutation of the same keywords set)
 #
-BIMCM_CACHE_ADD(
+CMLIB_CACHE_ADD(
 	KEYWORDS A C B
 	PATH "${CMAKE_CURRENT_LIST_DIR}/A_B_C.txt"
 	CACHE_PATH_VAR var_a_c_b
@@ -79,7 +79,7 @@ MESSAGE(STATUS "A_C_B Cache: ${var_a_c_b}")
 #
 # Cache whole directory
 #
-BIMCM_CACHE_ADD(
+CMLIB_CACHE_ADD(
 	KEYWORDS A B C DIRECTORY
 	PATH "${CMAKE_CURRENT_LIST_DIR}/Directory"
 	CACHE_PATH_VAR var_a_b_c_directory
@@ -89,7 +89,7 @@ MESSAGE(STATUS "A_B_C_Directory Cache: ${var_a_b_c_directory}")
 #
 # Cache directory with different keywords
 #
-BIMCM_CACHE_ADD(
+CMLIB_CACHE_ADD(
 	KEYWORDS DIRECTORY TEST
 	PATH "${CMAKE_CURRENT_LIST_DIR}/Directory"
 	CACHE_PATH_VAR var_directory_test
@@ -102,7 +102,7 @@ MESSAGE(STATUS "directory_test Cache: ${var_directory_test}")
 # If no cache entry is found get_var_a_b_c is
 # not defined. (we can you IF(DEFINED <>) ...)
 #
-BIMCM_CACHE_GET(
+CMLIB_CACHE_GET(
 	KEYWORDS A B C
 	CACHE_PATH_VAR get_var_a_b_c
 )
@@ -113,6 +113,6 @@ MESSAGE(STATUS "Cache entry: ${get_var_a_b_c}")
 # Delete whole directory structure if there are
 # no files left.
 #
-BIMCM_CACHE_DELETE(KEYWORDS A B C)
-BIMCM_CACHE_DELETE(KEYWORDS A B C DIRECTORY)
-BIMCM_CACHE_DELETE(KEYWORDS DIRECTORY TEST)
+CMLIB_CACHE_DELETE(KEYWORDS A B C)
+CMLIB_CACHE_DELETE(KEYWORDS A B C DIRECTORY)
+CMLIB_CACHE_DELETE(KEYWORDS DIRECTORY TEST)

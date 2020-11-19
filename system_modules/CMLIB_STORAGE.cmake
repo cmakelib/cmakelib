@@ -1,30 +1,30 @@
 ## Main
 #
-# BIMCM module which track storage repository.
+# CMLIB module which track storage repository.
 #
 # BIM Shared storage is storage in which global links are gathered.
 # 
 # List of functions
-# - BIMCM_STORAGE_TEMPLATE_INSTANCE
+# - CMLIB_STORAGE_TEMPLATE_INSTANCE
 # 
 #
 
-IF(NOT BIMCM_USE_STORAGE)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMSTORAGE disabled")
+IF(NOT CMLIB_USE_STORAGE)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("BIMSTORAGE disabled")
 	RETURN()
 ENDIF()
 
-IF(DEFINED BIMCM_STORAGE_INCLUDED)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMCM_REQUIRED_ENV already included")
+IF(DEFINED CMLIB_STORAGE_INCLUDED)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_REQUIRED_ENV already included")
 	RETURN()
 ENDIF()
 
-SET(BIMCM_STORAGE_INCLUDED 1)
+SET(CMLIB_STORAGE_INCLUDED 1)
 
-_BIMCM_LIBRARY_MANAGER(BIMCM_REQUIRED_ENV)
-_BIMCM_LIBRARY_MANAGER(BIMCM_DEPENDENCY)
+_CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
+_CMLIB_LIBRARY_MANAGER(CMLIB_DEPENDENCY)
 
-SET(_BIMCM_STORAGE_REPOSITORY_NAME "cmake-lib-storage.git"
+SET(_CMLIB_STORAGE_REPOSITORY_NAME "cmake-lib-storage.git"
 	CACHE INTERNAL
 	"Name of the storage repository"
 )
@@ -86,19 +86,19 @@ SET(_BIMCM_STORAGE_REPOSITORY_NAME "cmake-lib-storage.git"
 #		[<key_1> <value_1> ... <key_x> <value_x>] // KeyToValue mapping
 # )
 #
-FUNCTION(BIMCM_STORAGE_TEMPLATE_INSTANCE output_var)
+FUNCTION(CMLIB_STORAGE_TEMPLATE_INSTANCE output_var)
 	LIST(GET ARGN 0 template_name)
 	IF(NOT (DEFINED ${template_name}))
 		MESSAGE(FATAL_ERROR "Template var '${template_name}' is not defined in current context")
 	ENDIF()
 
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMCM_STORAGE_TEMPLATE: Lower arguments in template ${template_name}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_STORAGE_TEMPLATE: Lower arguments in template ${template_name}")
 
 	STRING(REGEX MATCHALL "<([^>]+)>" template_arguments "${${template_name}}")
 	SET(template_arguments_lower)
 	FOREACH(T IN LISTS template_arguments)
 		STRING(TOLOWER "${T}" T_lower)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMCM_STORAGE_TEMPLATE: template arguments - key: '${T}' key_lower: '${T_lower}'")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_STORAGE_TEMPLATE: template arguments - key: '${T}' key_lower: '${T_lower}'")
 		LIST(APPEND template_arguments_lower ${T_lower})
 	ENDFOREACH()
 
@@ -120,7 +120,7 @@ FUNCTION(BIMCM_STORAGE_TEMPLATE_INSTANCE output_var)
 			LIST(GET arguments ${value_index} value)
 			STRING(TOLOWER "${key}" key_lower)
 
-			_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMCM_STORAGE_TEMPLATE: key: ${key}, key_lower: ${key_lower}, value: ${value}")
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_STORAGE_TEMPLATE: key: ${key}, key_lower: ${key_lower}, value: ${value}")
 
 			LIST(FIND template_arguments_lower "<${key_lower}>" found_index)
 			IF(found_index EQUAL -1)
@@ -129,7 +129,7 @@ FUNCTION(BIMCM_STORAGE_TEMPLATE_INSTANCE output_var)
 
 			LIST(GET template_arguments ${found_index} _arg)
 			STRING(REPLACE "${_arg}" "${value}" template_expanded "${template_expanded}")
-			_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMCM_STORAGE_TEMPLATE: replaced value '${template_expanded}'")
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_STORAGE_TEMPLATE: replaced value '${template_expanded}'")
 		ENDFOREACH()
 	ENDIF()
 	SET(${output_var} ${template_expanded} PARENT_SCOPE)
@@ -138,18 +138,18 @@ ENDFUNCTION()
 
 
 ##
-# Initialize BIMCM_STORAGE module.
+# Initialize CMLIB_STORAGE module.
 #
-# Track module under { BIMCM STORAGE } keywords
+# Track module under { CMLIB STORAGE } keywords
 # and include BIMSTORAGE.cmake file.
 #
 # <function>(
 # )
 #
-MACRO(BIMCM_STORAGE_INIT)
-	SET(storage_uri ${BIMCM_REQUIRED_ENV_REMOTE_URL}/${_BIMCM_STORAGE_REPOSITORY_NAME})
-	BIMCM_DEPENDENCY(
-		KEYWORDS BIMCM BIMSTORAGE
+MACRO(CMLIB_STORAGE_INIT)
+	SET(storage_uri ${CMLIB_REQUIRED_ENV_REMOTE_URL}/${_CMLIB_STORAGE_REPOSITORY_NAME})
+	CMLIB_DEPENDENCY(
+		KEYWORDS CMLIB BIMSTORAGE
 		TYPE DIRECTORY
 		URI "${storage_uri}"
 		URI_TYPE GIT
@@ -167,4 +167,4 @@ ENDMACRO()
 ##
 #
 #
-BIMCM_STORAGE_INIT()
+CMLIB_STORAGE_INIT()

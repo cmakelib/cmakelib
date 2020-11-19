@@ -1,6 +1,6 @@
 ## Main
 #
-# BIM CMake cache
+# CMake cache
 # It enables store files/directories into a cache
 # and retrieve them if needed.
 #
@@ -11,8 +11,8 @@
 #   cache entries in CMake cache.
 #
 # Cache entry is represented by CMake Cache variable.
-# Cache variable - <_BIMCM_CACHE_VAR_ENTRY_PREFIX>_{keywords, ...}.join('_')
-# These variables are stored as list in BIMCM_CACHE_ENTRY_LIST cache variable.
+# Cache variable - <_CMLIB_CACHE_VAR_ENTRY_PREFIX>_{keywords, ...}.join('_')
+# These variables are stored as list in CMLIB_CACHE_ENTRY_LIST cache variable.
 #
 # Value of cache entry/cache entry variable is path where files are cached.
 #
@@ -31,15 +31,15 @@
 # A_i = B_i
 #
 # Cache Entry Variable is standard CMake cache variable
-# in form <_BIMCM_CACHE_VAR_ENTRY_PREFIX>_{keywords, ...}.join('_')
-# Cache Entry variables are stored as list in BIMCM_CACHE_ENTRY_LIST CMake cache variable.
+# in form <_CMLIB_CACHE_VAR_ENTRY_PREFIX>_{keywords, ...}.join('_')
+# Cache Entry variables are stored as list in CMLIB_CACHE_ENTRY_LIST CMake cache variable.
 #
 # File system folder hierarchy represent cached file on host filesystem.
 # Directory where the cache file will be stored is constructed
 #	Directory cache entry:
-#		DIRECTORY_CACHE_PATH = <BIMCM_REQUIRED_ENV_TMP_PATH>/cache/dir/[keywords...].join('/')/<filename>
+#		DIRECTORY_CACHE_PATH = <CMLIB_REQUIRED_ENV_TMP_PATH>/cache/dir/[keywords...].join('/')/<filename>
 #	File cache entry:
-#		FILE_CACHE_PATH = <BIMCM_REQUIRED_ENV_TMP_PATH>/cache/file/[keywords...].join('/')/
+#		FILE_CACHE_PATH = <CMLIB_REQUIRED_ENV_TMP_PATH>/cache/file/[keywords...].join('/')/
 #
 # Cache distincts between files and directories.
 #
@@ -54,21 +54,21 @@
 #
 ## Cache regenerate
 # If the CMakeCache.txt is deleted from CMake binary dir
-# all cache entries are lost. For that situation BIMCM_CACHE implement
+# all cache entries are lost. For that situation CMLIB_CACHE implement
 # mechanism called "cache regenerate" which regenerates cahce entries by
 # file system cache representation.
 #
 # For cache regenerate Cache type constraints must be met.
 #
-# If the BIMCM_CACHE_HAS_FILE returns defined
+# If the CMLIB_CACHE_HAS_FILE returns defined
 # variable (specified be PATH_VAR) function CACHE_ADD use this
 # file as a cache instead of file specified by PATH.
-# This allow call BIMCM_CACHE_ADD where cache files
+# This allow call CMLIB_CACHE_ADD where cache files
 # exists but cache entry not. (CMakeCache.txt is deleted etc...).
 # File path is returned in CACHE_PATH_VAR variable and
 # PATH file/variable remains untouched.
 #
-# If the BIMCM_CACHE_HAS_FILE does not define variable
+# If the CMLIB_CACHE_HAS_FILE does not define variable
 # (specified by PATH_VAR) function
 # store file under PATH to the cache path
 # and return cache path entry (in CACHE_PATH_VAR)
@@ -76,41 +76,41 @@
 #
 #
 # Cache functions:
-# BIMCM_CACHE_ADD - adds cache entry
-# BIMCM_CACHE_GET - gets entry for the cache or undef of the entry does not exist
-# BIMCM_CACHE_DELETE - deletes cache entry with files and remaining directories
-# BIMCM_CACHE_HAS_FILE - check if the file for given keyword set exists
+# CMLIB_CACHE_ADD - adds cache entry
+# CMLIB_CACHE_GET - gets entry for the cache or undef of the entry does not exist
+# CMLIB_CACHE_DELETE - deletes cache entry with files and remaining directories
+# CMLIB_CACHE_HAS_FILE - check if the file for given keyword set exists
 #
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
-IF(DEFINED BIMCM_CACHE_INCLUDED)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("BIMCM_CACHE already included")
+IF(DEFINED CMLIB_CACHE_INCLUDED)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_CACHE already included")
 	RETURN()
 ENDIF()
 
 # Flag that REQUIRED_ENV is already included
-SET(BIMCM_CACHE_INCLUDED "1")
+SET(CMLIB_CACHE_INCLUDED "1")
 
-_BIMCM_LIBRARY_MANAGER(BIMCM_REQUIRED_ENV)
-_BIMCM_LIBRARY_MANAGER(BIMCM_PARSE_ARGUMENTS)
+_CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
+_CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
-SET(_BIMCM_CACHE_VAR_ENTRY_PREFIX "BIMCM_CACHE_ENTRY"
+SET(_CMLIB_CACHE_VAR_ENTRY_PREFIX "CMLIB_CACHE_ENTRY"
 	CACHE INTERNAL
 	"Cache entry var prefix"
 )
 
-SET(_BIMCM_CACHE_VAR_ENTRY_LIST_DESC "List of all cache entries"
+SET(_CMLIB_CACHE_VAR_ENTRY_LIST_DESC "List of all cache entries"
 	CACHE INTERNAL
 	"Var entry cache description"
 )
 
-SET(_BIMCM_CACHE_VAR_DIRECTORY_NAME "cache"
+SET(_CMLIB_CACHE_VAR_DIRECTORY_NAME "cache"
 	CACHE INTERNAL
 	"Name of the directory in ehich the cache in the TMP will be located"
 )
 
-SET(BIMCM_CACHE_ENTRY_LIST ""
+SET(CMLIB_CACHE_ENTRY_LIST ""
 	CACHE STRING
 	"List of all cache entries"
 )
@@ -141,8 +141,8 @@ SET(BIMCM_CACHE_ENTRY_LIST ""
 #		[GET_IF_EXISTS <ON|OFF>]
 # )
 #
-FUNCTION(BIMCM_CACHE_ADD)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(CMLIB_CACHE_ADD)
+	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			PATH
 			CACHE_PATH_VAR
@@ -156,11 +156,11 @@ FUNCTION(BIMCM_CACHE_ADD)
 			KEYWORDS
 		P_ARGN ${ARGN}
 	)
-	_BIMCM_CACHE_KEYWORDS_CHECK(${__KEYWORDS})
+	_CMLIB_CACHE_KEYWORDS_CHECK(${__KEYWORDS})
 
-	_BIMCM_CACHE_LIST_GET_ENTRY(cache_var ${__KEYWORDS})
+	_CMLIB_CACHE_LIST_GET_ENTRY(cache_var ${__KEYWORDS})
 	IF(cache_var)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Cache already exist: ${cache_var}: ${${cache_var}}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Cache already exist: ${cache_var}: ${${cache_var}}")
 		IF(__GET_IF_EXISTS)
 			IF(DEFINED __CACHE_PATH_VAR)
 				SET(${__CACHE_PATH_VAR} "${${cache_var}}" PARENT_SCOPE)
@@ -173,10 +173,10 @@ FUNCTION(BIMCM_CACHE_ADD)
 
 	# Check permutation first so not danglig files/defines if fail
 	IF(NOT __KEYWORDS_PERMUTATION_ALLOWED)
-		_BIMCM_CACHE_LIST_CHECK_DUPLICITIES(${__KEYWORDS})
+		_CMLIB_CACHE_LIST_CHECK_DUPLICITIES(${__KEYWORDS})
 	ENDIF()
 
-	BIMCM_CACHE_HAS_FILE(
+	CMLIB_CACHE_HAS_FILE(
 		KEYWORDS ${__KEYWORDS}
 		PATH_VAR has_file_path
 	)
@@ -187,18 +187,18 @@ FUNCTION(BIMCM_CACHE_ADD)
 			MESSAGE(FATAL_ERROR "Cannot cache '${_PATH}' - path does not exist!")
 		ENDIF()
 		GET_FILENAME_COMPONENT(name "${__PATH}" NAME)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Cache file does not exist, name: ${name}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Cache file does not exist, name: ${name}")
 
 		IF(IS_DIRECTORY ${__PATH})
-			_BIMCM_CACHE_CONSTRUCT_CACHE_PATH(cache_dir "DIRECTORY" ${__KEYWORDS})
-			_BIMCM_CACHE_LIST_CHECK_SUBSET_DIR(${__KEYWORDS})
+			_CMLIB_CACHE_CONSTRUCT_CACHE_PATH(cache_dir "DIRECTORY" ${__KEYWORDS})
+			_CMLIB_CACHE_LIST_CHECK_SUBSET_DIR(${__KEYWORDS})
 			SET(cache_path "${cache_dir}/")
 			EXECUTE_PROCESS(
 				COMMAND ${CMAKE_COMMAND} -E make_directory "${cache_dir}/"
 				COMMAND ${CMAKE_COMMAND} -E copy_directory "${__PATH}" "${cache_path}"
 			)
 		ELSE()
-			_BIMCM_CACHE_CONSTRUCT_CACHE_PATH(cache_dir "FILE" ${__KEYWORDS})
+			_CMLIB_CACHE_CONSTRUCT_CACHE_PATH(cache_dir "FILE" ${__KEYWORDS})
 			SET(cache_path "${cache_dir}/${name}")
 			EXECUTE_PROCESS(
 				COMMAND ${CMAKE_COMMAND} -E make_directory "${cache_dir}"
@@ -206,7 +206,7 @@ FUNCTION(BIMCM_CACHE_ADD)
 			)
 		ENDIF()
 	ELSE()
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Cache file found, ${has_file_path}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Cache file found, ${has_file_path}")
 		SET(cache_path "${has_file_path}")
 	ENDIF()
 
@@ -215,13 +215,13 @@ FUNCTION(BIMCM_CACHE_ADD)
 	IF(__KEYWORDS_PERMUTATION_ALLOWED)
 		SET(keyword_permutation KEYWORDS_PERMUTATION_ALLOWED 1)
 	ENDIF()
-	_BIMCM_CACHE_LIST_ADD_ENTRY(
+	_CMLIB_CACHE_LIST_ADD_ENTRY(
 		KEYWORDS ${__KEYWORDS}
 		${keyword_permutation}
 	)
 
 	# Set cache entry var value
-	_BIMCM_CACHE_CONTRUCT_CACHE_ENTRY_VAR(cache_var ${__KEYWORDS})
+	_CMLIB_CACHE_CONTRUCT_CACHE_ENTRY_VAR(cache_var ${__KEYWORDS})
 	SET(${cache_var} "${cache_path}"
 		CACHE PATH
 		"${__DESCRIPTION}"
@@ -244,8 +244,8 @@ ENDFUNCTION()
 # If the TRY_REGENERATE is specified and set to ON then
 # If the cache entry is not found in the cache <function> recontructs
 # cache entry as follows
-#	- BIMCM_CACHE_HAS_FILE(...)
-#	- If BIMCM_CACHE_HAS_FILE returns true call BIMCM_CACHE_ADD
+#	- CMLIB_CACHE_HAS_FILE(...)
+#	- If CMLIB_CACHE_HAS_FILE returns true call CMLIB_CACHE_ADD
 #	  without PATH var --> regenerate cahce entry in CMake cache
 #
 # <function>(
@@ -254,8 +254,8 @@ ENDFUNCTION()
 #		[TRY_REGENERATE <ON|OFF>]
 # )
 #
-FUNCTION(BIMCM_CACHE_GET)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(CMLIB_CACHE_GET)
+	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			CACHE_PATH_VAR
 		MULTI_VALUE
@@ -268,22 +268,22 @@ FUNCTION(BIMCM_CACHE_GET)
 		P_ARGN ${ARGN}
 	)
 
-	_BIMCM_CACHE_KEYWORDS_CHECK(${__KEYWORDS})
+	_CMLIB_CACHE_KEYWORDS_CHECK(${__KEYWORDS})
 
-	_BIMCM_CACHE_LIST_GET_ENTRY(cache_var ${__KEYWORDS})
+	_CMLIB_CACHE_LIST_GET_ENTRY(cache_var ${__KEYWORDS})
 	IF((DEFINED cache_var) AND (EXISTS "${${cache_var}}"))
 		SET(${__CACHE_PATH_VAR} ${${cache_var}} PARENT_SCOPE)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Cache entry found: ${${cache_var}}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Cache entry found: ${${cache_var}}")
 		RETURN()
 	ELSEIF(DEFINED cache_var)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Cache entry exist but the cache target cannot be found - ${cache_var}. Cannot get cache")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Cache entry exist but the cache target cannot be found - ${cache_var}. Cannot get cache")
 	ELSEIF(__TRY_REGENERATE)
-		BIMCM_CACHE_HAS_FILE(
+		CMLIB_CACHE_HAS_FILE(
 			KEYWORDS ${__KEYWORDS}
 			PATH_VAR file_exist
 		)
 		IF(DEFINED file_exist)
-			BIMCM_CACHE_ADD(
+			CMLIB_CACHE_ADD(
 				KEYWORDS ${__KEYWORDS}
 				CACHE_PATH_VAR regenerated_cache_path
 			)
@@ -324,18 +324,18 @@ ENDFUNCTION()
 #		KEYWORDS <keywords> [M]
 # )
 #
-FUNCTION(BIMCM_CACHE_DELETE)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(CMLIB_CACHE_DELETE)
+	CMLIB_PARSE_ARGUMENTS(
 		MULTI_VALUE
 			KEYWORDS
 		REQUIRED
 			KEYWORDS
 		P_ARGN ${ARGN}
 	)
-	_BIMCM_CACHE_KEYWORDS_CHECK(${__KEYWORDS})
-	_BIMCM_CACHE_LIST_GET_ENTRY(cache_var ${__KEYWORDS})
+	_CMLIB_CACHE_KEYWORDS_CHECK(${__KEYWORDS})
+	_CMLIB_CACHE_LIST_GET_ENTRY(cache_var ${__KEYWORDS})
 	IF(NOT DEFINED cache_var)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Cannot delete cache entry under keywords ${__KEYWORDS}. It does not exist")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Cannot delete cache entry under keywords ${__KEYWORDS}. It does not exist")
 		RETURN()
 	ENDIF()
 
@@ -377,14 +377,14 @@ FUNCTION(BIMCM_CACHE_DELETE)
 		GET_FILENAME_COMPONENT(parent_directory "${parent_directory}" DIRECTORY)
 	ENDFOREACH()
 
-	_BIMCM_CACHE_CONSTRUCT_CACHE_PATH(cache_dir_file FILE)
-	_BIMCM_CACHE_CONSTRUCT_CACHE_PATH(cache_dir_dir DIRECTORY)
+	_CMLIB_CACHE_CONSTRUCT_CACHE_PATH(cache_dir_file FILE)
+	_CMLIB_CACHE_CONSTRUCT_CACHE_PATH(cache_dir_dir DIRECTORY)
 	STRING(REGEX MATCH "${cache_dir_file}/?$" cache_dir_file_match "${parent_directory}")
 	STRING(REGEX MATCH "${cache_dir_dir}/?$"  cache_dir_dir_match  "${parent_directory}")
 
 	SET(command)
 	IF(cache_dir_file_match)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("cache base directory for file will be deleted")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("cache base directory for file will be deleted")
 		FILE(GLOB cache_dir_file_content "${cache_dir_file}/*")
 		LIST(LENGTH cache_dir_file_content cache_dir_file_content_size)
 		IF(cache_dir_file_content_size EQUAL 0)
@@ -399,20 +399,20 @@ FUNCTION(BIMCM_CACHE_DELETE)
 			LIST(APPEND command COMMAND ${CMAKE_COMMAND} -E remove_directory
 				"${cache_dir_dir}")
 		ENDIF()
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("cache base directory for dir will be deleted, ${command}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("cache base directory for dir will be deleted, ${command}")
 	ENDIF()
 	IF(command)
 		EXECUTE_PROCESS(${command})
 	ENDIF()
 
-	_BIMCM_CACHE_CONSTRUCT_CACHE_PATH(base_dir BASEDIR)
+	_CMLIB_CACHE_CONSTRUCT_CACHE_PATH(base_dir BASEDIR)
 	FILE(GLOB base_dir_content "${base_dir}/*")
 	LIST(LENGTH base_dir_content base_dir_content_size)
 	IF(base_dir_content_size EQUAL 0)
 		EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E remove_directory "${base_dir}")
 	ENDIF()
 
-	_BIMCM_CACHE_LIST_REMOVE_ENTRY(${__KEYWORDS})
+	_CMLIB_CACHE_LIST_REMOVE_ENTRY(${__KEYWORDS})
 	UNSET(${cache_var} CACHE)
 
 ENDFUNCTION()
@@ -442,8 +442,8 @@ ENDFUNCTION()
 #		PATH_VAR <path_var>
 # )
 #
-FUNCTION(BIMCM_CACHE_HAS_FILE)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(CMLIB_CACHE_HAS_FILE)
+	CMLIB_PARSE_ARGUMENTS(
 		MULTI_VALUE
 			KEYWORDS
 			PATH_VAR
@@ -452,11 +452,11 @@ FUNCTION(BIMCM_CACHE_HAS_FILE)
 			PATH_VAR
 		P_ARGN ${ARGN}
 	)
-	_BIMCM_CACHE_KEYWORDS_CHECK(${__KEYWORDS})
-	_BIMCM_CACHE_CONSTRUCT_CACHE_PATH(cache_path_directories DIRECTORY ${__KEYWORDS})
-	_BIMCM_CACHE_CONSTRUCT_CACHE_PATH(cache_path_files FILE ${__KEYWORDS})
+	_CMLIB_CACHE_KEYWORDS_CHECK(${__KEYWORDS})
+	_CMLIB_CACHE_CONSTRUCT_CACHE_PATH(cache_path_directories DIRECTORY ${__KEYWORDS})
+	_CMLIB_CACHE_CONSTRUCT_CACHE_PATH(cache_path_files FILE ${__KEYWORDS})
 	IF(EXISTS "${cache_path_files}")
-		_BIMCM_CACHE_COUNT_FILES_AND_DIRECTORIES("${cache_path_files}"
+		_CMLIB_CACHE_COUNT_FILES_AND_DIRECTORIES("${cache_path_files}"
 			file_count directory_count file_list directory_list)
 		IF(file_count EQUAL 1)
 			SET(${__PATH_VAR} "${file_list}" PARENT_SCOPE)
@@ -467,7 +467,7 @@ FUNCTION(BIMCM_CACHE_HAS_FILE)
 		SET(${__PATH_VAR} "${cache_path_directories}" PARENT_SCOPE)
 		RETURN()
 	ENDIF()
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("No file count, ${cache_path_directories}\n${cache_path_files}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("No file count, ${cache_path_directories}\n${cache_path_files}")
 	UNSET(${__PATH_VAR} PARENT_SCOPE)
 ENDFUNCTION()
 
@@ -490,8 +490,8 @@ ENDFUNCTION()
 #		[KEYWORDS_PERMUTATION_ALLOWED]
 # )
 #
-FUNCTION(_BIMCM_CACHE_LIST_ADD_ENTRY)
-	BIMCM_PARSE_ARGUMENTS(
+FUNCTION(_CMLIB_CACHE_LIST_ADD_ENTRY)
+	CMLIB_PARSE_ARGUMENTS(
 		MULTI_VALUE
 			KEYWORDS
 		OPTIONS
@@ -503,18 +503,18 @@ FUNCTION(_BIMCM_CACHE_LIST_ADD_ENTRY)
 	SET(keywords ${__KEYWORDS})
 
 	IF(NOT __KEYWORDS_PERMUTATION_ALLOWED)
-		_BIMCM_CACHE_LIST_CHECK_DUPLICITIES(${keywords})
+		_CMLIB_CACHE_LIST_CHECK_DUPLICITIES(${keywords})
 	ENDIF()
 
-	_BIMCM_CACHE_CONTRUCT_CACHE_ENTRY_VAR(base_entry_name ${keywords})
+	_CMLIB_CACHE_CONTRUCT_CACHE_ENTRY_VAR(base_entry_name ${keywords})
 
-	LIST(FIND BIMCM_CACHE_ENTRY_LIST "${base_entry_name}" index)
+	LIST(FIND CMLIB_CACHE_ENTRY_LIST "${base_entry_name}" index)
 	IF(index EQUAL -1)
-		SET(_tmp ${BIMCM_CACHE_ENTRY_LIST})
+		SET(_tmp ${CMLIB_CACHE_ENTRY_LIST})
 		LIST(APPEND _tmp ${base_entry_name})
-		SET(BIMCM_CACHE_ENTRY_LIST ${_tmp} CACHE STRING "" FORCE)
+		SET(CMLIB_CACHE_ENTRY_LIST ${_tmp} CACHE STRING "" FORCE)
 	ELSE()
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Entry '${base_entry_name}' already in entry list")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Entry '${base_entry_name}' already in entry list")
 	ENDIF()
 ENDFUNCTION()
 
@@ -529,10 +529,10 @@ ENDFUNCTION()
 #		<output_var>
 # )
 #
-FUNCTION(_BIMCM_CACHE_LIST_GET_ENTRY var)
+FUNCTION(_CMLIB_CACHE_LIST_GET_ENTRY var)
 	SET(keywords ${ARGN})
-	_BIMCM_CACHE_CONTRUCT_CACHE_ENTRY_VAR(base_entry_name ${keywords})
-	LIST(FIND BIMCM_CACHE_ENTRY_LIST "${base_entry_name}" index)
+	_CMLIB_CACHE_CONTRUCT_CACHE_ENTRY_VAR(base_entry_name ${keywords})
+	LIST(FIND CMLIB_CACHE_ENTRY_LIST "${base_entry_name}" index)
 	IF(index EQUAL -1)
 		UNSET(${var} PARENT_SCOPE)
 		RETURN()
@@ -549,18 +549,18 @@ ENDFUNCTION()
 #		<keywords>...
 # )
 #
-FUNCTION(_BIMCM_CACHE_LIST_REMOVE_ENTRY)
+FUNCTION(_CMLIB_CACHE_LIST_REMOVE_ENTRY)
 	SET(keywords ${ARGN})
 
-	_BIMCM_CACHE_CONTRUCT_CACHE_ENTRY_VAR(base_entry_name ${keywords})
+	_CMLIB_CACHE_CONTRUCT_CACHE_ENTRY_VAR(base_entry_name ${keywords})
 
-	LIST(FIND BIMCM_CACHE_ENTRY_LIST "${base_entry_name}" index)
+	LIST(FIND CMLIB_CACHE_ENTRY_LIST "${base_entry_name}" index)
 	IF(index EQUAL -1)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Entry '${base_entry_name}' will not be deleted. Not found in the list.")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Entry '${base_entry_name}' will not be deleted. Not found in the list.")
 	ENDIF()
-	SET(_tmp ${BIMCM_CACHE_ENTRY_LIST})
+	SET(_tmp ${CMLIB_CACHE_ENTRY_LIST})
 	LIST(REMOVE_ITEM _tmp ${base_entry_name})
-	SET(BIMCM_CACHE_ENTRY_LIST ${_tmp} CACHE STRING "" FORCE)
+	SET(CMLIB_CACHE_ENTRY_LIST ${_tmp} CACHE STRING "" FORCE)
 ENDFUNCTION()
 
 
@@ -574,13 +574,13 @@ ENDFUNCTION()
 #		<keywords>...
 #)
 #
-FUNCTION(_BIMCM_CACHE_LIST_CHECK_DUPLICITIES)
+FUNCTION(_CMLIB_CACHE_LIST_CHECK_DUPLICITIES)
 	SET(keywords ${ARGN})
 	LIST(SORT keywords)
 	LIST(JOIN keywords "_" keywords_entry_sorted)
 	SET(count 0)
-	FOREACH(entry ${BIMCM_CACHE_ENTRY_LIST})
-		STRING(REGEX REPLACE "^${_BIMCM_CACHE_VAR_ENTRY_PREFIX}_" "" entry_keywords_string "${entry}")
+	FOREACH(entry ${CMLIB_CACHE_ENTRY_LIST})
+		STRING(REGEX REPLACE "^${_CMLIB_CACHE_VAR_ENTRY_PREFIX}_" "" entry_keywords_string "${entry}")
 		STRING(REPLACE "_" ";" entry_split_sorted "${entry_keywords_string}")
 		LIST(SORT entry_split_sorted)
 		LIST(JOIN entry_split_sorted "_" entry_sorted)
@@ -602,14 +602,14 @@ ENDFUNCTION()
 # <function>(
 # )
 #
-FUNCTION(_BIMCM_CACHE_LIST_CHECK_SUBSET_DIR)
+FUNCTION(_CMLIB_CACHE_LIST_CHECK_SUBSET_DIR)
 	SET(keywords ${ARGN})
 	LIST(JOIN keywords "_" keywords_entry_sorted)
-	FOREACH(entry ${BIMCM_CACHE_ENTRY_LIST})
-		STRING(REGEX REPLACE "^${_BIMCM_CACHE_VAR_ENTRY_PREFIX}_" "" entry_keywords_string "${entry}")
+	FOREACH(entry ${CMLIB_CACHE_ENTRY_LIST})
+		STRING(REGEX REPLACE "^${_CMLIB_CACHE_VAR_ENTRY_PREFIX}_" "" entry_keywords_string "${entry}")
 		STRING(REPLACE "_" ";" entry_keywords_split "${entry_keywords_string}")
 		LIST(JOIN entry_keywords_split "_" entry_sorted)
-		_BIMCM_LIBRARY_DEBUG_MESSAGE("Subset variables ${keywords_entry_sorted}:${entry_sorted}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Subset variables ${keywords_entry_sorted}:${entry_sorted}")
 		STRING(REGEX MATCH "^${keywords_entry_sorted}_(.*)" match_ok "${entry_sorted}")
 		STRING(REGEX MATCH "^${entry_sorted}_(.*)" match_ok2 "${keywords_entry_sorted}")
 		IF((match_ok OR match_ok2) AND NOT IS_DIRECTORY "${entry}")
@@ -629,7 +629,7 @@ ENDFUNCTION()
 #		<output_directory_count>
 # )
 #
-FUNCTION(_BIMCM_CACHE_COUNT_FILES_AND_DIRECTORIES root_dir
+FUNCTION(_CMLIB_CACHE_COUNT_FILES_AND_DIRECTORIES root_dir
 		output_file_count output_directory_count
 		output_file_list output_directory_list)
 	FILE(GLOB root_dir_files "${root_dir}/*")
@@ -663,11 +663,11 @@ ENDFUNCTION()
 #	<keywords>
 # )
 #
-FUNCTION(_BIMCM_CACHE_CONTRUCT_CACHE_ENTRY_VAR var)
+FUNCTION(_CMLIB_CACHE_CONTRUCT_CACHE_ENTRY_VAR var)
 	SET(keywords ${ARGN})
 	LIST(JOIN keywords "_" _tmp)
-	SET("${var}" "${_BIMCM_CACHE_VAR_ENTRY_PREFIX}_${_tmp}" PARENT_SCOPE)
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("Cache var name ${_BIMCM_CACHE_VAR_ENTRY_PREFIX}_${_tmp}")
+	SET("${var}" "${_CMLIB_CACHE_VAR_ENTRY_PREFIX}_${_tmp}" PARENT_SCOPE)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("Cache var name ${_CMLIB_CACHE_VAR_ENTRY_PREFIX}_${_tmp}")
 ENDFUNCTION()
 
 
@@ -685,22 +685,22 @@ ENDFUNCTION()
 #		<type> <DIRECTORY|FILE|BASEDIR>
 # )
 #
-FUNCTION(_BIMCM_CACHE_CONSTRUCT_CACHE_PATH var type)
+FUNCTION(_CMLIB_CACHE_CONSTRUCT_CACHE_PATH var type)
 	SET(keywords ${ARGN})
 	LIST(JOIN keywords "/" _tmp)
 	IF(NOT _tmp STREQUAL "")
 		SET(_tmp "/${_tmp}")
 	ENDIF()
 	IF("${type}" STREQUAL "DIRECTORY")
-		SET("${var}" "${BIMCM_REQUIRED_ENV_TMP_PATH}/${_BIMCM_CACHE_VAR_DIRECTORY_NAME}/dir${_tmp}" PARENT_SCOPE)
+		SET("${var}" "${CMLIB_REQUIRED_ENV_TMP_PATH}/${_CMLIB_CACHE_VAR_DIRECTORY_NAME}/dir${_tmp}" PARENT_SCOPE)
 	ELSEIF("${type}" STREQUAL "FILE")
-		SET("${var}" "${BIMCM_REQUIRED_ENV_TMP_PATH}/${_BIMCM_CACHE_VAR_DIRECTORY_NAME}/file${_tmp}" PARENT_SCOPE)
+		SET("${var}" "${CMLIB_REQUIRED_ENV_TMP_PATH}/${_CMLIB_CACHE_VAR_DIRECTORY_NAME}/file${_tmp}" PARENT_SCOPE)
 	ELSEIF("${type}" STREQUAL "BASEDIR")
-		SET("${var}" "${BIMCM_REQUIRED_ENV_TMP_PATH}/${_BIMCM_CACHE_VAR_DIRECTORY_NAME}" PARENT_SCOPE)
+		SET("${var}" "${CMLIB_REQUIRED_ENV_TMP_PATH}/${_CMLIB_CACHE_VAR_DIRECTORY_NAME}" PARENT_SCOPE)
 	ELSE()
 		MESSAGE(FATAL_ERROR "Canot retrieve path for '${type}'")
 	ENDIF()
-	_BIMCM_LIBRARY_DEBUG_MESSAGE("Cache path ${${var}}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("Cache path ${${var}}")
 ENDFUNCTION()
 
 
@@ -713,7 +713,7 @@ ENDFUNCTION()
 #		<keywords>...
 # )
 #
-FUNCTION(_BIMCM_CACHE_KEYWORDS_CHECK)
+FUNCTION(_CMLIB_CACHE_KEYWORDS_CHECK)
 	FOREACH(keyword ${ARGN})
 		STRING(REGEX MATCH "^[A-Z0-9]+$" keyword_regex_ok "${keyword}")
 		IF(NOT keyword_regex_ok)
