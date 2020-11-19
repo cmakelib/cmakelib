@@ -1,9 +1,9 @@
 
-# BIMCM Library
+# CMLIB Library
 
 Soft and "tiny" CMake library for C/C++.
 
-BIMCM Library is dependency tracking library which allows
+CMLIB Library is dependency tracking library which allows
 user-programmer effectively track all needed dependencies.
 
 ## Common
@@ -23,23 +23,23 @@ Each component has own git repository.
 
 The library core is function
 
-	BIMCM_DEPENDENCY
+	CMLIB_DEPENDENCY
 
 Which can track/cache various number of dependencies.
 
-Modules does not contain anything except what we need for `BIMCM_DEPENDENCY` implementation.
+Modules does not contain anything except what we need for `CMLIB_DEPENDENCY` implementation.
 
 Library consist from several modules
 
-- **[BIMCM_DEPENDENCY] - track and cache remote dependencies** (under remote dependency we assume dependency
+- **[CMLIB_DEPENDENCY] - track and cache remote dependencies** (under remote dependency we assume dependency
 which is not 'directly' attached to the user CMake project)
-- [BIMCM_REQUIRED_ENV] which init base environment for library needs
-- [BIMCM_CACHE] - cache files on host filesystem (represent persisten cache)
-- [BIMCM_FILE_DOWNLOAD] - download file from remote HTTP URl or GIT repository
-- [BIMCM_PARSE_ARGUMENTS] - wrapper around cmake_parse_arguments
-- [BIMCM_ARCHIVE] - extract files from archive
-- [BIMCM_STORAGE] - initialize [BIMCM_STORAGE], controlled by  STORAGE component (specified as component in FIND_PACKAGE).
-Can be overriden by BIMCM_USE_STORAGE env variable.
+- [CMLIB_REQUIRED_ENV] which init base environment for library needs
+- [CMLIB_CACHE] - cache files on host filesystem (represent persisten cache)
+- [CMLIB_FILE_DOWNLOAD] - download file from remote HTTP URl or GIT repository
+- [CMLIB_PARSE_ARGUMENTS] - wrapper around cmake_parse_arguments
+- [CMLIB_ARCHIVE] - extract files from archive
+- [CMLIB_STORAGE] - initialize [CMLIB_STORAGE], controlled by  STORAGE component (specified as component in FIND_PACKAGE).
+Can be overriden by CMLIB_USE_STORAGE env variable.
 
 Detailed documentation can be found in each module.
 
@@ -57,20 +57,20 @@ There are examples for each modules in [example] directory.
 
 It's intended that the user has only one instance of library.
 
-Library is stored on User computer and the global CMake variable `BIMCM_DIR`
+Library is stored on User computer and the global CMake variable `CMLIB_DIR`
 must be defined.
 
 - Choose directory where cmakelib will be stored. We will call this directory
 <bimcm_root>
 - Clone repository to local computer to <bimcm_root>
-- Define System ENV var `BIMCM_DIR` as absolute path to already cloned repository
-- Define System ENV var `BIMCM_REQUIRED_ENV_TMP_PATH` to path to existing directory. This variable represents
+- Define System ENV var `CMLIB_DIR` as absolute path to already cloned repository
+- Define System ENV var `CMLIB_REQUIRED_ENV_TMP_PATH` to path to existing directory. This variable represents
 Cache directory where the cache will be stored
 - Restart computer (due to System ENV vars) and in given CMakeLists.txt
-call `FIND_PACKAGE(BIMCM [COMPONENTS STORAGE])`
+call `FIND_PACKAGE(CMLIB [COMPONENTS STORAGE])`
 - Everything should works fine now
 
-Examples for `BIMCM_DEPENDENCY` can be found at [example/DEPENDENCY]
+Examples for `CMLIB_DEPENDENCY` can be found at [example/DEPENDENCY]
 
 
 ## Update
@@ -81,20 +81,20 @@ In case of cmake-generation problem reset cache.
 
 ## Reset cache
 
-If the `BIMCM_REQUIRED_ENV_TMP_PATH` is set then the cache will be stored
-in the directory specified by `BIMCM_REQUIRED_ENV_TMP_PATH`.
+If the `CMLIB_REQUIRED_ENV_TMP_PATH` is set then the cache will be stored
+in the directory specified by `CMLIB_REQUIRED_ENV_TMP_PATH`.
 
 If the cache reset is needed, just delete directory which path is stored
-in `BIMCM_REQUIRED_ENV_TMP_PATH` env variable.
+in `CMLIB_REQUIRED_ENV_TMP_PATH` env variable.
 
 ### CMake environment settings
 
 All temporary files and outputs are stored in temporary directory
 
-Path to temporary directory is controlled by `BIMCM_REQUIRED_ENV_TMP_PATH`
+Path to temporary directory is controlled by `CMLIB_REQUIRED_ENV_TMP_PATH`
 
-`BIMCM_REQUIRED_ENV_TMP_PATH` can be overridden be system ENV var named
-`BIMCM_REQUIRED_ENV_TMP_PATH`
+`CMLIB_REQUIRED_ENV_TMP_PATH` can be overridden be system ENV var named
+`CMLIB_REQUIRED_ENV_TMP_PATH`
 
 User define global ENV var to specify one, central cache storage which will be
 shared across CMake project instances.
@@ -103,8 +103,8 @@ shared across CMake project instances.
 
 - Each cache entry is represented by ordered set of keywords.
 It's common idiom the the first keyword is name of the project in which
-the BIMCM_DEPENDENCY/BIMCM_CACHE is written.
-- Use BIMCM_DEPENDENCY instead of other BIMCM functions. (use other only if you known what
+the CMLIB_DEPENDENCY/CMLIB_CACHE is written.
+- Use CMLIB_DEPENDENCY instead of other CMLIB functions. (use other only if you known what
 you are doing)
 
 
@@ -134,13 +134,13 @@ then just clean up all intermediate files by
 
 
 
-[BIMCM_REQUIRED_ENV]:    ./system_modules/BIMCM_REQUIRED_ENV.cmake
-[BIMCM_CACHE]:           ./system_modules/BIMCM_CACHE.cmake
-[BIMCM_FILE_DOWNLOAD]:   ./system_modules/BIMCM_FILE_DOWNLOAD.cmake
-[BIMCM_PARSE_ARGUMENTS]: ./system_modules/BIMCM_PARSE_ARGUMENTS.cmake
-[BIMCM_ARCHIVE]:         ./system_modules/BIMCM_ARCHIVE.cmake
-[BIMCM_DEPENDENCY]:      ./system_modules/BIMCM_DEPENDENCY.cmake
-[BIMCM_STORAGE]:         ./system_modules/BIMCM_STORAGE.cmake
+[CMLIB_REQUIRED_ENV]:    ./system_modules/CMLIB_REQUIRED_ENV.cmake
+[CMLIB_CACHE]:           ./system_modules/CMLIB_CACHE.cmake
+[CMLIB_FILE_DOWNLOAD]:   ./system_modules/CMLIB_FILE_DOWNLOAD.cmake
+[CMLIB_PARSE_ARGUMENTS]: ./system_modules/CMLIB_PARSE_ARGUMENTS.cmake
+[CMLIB_ARCHIVE]:         ./system_modules/CMLIB_ARCHIVE.cmake
+[CMLIB_DEPENDENCY]:      ./system_modules/CMLIB_DEPENDENCY.cmake
+[CMLIB_STORAGE]:         ./system_modules/CMLIB_STORAGE.cmake
 [example]:               ./example/
 [example/DEPENDENCY]:    ./example/DEPENDENCY
 [Scheme]:                ./doc/cmake-lib-img.png
