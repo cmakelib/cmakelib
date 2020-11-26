@@ -15,7 +15,9 @@ ENDIF()
 # Flag that REQUIRED_DEPENDENCY is already included
 SET(CMLIB_DEPENDENCY_INCLUDED "1")
 
-SET(CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM "|"
+# Value of the KEYDELIM var is used in Cmake regex
+# Please avaid using special regex characters
+SET(CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM ","
 	CACHE INTERNAL
 	"Delimiter for keywords in control file"
 )
@@ -448,16 +450,22 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 
 	FILE(READ "${control_file_path}" real_file_content)
 	IF(NOT "${file_content}" STREQUAL "${real_file_content}")
-		STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]+);([0-9a-zA-Z;]+)$")
-		SET(cached_keywords "${CMAKE_MATCH_0}")
+		STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]+);(.+)$" matched "${real_file_content}")
+		IF(NOT matched)
+			MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
+		ENDIF()
+
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control file content: '${matched}'")
+
+		SET(cached_keywords "${CMAKE_MATCH_1}")
 		IF(NOT DEFINED __ORIGINAL_KEYWORDS)
-			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords
-				but keywords provided '${cached_keywords}'")
+			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords "
+				"but keywords provided '${cached_keywords}'")
 		ELSE()
 			STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
 			MESSAGE(FATAL_ERROR
-				"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'
-				are not same as required keywords '${original_keywords_string}'"
+				"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'"
+				" are not same as required keywords '${original_keywords_string}'"
 			)
 		ENDIF()
 	ENDIF()

@@ -282,14 +282,29 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 		FILE(REMOVE "${archive_path}")
 	ENDIF()
 
+	SET(git_repo_dir "${tmp_dir}/git_repo")
+	FILE(MAKE_DIRECTORY "${git_repo_dir}")
+	EXECUTE_PROCESS(
+		COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" clone
+			--depth=1
+			--branch ${__GIT_REVISION}
+			--single-branch
+			"${__URI}" .
+		RESULT_VARIABLE   git_not_found
+		WORKING_DIRECTORY "${git_repo_dir}"
+	)
+	IF(NOT git_not_found EQUAL 0)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${git_not_found}\n${git_stderr}")
+		_CMLIB_FILE_TMP_DIR_CLEAN()
+		RETURN()
+	ENDIF()
 	EXECUTE_PROCESS(
 		COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" archive
-			--remote=${__URI}
 			-o "${archive_path}"
 			${__GIT_REVISION}
 			"${__GIT_PATH}"
 		RESULT_VARIABLE   file_not_found
-		WORKING_DIRECTORY "${tmp_dir}"
+		WORKING_DIRECTORY "${git_repo_dir}"
 	)
 	IF(NOT file_not_found EQUAL 0)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${file_not_found}\n${git_stderr}")
