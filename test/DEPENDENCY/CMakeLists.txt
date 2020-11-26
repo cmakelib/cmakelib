@@ -9,15 +9,17 @@ FIND_PACKAGE(CMLIB)
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../TEST.cmake")
 
-SET(HTTP_DOWNLOAD_URI_ZIP "http://data2.bimproject.cz/plugins/release/BPC.AC.WIN.zip")
-SET(GIT_DOWNLOAD_URI "ssh://git@stash.bimproject.cz:7999/bpcomm/cmake-lib-test.git")
-SET(GIT_PATH_FILE "cmake/README.txt")
-SET(GIT_PATH_ZIP "cmake/dir_a/test.zip")
-SET(GIT_PATH_DIRECTORY "cmake/")
-SET(GIT_REVISION_PATH_FILE "cmake-test/test_branch_README.txt")
-SET(GIT_REVISION_PATH_ZIP "cmake-test/test_branch_dir_a/test.zip")
+GET_FILENAME_COMPONENT(base_url "${CMLIB_REQUIRED_ENV_REMOTE_URL}" DIRECTORY)
+
+SET(HTTP_DOWNLOAD_URI_ZIP       "http://google.com/index.html")
+SET(GIT_DOWNLOAD_URI            "${base_url}/cmakelib-test.git")
+SET(GIT_PATH_FILE               "cmake/README.txt")
+SET(GIT_PATH_ZIP                "cmake/dir_a/test.zip")
+SET(GIT_PATH_DIRECTORY          "cmake/")
+SET(GIT_REVISION_PATH_FILE      "cmake-test/test_branch_README.txt")
+SET(GIT_REVISION_PATH_ZIP       "cmake-test/test_branch_dir_a/test.zip")
 SET(GIT_REVISION_PATH_DIRECTORY "cmake-test/")
-SET(GIT_REVISION_NAME "test-branch")
+SET(GIT_REVISION_NAME           "test-branch")
 
 # Content of GIT_PATH_ZIP archive
 SET(GIT_ZIP_CONTENT cmake1.png Release_CMake.jpg)
@@ -110,7 +112,7 @@ FUNCTION(DEPENDENCY_GIT_DOWNLOAD test_branch_files)
 	TEST_MODULE_MACRO()
 	SET(CMAKE_MODULE_PATH ${_tmp_cmake_path})
 
-	SET(test_output_path "testik")
+	SET(test_output_path "testtest")
 	CMLIB_DEPENDENCY(
 		KEYWORDS GIT MODULE TESTBRANCH
 		TYPE MODULE
@@ -119,7 +121,7 @@ FUNCTION(DEPENDENCY_GIT_DOWNLOAD test_branch_files)
 		GIT_REVISION "${GIT_REVISION_NAME}"
 		OUTPUT_PATH_VAR test_output_path
 	)
-	IF(NOT ("${test_output_path}" STREQUAL "testik"))
+	IF(NOT ("${test_output_path}" STREQUAL "testtest"))
 		MESSAGE(FATAL_ERROR "test_output_var modified! ${test_output_path}")
 	ENDIF()
 	INCLUDE(TEST_MODULE)

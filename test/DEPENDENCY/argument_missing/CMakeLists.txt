@@ -18,7 +18,9 @@ ENDIF()
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
 FIND_PACKAGE(CMLIB)
 
-SET(GIT_DOWNLOAD_URI "ssh://git@stash.bimproject.cz:7999/bpcomm/cmake-lib-test.git")
+GET_FILENAME_COMPONENT(base_url "${CMLIB_REQUIRED_ENV_REMOTE_URL}" DIRECTORY)
+
+SET(GIT_DOWNLOAD_URI "${base_url}/cmakelib-test.git")
 
 #
 # Download zip as FILE

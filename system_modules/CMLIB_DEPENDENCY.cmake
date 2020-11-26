@@ -71,8 +71,8 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # sync with cache entry. (if we call DEPENDENCY multiple times with same KEYWORDS set)
 #
 # <function>(
-#		KEYWORDS <keywords>
 #		TYPE          <MODULE|ARCHIVE|FILE|DIRECTORY>
+#		[KEYWORDS     <keywords>]
 #		[URI          <uri>]
 #		[GIT PATH     <FILE_DOWNLOAD::GIT_PATH>]
 #		[GIT_REVISION <git_revision_name>]
@@ -91,7 +91,7 @@ FUNCTION(CMLIB_DEPENDENCY)
 			KEYWORDS
 		REQUIRED
 			TYPE
-			KEYWORDS
+			#KEYWORDS
 		P_ARGN ${ARGN}
 	)
 	_CMLIB_DEPENDENCY_VALIDATE_TYPE(${__TYPE})
