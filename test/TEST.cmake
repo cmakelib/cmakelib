@@ -62,6 +62,7 @@ MACRO(TEST_VAR_EQUAL var_a var_b)
 ENDMACRO()
 
 
+
 ##
 #
 # Run cmake in given directory and expetcts cmake error
@@ -87,18 +88,21 @@ FUNCTION(TEST_INVALID_CMAKE_RUN working_directory)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("Invalid type result: ${result_var}")
 	TEST_VAR_TRUE(result_var)
 
-	STRING(FIND "${errout}" "${expected_error_string}" match_found)
+	IF(NOT expected_error_string)
+		RETURN()
+	ENDIF()
+	STRING(REGEX MATCH "${expected_error_string}" match_found "${errout}")
 	IF(match_found EQUAL -1)
 		MESSAGE(FATAL_ERROR "Unexpected err message '${errout}'")
 	ENDIF()
-
 ENDFUNCTION()
+
 
 
 ##
 #
 # <function> (
-#		"<path_to_test_dir>"
+#		"<path_to_cmakproject_test>"
 # )
 #
 FUNCTION(RUN_TEST test)
@@ -115,71 +119,3 @@ FUNCTION(RUN_TEST test)
 	ENDIF()
 ENDFUNCTION()
 
-
-
-
-
-
-
-
-
-FUNCTION(RUN_TEST test)
-	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
-		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -D .
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
-		)
-	ELSE()
-		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -P CMakeLists.txt
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
-		)
-	ENDIF()
-ENDFUNCTION()
-
-
-
-FUNCTION(RUN_TEST test)
-	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
-		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -D .
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
-		)
-	ELSE()
-		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -P CMakeLists.txt
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
-		)
-	ENDIF()
-ENDFUNCTION()
-
-
-
-FUNCTION(RUN_TEST test)
-	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
-		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -D .
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
-		)
-	ELSE()
-		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -P CMakeLists.txt
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
-		)
-	ENDIF()
-ENDFUNCTION()
-
-
-FUNCTION(RUN_TEST test)
-	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
-		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -D .
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
-		)
-	ELSE()
-		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -P CMakeLists.txt
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
-		)
-	ENDIF()
-ENDFUNCTION()

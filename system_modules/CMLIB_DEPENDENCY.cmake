@@ -444,13 +444,14 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 	SET(file_content "${keywords_string};${__URI};${__GIT_PATH};${__GIT_REVISION}")
 
 	IF(NOT EXISTS "${control_file_path}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK Cache control file create")
 		FILE(WRITE "${control_file_path}" "${file_content}")
 		RETURN()
 	ENDIF()
 
 	FILE(READ "${control_file_path}" real_file_content)
 	IF(NOT "${file_content}" STREQUAL "${real_file_content}")
-		STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]+);(.+)$" matched "${real_file_content}")
+		STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]*);(.+)$" matched "${real_file_content}")
 		IF(NOT matched)
 			MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
 		ENDIF()
@@ -458,8 +459,11 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control file content: '${matched}'")
 
 		SET(cached_keywords "${CMAKE_MATCH_1}")
-		IF(NOT DEFINED __ORIGINAL_KEYWORDS)
+		IF(NOT cached_keywords)
 			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords "
+				"but keywords provided '${__ORIGINAL_KEYWORDS}'")
+		ELSEIF(NOT DEFINED __ORIGINAL_KEYWORDS)
+			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created with keywords ${cached_keywords}"
 				"but keywords provided '${cached_keywords}'")
 		ELSE()
 			STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
