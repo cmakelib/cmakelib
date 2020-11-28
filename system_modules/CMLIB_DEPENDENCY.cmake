@@ -464,7 +464,7 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 				"but keywords provided '${__ORIGINAL_KEYWORDS}'")
 		ELSEIF(NOT DEFINED __ORIGINAL_KEYWORDS)
 			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created with keywords ${cached_keywords}"
-				"but keywords provided '${cached_keywords}'")
+				" but no keywords provided")
 		ELSE()
 			STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
 			MESSAGE(FATAL_ERROR

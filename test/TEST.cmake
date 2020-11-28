@@ -67,11 +67,12 @@ ENDMACRO()
 #
 # Run cmake in given directory and expetcts cmake error
 # <function>(
-#		working_directory
+#		<working_directory>
+#		<expected_error_string_regex>
 # )
 #
 FUNCTION(TEST_INVALID_CMAKE_RUN working_directory)
-	SET(expected_error_string "${ARGV0}")
+	SET(expected_error_string "${ARGV1}")
 	SET(arg)
 	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
 		SET(arg .)
@@ -79,7 +80,7 @@ FUNCTION(TEST_INVALID_CMAKE_RUN working_directory)
 		SET(arg -P "./CMakeLists.txt")
 	ENDIF()
 	EXECUTE_PROCESS(
-		COMMAND "cmake" -DCMLIB_DEBUG=ON ${arg}
+		COMMAND "cmake" -DCMLIB_DEBUG=${CMLIB_DEBUG} ${arg}
 		WORKING_DIRECTORY "${working_directory}"
 		RESULT_VARIABLE result_var
 		ERROR_VARIABLE errout
@@ -91,8 +92,9 @@ FUNCTION(TEST_INVALID_CMAKE_RUN working_directory)
 	IF(NOT expected_error_string)
 		RETURN()
 	ENDIF()
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("Expected error string '${expected_error_string}'")
 	STRING(REGEX MATCH "${expected_error_string}" match_found "${errout}")
-	IF(match_found EQUAL -1)
+	IF(NOT match_found)
 		MESSAGE(FATAL_ERROR "Unexpected err message '${errout}'")
 	ENDIF()
 ENDFUNCTION()
@@ -102,13 +104,13 @@ ENDFUNCTION()
 ##
 #
 # <function> (
-#		"<path_to_cmakproject_test>"
+#		<working_directory>
 # )
 #
 FUNCTION(RUN_TEST test)
 	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
 		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -D .
+			COMMAND "${CMAKE_COMMAND}" -DCMLIB_DEBUG=${CMLIB_DEBUG} .
 			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
 		)
 	ELSE()
