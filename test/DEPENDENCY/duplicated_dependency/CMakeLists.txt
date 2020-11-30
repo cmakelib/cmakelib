@@ -1,6 +1,7 @@
 ##
 #
-#
+# Test if combinations of cache antrie with explicit keywords 
+# and implicit keywords emit an error.
 #
 
 IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)

@@ -4,6 +4,12 @@ IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
 	PROJECT(CMLIB_CACHE_TEST)
 ENDIF()
 
+SET(CMLIB_DEPENDENCY_CONTROL OFF
+	CACHE BOOL
+	"Disable cache dependency control"
+	FORCE
+)
+
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
 FIND_PACKAGE(CMLIB)
 
@@ -11,9 +17,9 @@ INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../TEST.cmake")
 
 GET_FILENAME_COMPONENT(base_url "${CMLIB_REQUIRED_ENV_REMOTE_URL}" DIRECTORY)
 
-SET(HTTP_DOWNLOAD_URI_ZIP       "http://google.com/index.html")
+SET(HTTP_DOWNLOAD_URI_ZIP       "${base_url}/cmakelib-test/archive/v1.0.0.zip")
 SET(GIT_DOWNLOAD_URI            "${base_url}/cmakelib-test.git")
-SET(GIT_PATH_FILE               "cmake/README.txt")
+	SET(GIT_PATH_FILE               "cmake/README.txt")
 SET(GIT_PATH_ZIP                "cmake/dir_a/test.zip")
 SET(GIT_PATH_DIRECTORY          "cmake/")
 SET(GIT_REVISION_PATH_FILE      "cmake-test/test_branch_README.txt")

@@ -22,6 +22,11 @@ SET(CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM ","
 	"Delimiter for keywords in control file"
 )
 
+SET(CMLIB_DEPENDENCY_CONTROL ON
+	CACHE BOOL
+	"Enable depenendcy Conrol if ON, Disable dependency conrol if OFF"
+)
+
 _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
 _CMLIB_LIBRARY_MANAGER(CMLIB_FILE_DOWNLOAD)
 _CMLIB_LIBRARY_MANAGER(CMLIB_ARCHIVE)
@@ -98,13 +103,18 @@ FUNCTION(CMLIB_DEPENDENCY)
 	)
 	_CMLIB_DEPENDENCY_VALIDATE_TYPE(${__TYPE})
 
-	_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS(
-		ORIGINAL_KEYWORDS ${__KEYWORDS}
-		URI               "${__URI}"
-		GIT_PATH          "${__GIT_PATH}"
-		GIT_REVISION      "${__GIT_REVISION}"
-		KEYWORDS_VAR      hash_keyword
-	)
+	SET(hash_keyword)
+	IF(CMLIB_DEPENDENCY_CONTROL)
+		_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS(
+			ORIGINAL_KEYWORDS ${__KEYWORDS}
+			URI               "${__URI}"
+			GIT_PATH          "${__GIT_PATH}"
+			GIT_REVISION      "${__GIT_REVISION}"
+			KEYWORDS_VAR      hash_keyword
+		)
+	ELSE()
+		SET(hash_keyword ${__KEYWORDS})
+	ENDIF()
 
 	CMLIB_CACHE_GET(
 		KEYWORDS ${hash_keyword}
@@ -460,8 +470,8 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 
 		SET(cached_keywords "${CMAKE_MATCH_1}")
 		IF(NOT cached_keywords)
-			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords "
-				"but keywords provided '${__ORIGINAL_KEYWORDS}'")
+			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords"
+				" but keywords provided '${__ORIGINAL_KEYWORDS}'")
 		ELSEIF(NOT DEFINED __ORIGINAL_KEYWORDS)
 			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created with keywords ${cached_keywords}"
 				" but no keywords provided")
