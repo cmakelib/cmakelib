@@ -407,7 +407,7 @@ ENDFUNCTION()
 #)
 #
 FUNCTION(_CMLIB_FILE_DETERMINE_URI_TYPE var uri)
-	STRING(REGEX MATCH "^git://.*" git_uri "${uri}")
+	STRING(REGEX MATCH "^(git://|git@).*" git_uri "${uri}")
 	STRING(REGEX MATCH "^ssh://git@.*" git_ssh_uri "${uri}")
 	STRING(REGEX MATCH "^http[s]?://.*" http_uri "${uri}")
 	IF(git_uri OR git_ssh_uri)
