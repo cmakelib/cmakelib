@@ -1,4 +1,4 @@
-name: Ubuntu Test
+name: Linux tests
 
 on:
   push:
@@ -11,10 +11,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: ubuntu-18.04
+  test_debian_buster:
+    container:
+        image: cmakelib/build-debian-buster:latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: Run tests
         run: cmake test/
