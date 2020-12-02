@@ -12,6 +12,7 @@ on:
 
 jobs:
   test_debian_buster:
+    runs-on: ubuntu-latest
     container:
         image: cmakelib/build-debian-buster:latest
     steps:
