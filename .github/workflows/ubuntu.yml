@@ -19,3 +19,21 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run tests
         run: cmake test/
+
+  test_debian_stretch:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-debian-stretch:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cmake test/
+
+  test_ubuntu_1804:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-ubuntu-18.04:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cmake test/
