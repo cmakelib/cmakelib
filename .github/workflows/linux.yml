@@ -27,9 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Add origin
-        run: git remote add origin $REPO_URL
         env:
           REPO_URL: ${{ github.repositoryUrl }}
+        run: git remote add origin $REPO_URL
       - name: Run Tests
         run: cmake test/
           
