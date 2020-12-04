@@ -9,18 +9,18 @@ FIND_PACKAGE(CMLIB)
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../TEST.cmake")
 
-SET(VALID_HTTP_URI   "http://bimproject.cz/")
-SET(INVALID_HTTP_URI "http://bimproject-does-not-exist.cz/")
-SET(VALID_GIT_URI    "ssh://git@stash.bimproject.cz:7999/bpcomm/cmake-lib-test.git")
-SET(INVALID_GIT_URI  "ssh://git@stash.bimproject.cz:7999/bpcomm/utils-does-not-exist.git")
+SET(VALID_HTTP_URI   "http://cmake.org/")
+SET(INVALID_HTTP_URI "http://cmake-does-not-exist.org/")
+SET(VALID_GIT_URI    "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
+SET(INVALID_GIT_URI  "${CMLIB_REQUIRED_ENV_REMOTE_URL}/utils-does-not-exist.git")
 SET(VALID_GIT_FILE_PATH   "cmake/README.txt")
 SET(INVALID_GIT_FILE_PATH "cmake/README_not_found")
-SET(VALID_GIT_REVISION_FILE_PATH   "cmake-test/test_branch_README.txt")
-SET(INVALID_GIT_REVISION_FILE_PATH "cmake-test/README_not_found")
-SET(VALID_GIT_DIRECTORY_PATH   "cmake/")
-SET(VALID_GIT_REVISION_DIRECTORY_PATH   "cmake-test/")
-SET(INVALID_GIT_DIRECTORY_PATH "cmak")
-SET(TEST_BRANCH_NAME "test-branch")
+SET(VALID_GIT_REVISION_FILE_PATH      "cmake-test/test_branch_README.txt")
+SET(INVALID_GIT_REVISION_FILE_PATH    "cmake-test/README_not_found")
+SET(VALID_GIT_DIRECTORY_PATH          "cmake/")
+SET(VALID_GIT_REVISION_DIRECTORY_PATH "cmake-test/")
+SET(INVALID_GIT_DIRECTORY_PATH        "cmak")
+SET(TEST_BRANCH_NAME                  "test-branch")
 
 
 

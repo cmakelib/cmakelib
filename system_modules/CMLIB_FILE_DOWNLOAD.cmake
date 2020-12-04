@@ -290,6 +290,7 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 			--branch ${__GIT_REVISION}
 			--single-branch
 			"${__URI}" .
+		OUTPUT_VARIABLE   stdout # Just discard STDOUT
 		RESULT_VARIABLE   git_not_found
 		WORKING_DIRECTORY "${git_repo_dir}"
 	)
