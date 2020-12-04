@@ -9,36 +9,8 @@ on:
       - '*'
 
   workflow_dispatch:
-
-jobs:
-  one:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Dump job context
-        env:
-          JOB_CONTEXT: ${{ toJson(job) }}
-        run: echo "$JOB_CONTEXT"
-      - name: Dump steps context
-        env:
-          STEPS_CONTEXT: ${{ toJson(steps) }}
-        run: echo "$STEPS_CONTEXT"
-      - name: Dump runner context
-        env:
-          RUNNER_CONTEXT: ${{ toJson(runner) }}
-        run: echo "$RUNNER_CONTEXT"
-      - name: Dump strategy context
-        env:
-          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-        run: echo "$STRATEGY_CONTEXT"
-      - name: Dump matrix context
-        env:
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
-        
+  
+jobs:   
   test_debian_buster:
     runs-on: ubuntu-latest
     container:
@@ -55,10 +27,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Add origin
-        run: git remote add origin ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}
+        run: git remote add origin $REPO_URL
       - name: Run Tests
         run: cmake test/
-
+      - env:
+          REPO_URL: ${{ github.repositoryUrl }}
+          
   test_ubuntu_2004:
     runs-on: ubuntu-latest
     container:
