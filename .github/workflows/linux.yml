@@ -20,15 +20,6 @@ jobs:
       - name: Run tests
         run: cmake test/
 
-  test_debian_stretch:
-    runs-on: ubuntu-latest
-    container:
-        image: cmakelib/build-linux:latest-debian-stretch
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: cmake test/
-
   test_ubuntu_1804:
     runs-on: ubuntu-latest
     container:
@@ -36,7 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: cmake test/
+        run:
+            - git remote add origin '${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}'
+            - cmake test/
 
   test_ubuntu_2004:
     runs-on: ubuntu-latest
