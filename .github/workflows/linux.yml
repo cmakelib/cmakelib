@@ -27,7 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: git remote add origin ${{GITHUB_SERVER_URL}}/${{GITHUB_REPOSITORY}} && cmake test/
+      - run: git remote add origin ${{ env.GITHUB_SERVER_URL }}/${{ env.GITHUB_REPOSITORY }}
+      - run: cmake test/
 
   test_ubuntu_2004:
     runs-on: ubuntu-latest
@@ -36,4 +37,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: cmake test/
+      - run: cmake test/
