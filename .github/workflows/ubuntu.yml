@@ -1,0 +1,39 @@
+name: Linux tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+
+  workflow_dispatch:
+
+jobs:
+  test_debian_buster:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-debian-buster:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cmake test/
+
+  test_debian_stretch:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-debian-stretch:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cmake test/
+
+  test_ubuntu_1804:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-ubuntu-18.04:latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cmake test/
