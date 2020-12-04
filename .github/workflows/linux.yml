@@ -26,6 +26,8 @@ jobs:
         image: cmakelib/build-linux:latest-ubuntu-1804
     steps:
       - uses: actions/checkout@v2
+      - name: Git init
+        run: git init
       - name: Add origin
         env:
           REPO_URL_TEST: ${{ github.repositoryUrl }}
