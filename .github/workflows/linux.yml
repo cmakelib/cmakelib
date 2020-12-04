@@ -14,16 +14,7 @@ jobs:
   test_debian_buster:
     runs-on: ubuntu-latest
     container:
-        image: cmakelib/build-debian-buster:latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: cmake test/
-
-  test_debian_stretch:
-    runs-on: ubuntu-latest
-    container:
-        image: cmakelib/build-debian-stretch:latest
+        image: cmakelib/build-linux:latest-debian-buster
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -32,7 +23,16 @@ jobs:
   test_ubuntu_1804:
     runs-on: ubuntu-latest
     container:
-        image: cmakelib/build-ubuntu-18.04:latest
+        image: cmakelib/build-linux:latest-ubuntu-1804
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cmake test/
+
+  test_ubuntu_2004:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-linux:latest-ubuntu-2004
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
