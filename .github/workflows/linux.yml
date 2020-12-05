@@ -9,8 +9,8 @@ on:
       - '*'
 
   workflow_dispatch:
-
-jobs:
+  
+jobs:   
   test_debian_buster:
     runs-on: ubuntu-latest
     container:
@@ -26,9 +26,15 @@ jobs:
         image: cmakelib/build-linux:latest-ubuntu-1804
     steps:
       - uses: actions/checkout@v2
-      - name: Run tests
-        run: git remote add origin ${{GITHUB_SERVER_URL}}/${{GITHUB_REPOSITORY}} && cmake test/
-
+      - name: Git init
+        run: git init
+      - name: Add origin
+        env:
+          REPO_URL_TEST: ${{ github.repositoryUrl }}
+        run: git remote add origin "$REPO_URL_TEST"
+      - name: Run Tests
+        run: cmake test/
+          
   test_ubuntu_2004:
     runs-on: ubuntu-latest
     container:
@@ -37,3 +43,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run tests
         run: cmake test/
+        
+  test_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cmake test/
+  
