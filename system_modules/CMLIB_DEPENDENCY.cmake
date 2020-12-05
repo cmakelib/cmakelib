@@ -460,15 +460,14 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 	ENDIF()
 
 	FILE(READ "${control_file_path}" real_file_content)
+	STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]*);(.+)$" matched "${real_file_content}")
+	IF(NOT matched)
+		MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
+	ENDIF()
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control file content: '${matched}'")
+	SET(cached_keywords "${CMAKE_MATCH_1}")
+
 	IF(NOT "${file_content}" STREQUAL "${real_file_content}")
-		STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]*);(.+)$" matched "${real_file_content}")
-		IF(NOT matched)
-			MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
-		ENDIF()
-
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control file content: '${matched}'")
-
-		SET(cached_keywords "${CMAKE_MATCH_1}")
 		IF(NOT cached_keywords)
 			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords"
 				" but keywords provided '${__ORIGINAL_KEYWORDS}'")
