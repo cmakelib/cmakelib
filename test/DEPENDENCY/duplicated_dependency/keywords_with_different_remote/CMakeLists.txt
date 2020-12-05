@@ -1,8 +1,7 @@
 ## Main
 #
-# Check if DEPENDENCY emit and error if
-# we try to add same resurce as a DEPENDENCY
-# under multiple keywords
+# Check if DEPENDENCY emit an error if we
+# try to add different remotes under same keyword set
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)

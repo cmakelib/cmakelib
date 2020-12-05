@@ -455,6 +455,16 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 
 	IF(NOT EXISTS "${control_file_path}")
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK Cache control file create")
+		IF(DEFINED __ORIGINAL_KEYWORDS)
+			CMLIB_CACHE_HAS_FILE(
+				KEYWORDS ${__ORIGINAL_KEYWORDS}
+				PATH_VAR cache_path
+			)
+			IF(cache_path)
+				STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
+				MESSAGE(FATAL_ERROR "The cache under keywords '${original_keywords_string}' already exist for different remote")
+			ENDIF()
+		ENDIF()
 		FILE(WRITE "${control_file_path}" "${file_content}")
 		RETURN()
 	ENDIF()
@@ -464,7 +474,7 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 	IF(NOT matched)
 		MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
 	ENDIF()
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control file content: '${matched}'")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control real file content: '${real_file_content}'")
 	SET(cached_keywords "${CMAKE_MATCH_1}")
 
 	IF(NOT "${file_content}" STREQUAL "${real_file_content}")
