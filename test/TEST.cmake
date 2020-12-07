@@ -110,16 +110,22 @@ ENDFUNCTION()
 #
 FUNCTION(RUN_TEST test)
 	MESSAGE(STATUS "TEST ${test}")
+	SET(result_variable 0)
 	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
 		EXECUTE_PROCESS(
 			COMMAND "${CMAKE_COMMAND}" -DCMLIB_DEBUG=${CMLIB_DEBUG} .
 			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
+			RESULT_VARIABLE result_variable
 		)
 	ELSE()
 		EXECUTE_PROCESS(
 			COMMAND "${CMAKE_COMMAND}" -P CMakeLists.txt
 			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
+			RESULT_VARIABLE result_variable
 		)
+	ENDIF()
+	IF(result_variable GREATER 0)
+		MESSAGE(FATAL_ERROR "Test '${test}' failed with '${result_variable}'")
 	ENDIF()
 ENDFUNCTION()
 
