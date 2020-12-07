@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: cmake test/
+        run: cd test/ && cmake .
           
   test_ubuntu_2004:
     runs-on: ubuntu-latest
@@ -27,19 +27,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: cmake test/
+        run: cd test/ && cmake .
 
   test_macos_11:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: cmake test/
+        run: cd test && cmake .
 
   test_windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: cmake test/
+        run: cd test/ && cmake .
   
