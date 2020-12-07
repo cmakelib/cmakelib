@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: cd test/ && cmake .
+        run: cd test/ && cmake . || tree DEPENDENCY/
 
   test_macos_11:
     runs-on: macos-latest
