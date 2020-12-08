@@ -63,6 +63,14 @@ ENDMACRO()
 
 
 
+MACRO(TEST_VAR_NOT_EQUAL var_a var_b)
+	IF(("${${var_a}}" STREQUAL "${${var_b}}"))
+		MESSAGE(FATAL_ERROR "Variable ${var_a}(${${var_a}}) is not equal to ${var_b}(${${var_b}})")
+	ENDIF()
+ENDMACRO()
+
+
+
 ##
 #
 # Run cmake in given directory and expetcts cmake error
@@ -108,24 +116,27 @@ ENDFUNCTION()
 #		<working_directory>
 # )
 #
-FUNCTION(RUN_TEST test)
+FUNCTION(TEST_RUN test)
 	MESSAGE(STATUS "TEST ${test}")
 	SET(result_variable 0)
+	SET(error_variable "")
 	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
 		EXECUTE_PROCESS(
 			COMMAND "${CMAKE_COMMAND}" -DCMLIB_DEBUG=${CMLIB_DEBUG} .
 			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
 			RESULT_VARIABLE result_variable
+			ERROR_VARIABLE error_variable
 		)
 	ELSE()
 		EXECUTE_PROCESS(
 			COMMAND "${CMAKE_COMMAND}" -P CMakeLists.txt
 			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
 			RESULT_VARIABLE result_variable
+			ERROR_VARIABLE error_variable
 		)
 	ENDIF()
 	IF(result_variable GREATER 0)
-		MESSAGE(FATAL_ERROR "Test '${test}' failed with '${result_variable}'")
+		MESSAGE(FATAL_ERROR "Test '${test}' failed with '${result_variable}' ${error_variable}")
 	ENDIF()
 ENDFUNCTION()
 

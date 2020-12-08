@@ -80,7 +80,7 @@ MESSAGE(STATUS "A_C_B Cache: ${var_a_c_b}")
 # Cache whole directory
 #
 CMLIB_CACHE_ADD(
-	KEYWORDS A B C DIRECTORY
+	KEYWORDS A B C DIRECTORY TEST
 	PATH "${CMAKE_CURRENT_LIST_DIR}/Directory"
 	CACHE_PATH_VAR var_a_b_c_directory
 )

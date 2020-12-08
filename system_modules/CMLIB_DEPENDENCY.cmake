@@ -39,11 +39,11 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 #
 # Download and cache dependency.
 #
-# The remote resource is uniquely identified by combination of all ementnts from
+# The remote resource is uniquely identified by combination of all elments from
 # REMOTE_ID_SET = { URI, GIT_PATH, GIT_REVISION } and additionaly by KEYWORDS set.
 #
 # There can be only one combination of REMOTE_ID_SET and KEYWORDS set for each REMOTE_ID_SET.
-# If you try to add same dependency with same REMOTE_ID_SET but two different KEYWORDS set
+# If you try to add same dependency with same REMOTE_ID_SET but under two different KEYWORDS set
 # then the error occure.
 #
 # [Arguments]
@@ -51,7 +51,6 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # Represents ordered set of keywords.
 # There is set of reserved keywords RK = { CMLIB }. Do not use this keywords
 # unless you known what you are doing.
-# KEWORDS are usable
 #
 # TYPE must be specified.
 # Note that for DIRECTORY type only the GIT uri can be used.
@@ -78,12 +77,17 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # If not specified the ARCHIVE_TYPE is determined automatically
 # Look at CMLIB_ARCHIVE macro.
 #
+# [Cache rules]
+# As mentioned above there can be exactly one combination of remote and cache KEYWORDS.
+# If the mechanism is enabled you cannot
+# - add same REMOTE_ID_SET with different KEYWORDS set except empty KEYWORDS set
+# - add REMOTE_ID_SET with empty KEYWORDS set and the try to add given
+#   REMOTE_ID_SET with non empty keywords set
+#
 # [Notes]
 # If the entry represented by KEYWORDS already exist is obtained from cache
 # whatever is specified in URI and TYPE. These fields are ignored
 # if the entry already exist.
-# Currently there is no way how to test if the URI and TYPE are in
-# sync with cache entry. (if we call DEPENDENCY multiple times with same KEYWORDS set)
 #
 # <function>(
 #		TYPE          <MODULE|ARCHIVE|FILE|DIRECTORY>
@@ -112,17 +116,13 @@ FUNCTION(CMLIB_DEPENDENCY)
 	_CMLIB_DEPENDENCY_VALIDATE_TYPE(${__TYPE})
 
 	SET(hash_keyword)
-	IF(CMLIB_DEPENDENCY_CONTROL)
-		_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS(
-			ORIGINAL_KEYWORDS ${__KEYWORDS}
-			URI               "${__URI}"
-			GIT_PATH          "${__GIT_PATH}"
-			GIT_REVISION      "${__GIT_REVISION}"
-			KEYWORDS_VAR      hash_keyword
-		)
-	ELSE()
-		SET(hash_keyword ${__KEYWORDS})
-	ENDIF()
+	_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS(
+		ORIGINAL_KEYWORDS ${__KEYWORDS}
+		URI               "${__URI}"
+		GIT_PATH          "${__GIT_PATH}"
+		GIT_REVISION      "${__GIT_REVISION}"
+		KEYWORDS_VAR      hash_keyword
+	)
 
 	CMLIB_CACHE_GET(
 		KEYWORDS ${hash_keyword}
@@ -204,7 +204,7 @@ FUNCTION(CMLIB_DEPENDENCY)
 		_CMLIB_DEPENDENCY_MODULE("${dependency_file}")
 		SET(output_var "${${__OUTPUT_PATH_VAR}}")
 	ELSEIF("${__TYPE}" STREQUAL "ARCHIVE")
-		_CMLIB_DEPENDENCY_ARCHIVE("${dependency_file}" "${__ARCHIVE_TYPE}" output_var ${__KEYWORDS})
+		_CMLIB_DEPENDENCY_ARCHIVE("${dependency_file}" "${__ARCHIVE_TYPE}" output_var ${hash_keyword})
 	ELSEIF("${__TYPE}" STREQUAL "FILE")
 		SET(output_var ${dependency_file})
 	ELSEIF("${__TYPE}" STREQUAL "DIRECTORY")
@@ -276,6 +276,9 @@ ENDMACRO()
 #
 FUNCTION(_CMLIB_DEPENDENCY_ARCHIVE archive_file archive_type output_var)
 	SET(keywords ${ARGN})
+	IF(NOT keywords)
+		MESSAGE(FATAL_ERROR "Keywords are not defined!")
+	ENDIF()
 	CMLIB_CACHE_GET(
 		KEYWORDS EXTRACTED ${keywords}
 		CACHE_PATH_VAR dependency_extracted_cache_entry
@@ -303,7 +306,7 @@ FUNCTION(_CMLIB_DEPENDENCY_ARCHIVE archive_file archive_type output_var)
 		OUTPUT_PATH_VAR archive_path
 	)
 	CMLIB_CACHE_ADD(
-		KEYWORDS EXTRACTED ${__KEYWORDS}
+		KEYWORDS EXTRACTED ${keywords}
 		PATH "${archive_path}"
 		CACHE_PATH_VAR cache_var
 	)
@@ -415,10 +418,12 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		OUTPUT_HASH_VAR hash_keyword
 	)
 
-	_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK(
-		HASH              ${hash_keyword}
-		ORIGINAL_KEYWORDS "${__ORIGINAL_KEYWORDS}"
-	)
+	IF(CMLIB_DEPENDENCY_CONTROL)
+		_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK(
+			HASH              ${hash_keyword}
+			ORIGINAL_KEYWORDS "${__ORIGINAL_KEYWORDS}"
+		)
+	ENDIF()
 
 	IF(__ORIGINAL_KEYWORDS)
 		SET(${__KEYWORDS_VAR} ${__ORIGINAL_KEYWORDS} PARENT_SCOPE)

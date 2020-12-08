@@ -63,3 +63,25 @@ MACRO(CMLIB_PARSE_ARGUMENTS)
 		ENDIF()
 	ENDFOREACH()
 ENDMACRO()
+
+
+
+##
+#
+# Cleanup context after CMLIB_PARSE_ARGUMENTS call.
+#
+# Because the CMLIB_PARSE_ARGUMENTS is a macro and use variables it can
+# mess up the context in which the function is called.
+# This function just clean up all local variables from CMLIB_PARSE_ARGUMENTS
+#
+# Usable if CMLIB_PARSE_ARGUMENTS is called in MACRO.
+#
+# <function>(
+# )
+#
+MACRO(CMLIB_PARSE_ARGUMENTS_CLEANUP)
+	UNSET(options)
+	UNSET(multi_value_args)
+	UNSET(one_value_args)
+	UNSET(_tmp)
+ENDMACRO()

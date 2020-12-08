@@ -11,8 +11,8 @@ INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../TEST.cmake")
 
 SET(VALID_HTTP_URI   "http://cmake.org/")
 SET(INVALID_HTTP_URI "http://cmake-does-not-exist.org/")
-SET(VALID_GIT_URI    "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
-SET(INVALID_GIT_URI  "${CMLIB_REQUIRED_ENV_REMOTE_URL}/utils-does-not-exist.git")
+SET(VALID_GIT_URI    "https://github.com/cmakelib/cmakelib-test.git")
+SET(INVALID_GIT_URI  "https://github.com/cmakelib/utils-does-not-exist.git")
 SET(VALID_GIT_FILE_PATH   "cmake/README.txt")
 SET(INVALID_GIT_FILE_PATH "cmake/README_not_found")
 SET(VALID_GIT_REVISION_FILE_PATH      "cmake-test/test_branch_README.txt")
@@ -274,6 +274,20 @@ FUNCTION(GIT_DOWNLOAD_DIRECTORY uri_type_option explicit_file_name status_check)
 	TEST_VAR_PATH_EXISTS(test_branch_tmp)
 ENDFUNCTION()
 
+FUNCTION(GIT_COUNT_FILES)
+	SET(output_path "${CMAKE_CURRENT_LIST_DIR}/count_files_git")
+	CMLIB_FILE_DOWNLOAD(
+		URI "${VALID_GIT_URI}"
+		URI_TYPE GIT
+		OUTPUT_PATH "${output_path}"
+	)
+	FILE(GLOB_RECURSE glob "${output_path}/*")
+	LIST(LENGTH glob downloaded_files_size)
+	IF(NOT (downloaded_files_size EQUAL 7))
+		MESSAGE(FATAL_ERROR "Invalid number of files: ${downloaded_files_size}")
+	ENDIF()
+ENDFUNCTION()
+
 
 
 
@@ -294,4 +308,5 @@ GIT_DOWNLOAD_DIRECTORY(OFF OFF ON)
 GIT_DOWNLOAD_DIRECTORY(OFF ON ON)
 GIT_DOWNLOAD_DIRECTORY(ON OFF ON)
 GIT_DOWNLOAD_DIRECTORY(OFF ON OFF)
+GIT_COUNT_FILES()
 FILE(REMOVE_RECURSE "${CMLIB_REQUIRED_ENV_TMP_PATH}")

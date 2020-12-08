@@ -467,7 +467,7 @@ FUNCTION(CMLIB_CACHE_HAS_FILE)
 		SET(${__PATH_VAR} "${cache_path_directories}" PARENT_SCOPE)
 		RETURN()
 	ENDIF()
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("No file count, ${cache_path_directories}\n${cache_path_files}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("No file count, ${cache_path_directories}\n\t${cache_path_files}")
 	UNSET(${__PATH_VAR} PARENT_SCOPE)
 ENDFUNCTION()
 
@@ -479,7 +479,7 @@ ENDFUNCTION()
 
 
 
-## HELPER
+## Helper
 #
 # Add entry to the entry list.
 # If the KEYWORDS_PERMUTATION_ALLOWED is not specified then
@@ -520,7 +520,7 @@ ENDFUNCTION()
 
 
 
-## HELPER
+## Helper
 #
 # Get cache entry.
 # If entry is not found the 'output_var' is unset
@@ -542,7 +542,7 @@ ENDFUNCTION()
 
 
 
-## HELPER
+## Helper
 #
 # Remove cache entry form the entry list.
 # <function>(
@@ -565,7 +565,7 @@ ENDFUNCTION()
 
 
 
-## HELPER
+## Helper
 #
 # Check if there are duplicities in the entry list.
 # (two different combinations of the same keywords set exist in the list)
@@ -612,8 +612,9 @@ FUNCTION(_CMLIB_CACHE_LIST_CHECK_SUBSET_DIR)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Subset variables ${keywords_entry_sorted}:${entry_sorted}")
 		STRING(REGEX MATCH "^${keywords_entry_sorted}_(.*)" match_ok "${entry_sorted}")
 		STRING(REGEX MATCH "^${entry_sorted}_(.*)" match_ok2 "${keywords_entry_sorted}")
-		IF((match_ok OR match_ok2) AND NOT IS_DIRECTORY "${entry}")
-			MESSAGE(FATAL_ERROR "Given keywords are subset of existing cahce keywords")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Entry: ${${entry}}")
+		IF((match_ok OR match_ok2) AND IS_DIRECTORY "${entry}")
+			MESSAGE(FATAL_ERROR "Given keywords are subset of existing cache keywords")
 		ENDIF()
 	ENDFOREACH()
 ENDFUNCTION()
@@ -700,7 +701,6 @@ FUNCTION(_CMLIB_CACHE_CONSTRUCT_CACHE_PATH var type)
 	ELSE()
 		MESSAGE(FATAL_ERROR "Canot retrieve path for '${type}'")
 	ENDIF()
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("Cache path ${${var}}")
 ENDFUNCTION()
 
 

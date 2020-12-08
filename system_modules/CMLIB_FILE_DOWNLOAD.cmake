@@ -1,6 +1,6 @@
 ## Main
 #
-# BIM CMake File Download
+# CMLIB File Download
 # It enables to store remote files localy
 # (Download files from remote to local filesystem)
 #
@@ -107,11 +107,12 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 		IF(DEFINED __GIT_PATH)
 			SET(uri_type "GIT")
 		ELSE()
-			_CMLIB_FILE_DETERMINE_URI_TYPE(uri_type "${__URI}")
+			_CMLIB_FILE_DETERMINE_URI_TYPE(uri_type "${__URI}" ${__GIT_REVISION} ${__GIT_PATH})
 		ENDIF()
 	ELSE()
 		SET(uri_type "${__URI_TYPE}")
 	ENDIF()
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("URI Type: '${uri_type}'")
 
 	SET(path)
 	SET(status)
@@ -149,6 +150,10 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 		SET(${__STATUS_VAR} OFF PARENT_SCOPE)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Download from '${__URI}' failed")
 		RETURN()
+	ENDIF()
+
+	IF(NOT EXISTS "${path}")
+		MESSAGE(FATAL_ERROR "Path does not exist '${path}'")
 	ENDIF()
 
 	IF(IS_DIRECTORY "${path}")
@@ -275,29 +280,35 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 	_CMLIB_FILE_TMP_DIR_CREATE()
 	_CMLIB_FILE_TMP_DIR_GET(tmp_dir)
 
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Download: ${__URI} --> '${tmp_dir}/${__GIT_PATH}'")
-
-	SET(archive_path "${tmp_dir}/git_file.tar")
-	IF(EXISTS "${archive_path}")
-		FILE(REMOVE "${archive_path}")
-	ENDIF()
-
-	SET(git_repo_dir "${tmp_dir}/git_repo")
+	SET(archive_path     "${tmp_dir}/git_file.tar")
+	SET(git_repo_dir     "${tmp_dir}/git_repo")
+	SET(exp_archive_path "${tmp_dir}/exp_arch")
 	FILE(MAKE_DIRECTORY "${git_repo_dir}")
+	FILE(MAKE_DIRECTORY "${exp_archive_path}")
+
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT URI: '${__URI}'")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Revision: '${__GIT_REVISION}'")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Path: '${__GIT_PATH}'")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Repo dir: '${git_repo_dir}'")
+
+	SET(terminal_porompt_orig_value "$ENV{GIT_TERMINAL_PROMPT}")
+	SET(ENV{GIT_TERMINAL_PROMPT} 0)
 	EXECUTE_PROCESS(
 		COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" clone
 			--depth=1
 			--branch ${__GIT_REVISION}
 			--single-branch
-			"${__URI}" .
+			"${__URI}" git_repo
 		OUTPUT_VARIABLE   stdout # discard STDOUT
 		ERROR_VARIABLE    stderr # discard STDERR
 		RESULT_VARIABLE   git_not_found
-		WORKING_DIRECTORY "${git_repo_dir}"
+		WORKING_DIRECTORY "${tmp_dir}"
 	)
+	SET(ENV{GIT_TERMINAL_PROMPT} "${terminal_porompt_orig_value}")
 	IF(NOT git_not_found EQUAL 0)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${git_not_found}\n${git_stderr}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${git_not_found}")
 		_CMLIB_FILE_TMP_DIR_CLEAN()
+		UNSET(${__STATUS_VAR} PARENT_SCOPE)
 		RETURN()
 	ENDIF()
 	EXECUTE_PROCESS(
@@ -311,22 +322,24 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 	IF(NOT file_not_found EQUAL 0)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${file_not_found}\n${git_stderr}")
 		_CMLIB_FILE_TMP_DIR_CLEAN()
+		UNSET(${__STATUS_VAR} PARENT_SCOPE)
 		RETURN()
 	ENDIF()
 
     EXECUTE_PROCESS(
 		COMMAND ${CMAKE_COMMAND} -E tar xf "${archive_path}"
-		WORKING_DIRECTORY ${tmp_dir}
+		WORKING_DIRECTORY ${exp_archive_path}
 		RESULT_VARIABLE tar_not_valid
     )
 	IF(NOT tar_not_valid EQUAL 0)
 		_CMLIB_FILE_TMP_DIR_CLEAN()
+		UNSET(${__STATUS_VAR} PARENT_SCOPE)
 		RETURN()
 	ENDIF()
 
 	FILE(REMOVE ${archive_path})
 	SET(${__STATUS_VAR} ON PARENT_SCOPE)
-	SET(${__OUTPUT_VAR} "${tmp_dir}/${__GIT_PATH}" PARENT_SCOPE)
+	SET(${__OUTPUT_VAR} "${exp_archive_path}/${__GIT_PATH}" PARENT_SCOPE)
 ENDFUNCTION()
 
 
@@ -389,7 +402,7 @@ ENDFUNCTION()
 
 ## Helper
 #
-# Clean the BIM_CM tmp directory.
+# Clean the CMLIB tmp directory.
 # <function>()
 #
 FUNCTION(_CMLIB_FILE_TMP_DIR_CLEAN)
@@ -409,10 +422,12 @@ ENDFUNCTION()
 #)
 #
 FUNCTION(_CMLIB_FILE_DETERMINE_URI_TYPE var uri)
+	LIST(POP_FRONT ${ARGN} git_revision)
+	LIST(POP_FRONT ${ARGN} git_path)
 	STRING(REGEX MATCH "^(git://|git@).*" git_uri "${uri}")
 	STRING(REGEX MATCH "^ssh://git@.*" git_ssh_uri "${uri}")
 	STRING(REGEX MATCH "^http[s]?://.*" http_uri "${uri}")
-	IF(git_uri OR git_ssh_uri)
+	IF(git_uri OR git_ssh_uri OR git_revision OR git_path)
 		SET(${var} "GIT" PARENT_SCOPE)
 		RETURN()
 	ENDIF()

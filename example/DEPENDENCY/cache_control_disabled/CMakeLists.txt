@@ -5,16 +5,22 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 PROJECT(CMLIB_CACHE_TEST)
 
+SET(CMLIB_DEPENDENCY_CONTROL OFF
+	CACHE BOOL
+	"Disable dependency cache control"
+)
+
+
 #
 # In production this may be omitted because
 # the path to the CMLIB library is stored in
 # global variable. Look at the <git_root>/README
 #
-LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
 FIND_PACKAGE(CMLIB)
 
-SET(HTTP_DOWNLOAD_URI_ZIP "http://bimproject.cz/data/plugins/release/AGC.AC.MAC.zip")
-SET(GIT_DOWNLOAD_URI "ssh://git@stash.bimproject.cz:7999/bpcomm/cmake-lib-test.git")
+SET(HTTP_DOWNLOAD_URI_ZIP "https://github.com/cmakelib/cmakelib-test/archive/v1.0.0.zip")
+SET(GIT_DOWNLOAD_URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
 SET(GIT_TEST_BRANCH "test-branch")
 SET(GIT_CMAKE_MODULE_PATH "TEST_MODULE.cmake")
 SET(GIT_CMAKE_MODULE_NAME "TEST_MODULE")
