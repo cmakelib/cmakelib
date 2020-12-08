@@ -1,0 +1,77 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+#pull_request:
+#    branches:
+#      - '*'
+
+  workflow_dispatch:
+  
+jobs:   
+  test_debian_buster:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-linux:latest-debian-buster
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test/ && cmake .
+
+  test_debian_buster_script:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-linux:latest-debian-buster
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test/ && cmake -P ./CMakeLists.txt
+          
+  test_ubuntu_2004:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-linux:latest-ubuntu-2004
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test/ && cmake .
+
+  test_ubuntu_2004_script:
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-linux:latest-ubuntu-2004
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test/ && cmake -P ./CMakeLists.txt
+
+  test_macos_11:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test && cmake .
+
+  test_macos_11_script:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test && cmake -P ./CMakeLists.txt
+
+  test_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test/ && cmake .
+
+  test_windows_script:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test/ && cmake -P ./CMakeLists.txt
+  
