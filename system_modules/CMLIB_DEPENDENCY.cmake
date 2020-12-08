@@ -39,11 +39,19 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 #
 # Download and cache dependency.
 #
+# The remote resource is uniquely identified by combination of all ementnts from
+# REMOTE_ID_SET = { URI, GIT_PATH, GIT_REVISION } and additionaly by KEYWORDS set.
+#
+# There can be only one combination of REMOTE_ID_SET and KEYWORDS set for each REMOTE_ID_SET.
+# If you try to add same dependency with same REMOTE_ID_SET but two different KEYWORDS set
+# then the error occure.
+#
 # [Arguments]
-# KEYWORDS must be specified.
+# KEYWORDS are optional and can be empty.
 # Represents ordered set of keywords.
 # There is set of reserved keywords RK = { CMLIB }. Do not use this keywords
 # unless you known what you are doing.
+# KEWORDS are usable
 #
 # TYPE must be specified.
 # Note that for DIRECTORY type only the GIT uri can be used.

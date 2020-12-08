@@ -40,6 +40,7 @@ ENDFUNCTION()
 
 
 ## Helper
+#
 # Try find Git executable and ensure that we found
 # supported version
 #
@@ -66,6 +67,7 @@ ENDMACRO()
 
 
 ## Helper
+#
 # Find and save 7Zip path to 7zip executable
 #
 # <function>(
@@ -77,7 +79,11 @@ MACRO(_CMLIB_REQUIRED_ENV_FIND_7ZIP)
 		DOC "7zip executable"
 	)
 	IF("${CMLIB_REQUIRED_ENV_7ZIP}" STREQUAL "CMLIB_REQUIRED_ENV_7ZIP-NOTFOUND")
-		MESSAGE(FATAL_ERROR "7zip not found. Are you sure that 7zip is installed and registered in PATH env. variable?")
+		SET(CMLIB_REQUIRED_ENV_7ZIP "NOTFOUND"
+			CACHE STRING
+			""
+			FORCE
+		)
 	ENDIF()
 ENDMACRO()
 

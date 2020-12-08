@@ -1,23 +1,41 @@
 
 # CMLIB Library
 
-Soft and "tiny" CMake library for C/C++.
+[buildbadge_github]
+
+[buildbadge_travisci]
+
+Dependency trackikg library for CMake - completly written in CMake.
 
 CMLIB Library is dependency tracking library which allows
 user-programmer effectively track all needed dependencies.
 
 ## Common
 
-![Scheme]
-
-Library consist from three main parts
+Library consist from two main parts
 
 - **cmake-lib - dependency tracking (this repository)**
-- cmake-lib-storage - storage where the shared data (like URLs) are stored (configured by cmake-lib)
-- cmake-lib-basedef - base definitions and wrappers for standard Cmake functionality
 Contains component called "DEFAULTS" which reset CMake build env setting...
+- cmakelib components - Components represents optional functionality which can be
+managed by `cmakelib`. Each component has own git repository in form `cmakelib-component-<component_name>`
 
-Each component has own git repository.
+## Usage
+
+- `git clone https://github.com/cmakelib/cmakelib.git`
+
+```
+	LIST(APPEND CMAKE_MODULE_PATH <path_to_cmakelib_repo>)
+	FIND_PACKAGE(CMLIB REQUIRED)
+	CMLIB_DEPENDENCY(
+		URI "https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.bz2"
+		TYPE ARCHIVE
+		OUTPUT_PATH_VAR boost_source_path
+	)
+	IF(NOT DEFINED boost_source_path)
+		MESSAGE(FATAL_ERROR "Cannot download Boost!")
+	ENDIF()
+	MESSAGE(STATUS "Boost downloaded to '${boost_source_path}'")
+```
 
 ### API
 
@@ -38,8 +56,7 @@ which is not 'directly' attached to the user CMake project)
 - [CMLIB_FILE_DOWNLOAD] - download file from remote HTTP URl or GIT repository
 - [CMLIB_PARSE_ARGUMENTS] - wrapper around cmake_parse_arguments
 - [CMLIB_ARCHIVE] - extract files from archive
-- [CMLIB_STORAGE] - initialize [CMLIB_STORAGE], controlled by  STORAGE component (specified as component in FIND_PACKAGE).
-Can be overriden by CMLIB_USE_STORAGE env variable.
+- [CMLIB_COMPONENT] - component logic
 
 Detailed documentation can be found in each module.
 
@@ -51,11 +68,16 @@ There are examples for each modules in [example] directory.
 
 - CMake >=3.16 installed and registered in PATH env. variable
 - 7Zip installed and bin/ directory of 7zip registered in PATH env. variable
+    - Without 7Zip cmakelib `ARCHIVE` functionality will not work - no arcives can be tracked
+	by cmakelib
 - Git installed and bin/ directory of git registered in PATH env. variable
 
 ### Library install
 
-It's intended that the user has only one instance of library.
+It's intended that the user has only one instance of library but it's possible use `cmakelib`
+as submodule.
+
+#### Global install
 
 Library is stored on User computer and the global CMake variable `CMLIB_DIR`
 must be defined.
@@ -71,6 +93,7 @@ call `FIND_PACKAGE(CMLIB [COMPONENTS STORAGE])`
 - Everything should works fine now
 
 Examples for `CMLIB_DEPENDENCY` can be found at [example/DEPENDENCY]
+
 
 
 ## Update
@@ -140,9 +163,8 @@ then just clean up all intermediate files by
 [CMLIB_PARSE_ARGUMENTS]: ./system_modules/CMLIB_PARSE_ARGUMENTS.cmake
 [CMLIB_ARCHIVE]:         ./system_modules/CMLIB_ARCHIVE.cmake
 [CMLIB_DEPENDENCY]:      ./system_modules/CMLIB_DEPENDENCY.cmake
-[CMLIB_STORAGE]:         ./system_modules/CMLIB_STORAGE.cmake
+[CMLIB_COMPONENT]:       ./system_modules/CMLIB_COMPONENT.cmake
 [example]:               ./example/
 [example/DEPENDENCY]:    ./example/DEPENDENCY
-[Scheme]:                ./doc/cmake-lib-img.png
-
+[buildbadge_github]:     https://github.com/cmakelib/cmakelib/workflows/Tests/badge.svg
 

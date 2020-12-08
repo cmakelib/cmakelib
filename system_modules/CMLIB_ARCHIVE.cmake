@@ -67,6 +67,9 @@ FUNCTION(CMLIB_ARCHIVE_EXTRACT)
 			ARCHIVE_PATH
 		P_ARGN ${ARGN}
 	)
+	IF(NOT EXISTS "${CMLIB_REQUIRED_ENV_7ZIP}")
+		MESSAGE(FATAL_ERROR "7Zip not found. If you want to use ARCHIVE functionality please install 7Zip and add it to the PATH env. variable")
+	ENDIF()
 
 	IF(NOT EXISTS "${__ARCHIVE_PATH}")
 		MESSAGE(FATAL_ERROR "Cannot dound ${__ARCHIVE_PATH}")
