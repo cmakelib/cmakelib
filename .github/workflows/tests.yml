@@ -1,0 +1,66 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+  
+jobs:
+  test_linux:
+    strategy:
+      matrix:
+        image: ["latest-debian-buster", "latest-ubuntu-2004", "latest-ubuntu-1804"]
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-linux:${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            cd test/ && cmake -DCMLIB_DEBUG=ON .
+            
+  test_linux_script:
+    strategy:
+      matrix:
+        image: ["latest-debian-buster", "latest-ubuntu-2004", "latest-ubuntu-1804"]
+    runs-on: ubuntu-latest
+    container:
+        image: cmakelib/build-linux:${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+            cd test/ && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
+
+  test_macos_11:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test && cmake -DCMLIB_DEBUG=ON .
+
+  test_macos_11_script:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
+
+  test_windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test/ && cmake -DCMLIB_DEBUG=ON .
+
+  test_windows_script:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: cd test/ && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
+  
