@@ -120,17 +120,18 @@ FUNCTION(TEST_RUN test)
 	MESSAGE(STATUS "TEST ${test}")
 	SET(result_variable 0)
 	SET(error_variable "")
+	FILE(TO_CMAKE_PATH "${CMAKE_CURRENT_LIST_DIR}/${test}" working_dir)
 	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
 		EXECUTE_PROCESS(
 			COMMAND "${CMAKE_COMMAND}" -DCMLIB_DEBUG=${CMLIB_DEBUG} .
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
+			WORKING_DIRECTORY "${working_dir}"
 			RESULT_VARIABLE result_variable
 			ERROR_VARIABLE error_variable
 		)
 	ELSE()
 		EXECUTE_PROCESS(
 			COMMAND "${CMAKE_COMMAND}" -P CMakeLists.txt
-			WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/${test}"
+			WORKING_DIRECTORY "${working_dir}"
 			RESULT_VARIABLE result_variable
 			ERROR_VARIABLE error_variable
 		)
