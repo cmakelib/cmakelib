@@ -2,13 +2,10 @@
 #
 # CMLIB library entry point
 #
-#
-#
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
 IF(DEFINED CMLIB_INCLUDED)
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB Library already included")
 	RETURN()
 ENDIF()
 

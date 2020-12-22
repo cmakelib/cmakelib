@@ -19,7 +19,7 @@ SET(_CMLIB_COMPONENT_REPO_NAME_PREFIX "cmakelib-component-"
 	"Filename prefix for components"
 )
 
-SET(_CMLIB_COMPONENT_AVAILABLE_LIST basedef storage
+SET(_CMLIB_COMPONENT_AVAILABLE_LIST basedef storage util
 	CACHE INTERNAL
 	"List of available components."
 )
