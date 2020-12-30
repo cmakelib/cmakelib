@@ -85,10 +85,7 @@ List of CMake-lib components
 
 ### Prerequisites
 
-- CMake >=3.16 installed and registered in PATH env. variable
-- 7Zip installed and bin/ directory of 7zip registered in PATH env. variable
-    - Without 7Zip cmakelib `ARCHIVE` functionality will not work - no archives can be tracked
-	by cmakelib
+- CMake >=3.18 installed and registered in PATH env. variable
 - Git installed and bin/ directory of git registered in PATH env. variable
 
 ### Library install

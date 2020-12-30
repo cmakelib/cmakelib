@@ -82,8 +82,6 @@
 # CMLIB_CACHE_HAS_FILE - check if the file for given keyword set exists
 #
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
-
 IF(DEFINED CMLIB_CACHE_INCLUDED)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_CACHE already included")
 	RETURN()
