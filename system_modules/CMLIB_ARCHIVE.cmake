@@ -8,8 +8,6 @@
 #
 #
 
-CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
-
 IF(DEFINED CMLIB_ARCHIVE_INCLUDED)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_ARCHIVE already included")
 	RETURN()
@@ -67,10 +65,6 @@ FUNCTION(CMLIB_ARCHIVE_EXTRACT)
 			ARCHIVE_PATH
 		P_ARGN ${ARGN}
 	)
-	IF(NOT EXISTS "${CMLIB_REQUIRED_ENV_7ZIP}")
-		MESSAGE(FATAL_ERROR "7Zip not found. If you want to use ARCHIVE functionality please install 7Zip and add it to the PATH env. variable")
-	ENDIF()
-
 	IF(NOT EXISTS "${__ARCHIVE_PATH}")
 		MESSAGE(FATAL_ERROR "Cannot dound ${__ARCHIVE_PATH}")
 	ENDIF()
@@ -103,46 +97,9 @@ FUNCTION(CMLIB_ARCHIVE_EXTRACT)
 		_CMLIB_ARCHIVE_VALIDATE_ARCHIVE_TYPE(${archive_type})
 	ENDIF()
 
-	_CMLIB_ARCHIVE_GET_7ZIP_TYPE("${archive_type}" seven_zip_types)
-	IF("${seven_zip_types}" STREQUAL "")
-		MESSAGE(FATAL_ERROR "cannot determine 7z archive types \"${archive_type}\"")
-	ENDIF()
+	FILE(TO_CMAKE_PATH "${tmp_dir}/extracted" extracted_output_directory)
+	FILE(ARCHIVE_EXTRACT INPUT "${__ARCHIVE_PATH}" DESTINATION ${extracted_output_directory})
 
-	LIST(REVERSE seven_zip_types)
-	SET(extracted_output_directory)
-	FOREACH(seven_zip_type ${seven_zip_types})
-		SET(last_output_directory "${extracted_output_directory}")
-		SET(input_file)
-		IF(EXISTS "${last_output_directory}")
-			FILE(GLOB files "${last_output_directory}/*")
-			LIST(LENGTH files files_length)
-			IF(files_length EQUAL 1)
-				SET(input_file "${files}")
-			ELSE()
-				_CMLIB_LIBRARY_DEBUG_MESSAGE("7Zip, Files in directory: ${files_length}")
-				MESSAGE(FATAL_ERROR "Cannot get intermediate archive")
-			ENDIF()
-		ELSE()
-			SET(input_file "${__ARCHIVE_PATH}")
-		ENDIF()
-
-		SET(extracted_output_directory "${tmp_dir}/${seven_zip_type}")
-		FILE(MAKE_DIRECTORY "${extracted_output_directory}")
-		FILE(TO_NATIVE_PATH "${extracted_output_directory}" ext_dir_normalized)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("7Zip aguments: \"${CMLIB_REQUIRED_ENV_7ZIP}\" x -t${seven_zip_type} -o\"${extracted_output_directory}\" ${input_file}")
-		EXECUTE_PROCESS(
-			COMMAND "${CMLIB_REQUIRED_ENV_7ZIP}"
-				x -t${seven_zip_type}
-				-o${ext_dir_normalized}
-				"${input_file}"
-			OUTPUT_VARIABLE stdout
-			RESULT_VARIABLE result_var
-			WORKING_DIRECTORY ${tmp_dir}
-		)
-		IF(NOT (result_var EQUAL 0))
-			MESSAGE(FATAL_ERROR "Cannot extract ${ext_dir_normalized}")
-		ENDIF()
-	ENDFOREACH()
 	IF(DEFINED __OUTPUT_PATH_VAR)
 		SET("${__OUTPUT_PATH_VAR}" ${extracted_output_directory} PARENT_SCOPE)
 	ELSE()
@@ -225,34 +182,6 @@ FUNCTION(_CMLIB_ARCHIVE_DETERMINE_ARCHIVE_TYPE filename archive_type_out)
 	ENDIF()
 	UNSET(${archive_type_out} PARENT_SCOPE)
 	MESSAGE(FATAL_ERROR "Cannot determine ARCHIVE_TYPE from given archive name '${filename}'")
-ENDFUNCTION()
-
-
-
-## Helper
-#
-# Map CMLIB_ARCHIVE type to 7Zip archive types.
-# <function>(
-#		<archive_type>
-#		<seven_zip_archive_types>
-# )
-#
-FUNCTION(_CMLIB_ARCHIVE_GET_7ZIP_TYPE archive_type seven_zip_types_out)
-	STRING(REPLACE "." ";" _tmp "${archive_type}")
-	SET(seven_zip_types_list)
-	FOREACH(type ${_tmp})
-		SET(translated_type)
-		IF("${type}" STREQUAL "BZ2")
-			SET(translated_type "bzip2")
-		ELSEIF("${type}" STREQUAL "GZ")
-			SET(translated_type "gzip")
-		ELSE()
-			SET(translated_type ${type})
-		ENDIF()
-		STRING(TOLOWER "${translated_type}" translated_type_lower)
-		LIST(APPEND seven_zip_types_list ${translated_type_lower})
-	ENDFOREACH()
-	SET(${seven_zip_types_out} ${seven_zip_types_list} PARENT_SCOPE)
 ENDFUNCTION()
 
 
