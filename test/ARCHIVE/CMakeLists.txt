@@ -1,3 +1,17 @@
+##
+#
+# Check if files are extracted correctly.
+#
+# Content of "archive/archive*" archives is
+#   - A.txt has content "A"
+#   - B.txt has content "B"
+#   - C.txt has content "C"
+#
+# Content of "archive/symlink*" archives is
+#   - dir/test.txt has content "TEST FILE R"
+#   - test.txt symlink to "dir/test.txt"
+#
+
 IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
 	CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 	PROJECT(CMLIB_ARCHIVE_TEST)
@@ -33,6 +47,19 @@ FUNCTION(TEST_EXTRACT archive_name archive_type)
 	TEST_VAR_PATH_EXISTS(var)
 ENDFUNCTION()
 
+FUNCTION(TEST_EXCTRACT_WITH_SYMLINK archive_name)
+	SET(archive_path "${CMAKE_CURRENT_LIST_DIR}/archive/${archive_name}")
+	SET(output_dir "${CMAKE_CURRENT_BINARY_DIR}/${archive_name}/")
+	FILE(MAKE_DIRECTORY ${output_dir})
+	CMLIB_ARCHIVE_EXTRACT(
+		ARCHIVE_PATH     "${archive_path}"
+		OUTPUT_DIRECTORY "${output_dir}"
+	)
+	FILE(READ "${output_dir}/test.txt"     root_file_content_symlink)
+	FILE(READ "${output_dir}/dir/test.txt" root_file_content_dir)
+	TEST_VAR_EQUAL(root_file_content_dir root_file_content_symlink)
+ENDFUNCTION()
+
 FUNCTION(TEST_INVALID_TYPE)
 	TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/invalid_archive_type_test/")
 ENDFUNCTION()
@@ -57,3 +84,9 @@ TEST_EXTRACT(archive_tar_gz TAR.GZ)
 TEST_EXTRACT(archive_zip ZIP)
 TEST_EXTRACT(archive_tar TAR)
 
+# Under windowswe do not want to use symlinks in tar
+CMAKE_HOST_SYSTEM_INFORMATION(RESULT system_name QUERY OS_NAME)
+IF(NOT system_name STREQUAL "Windows")
+	TEST_EXCTRACT_WITH_SYMLINK(symlink.tar)
+	TEST_EXCTRACT_WITH_SYMLINK(symlink.zip)
+ENDIF()

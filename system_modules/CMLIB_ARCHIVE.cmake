@@ -129,18 +129,33 @@ FUNCTION(CMLIB_ARCHIVE_EXTRACT)
 		SET(extracted_output_directory "${tmp_dir}/${seven_zip_type}")
 		FILE(MAKE_DIRECTORY "${extracted_output_directory}")
 		FILE(TO_NATIVE_PATH "${extracted_output_directory}" ext_dir_normalized)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("7Zip aguments: \"${CMLIB_REQUIRED_ENV_7ZIP}\" x -t${seven_zip_type} -o\"${extracted_output_directory}\" ${input_file}")
-		EXECUTE_PROCESS(
-			COMMAND "${CMLIB_REQUIRED_ENV_7ZIP}"
-				x -t${seven_zip_type}
-				-o${ext_dir_normalized}
-				"${input_file}"
-			OUTPUT_VARIABLE stdout
-			RESULT_VARIABLE result_var
-			WORKING_DIRECTORY ${tmp_dir}
-		)
-		IF(NOT (result_var EQUAL 0))
-			MESSAGE(FATAL_ERROR "Cannot extract ${ext_dir_normalized}")
+		IF(seven_zip_type STREQUAL "tar" AND NOT CMLIB_REQUIRED_ENV_TAR STREQUAL "NOTFOUND")
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("TAR aguments: \"${CMLIB_REQUIRED_ENV_TAR}\" -x -f \"${input_file}\" -C \"${ext_dir_normalized}\"")
+			EXECUTE_PROCESS(
+				COMMAND "${CMLIB_REQUIRED_ENV_TAR}"
+					-x -f "${input_file}"
+					-C "${ext_dir_normalized}"
+				OUTPUT_VARIABLE stdout
+				RESULT_VARIABLE result_var
+				WORKING_DIRECTORY ${tmp_dir}
+			)
+			IF(NOT (result_var EQUAL 0))
+				MESSAGE(FATAL_ERROR "Cannot extract ${ext_dir_normalized}")
+			ENDIF()
+		ELSE()
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("7Zip aguments: \"${CMLIB_REQUIRED_ENV_7ZIP}\" x -t${seven_zip_type} -o\"${extracted_output_directory}\" ${input_file}")
+			EXECUTE_PROCESS(
+				COMMAND "${CMLIB_REQUIRED_ENV_7ZIP}"
+					x -t${seven_zip_type}
+					-o${ext_dir_normalized}
+					"${input_file}"
+				OUTPUT_VARIABLE stdout
+				RESULT_VARIABLE result_var
+				WORKING_DIRECTORY ${tmp_dir}
+			)
+			IF(NOT (result_var EQUAL 0))
+				MESSAGE(FATAL_ERROR "Cannot extract ${ext_dir_normalized}")
+			ENDIF()
 		ENDIF()
 	ENDFOREACH()
 	IF(DEFINED __OUTPUT_PATH_VAR)
