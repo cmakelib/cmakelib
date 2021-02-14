@@ -3,18 +3,18 @@
 
 Linux: ![buildbadge_github], Windows: ![buildbadge_github], Mac OS: ![buildbadge_github]
 
-Dependency tracking library for CMake - completly written in CMake.
+Dependency tracking library for CMake - completely written in CMake.
 
-CMLIB Library is dependency tracking library which allows
-effectively track all needed dependencies
-without warry about consistency and project regeneration times.
+CMLIB Library is dependency tracking library which allows effectively track all
+needed dependencies without Worrying about consistency and project regeneration times.
 
 Main features are
 
 - No other dependencies. Only CMake and Git.
-- CMake cache regeneration - once the dependency is downloaded and cached it's persisted
-  even after build directory delete
-- Dependency cache consistency check - only dependency even if explicit keywords are specified
+- CMake cache regeneration - once the dependency is downloaded
+   and cached it's preserved even after build directory deletion
+- Dependency cache consistency check – the only dependency
+  even if explicit keywords are specified
 
 For examples look at the [example] directory
 
@@ -41,24 +41,24 @@ Full example can be found at [example/DEPENDENCY/boost_example]
 
 ### API
 
-Library consist from two main parts
+Library consist of two main parts
 
 - **cmake-lib - dependency tracking (this repository)**
 - cmakelib components - Components represents optional functionality which can be
 managed by `cmakelib`.
 
-The library core is function
+The library core is a function
 
 	CMLIB_DEPENDENCY
 
 Which can track/cache various number of dependencies.
 
-Modules does not contain anything except what we need for `CMLIB_DEPENDENCY` implementation.
+Modules do not contain anything except what is needed for `CMLIB_DEPENDENCY` implementation.
 
 Library consist from several modules
 
-- **[CMLIB_DEPENDENCY] - track and cache remote dependencies** (under remote dependency we assume dependency
-which is not 'directly' attached to the user CMake project)
+- **[CMLIB_DEPENDENCY] - track and cache remote dependencies** (under remote dependency we
+  assume dependency which is not 'directly' attached to the user CMake project)
 - [CMLIB_REQUIRED_ENV] which init base environment for library needs
 - [CMLIB_CACHE] - cache files on host filesystem (represent persisten cache)
 - [CMLIB_FILE_DOWNLOAD] - download file from remote HTTP URl or GIT repository
@@ -72,14 +72,14 @@ There are examples for each modules in [example] directory.
 
 ### CMake-lib components
 
-Each component has own git repository in form `cmakelib-component-<component_name>`.
+Each component has its own git repository in form `cmakelib-component-<component_name>`.
 
 The `master` branch of the given component is always used.
 
-List of CMake-lib compoents
+List of CMake-lib components
 
 - [CMLIB_STORAGE] - effectively track build resources,
-- [CMDEF] - defined build environment, 
+- [CMDEF] - defined built environment,
 
 ## Installation
 
@@ -93,8 +93,8 @@ List of CMake-lib compoents
 
 ### Library install
 
-It's intended that the user has only one, global instance of library but it's possible use `cmakelib`
-as submodule but it's not recommanded.
+It is intended that the user has only one global instance of library. However it is possible use `cmakelib`
+as submodule but it is not recommanded.
 
 #### Global install
 
@@ -105,8 +105,9 @@ must be defined.
 <cmlib_root>
 - Clone repository to local computer to <cmlib_root>
 - Define System ENV var `CMLIB_DIR` as absolute path to already cloned repository
-- You may define system ENV var `CMLIB_REQUIRED_ENV_TMP_PATH` to path to existing directory. This variable represents
-Cache directory where the cache will be stored. If not set the "${CMAKE_CURRENT_LIST_DIR}/_tmp" is use instead.
+- You may define system ENV var `CMLIB_REQUIRED_ENV_TMP_PATH` to path to existing directory.
+  This variable represents Cache directory where the cache will be stored.
+  If not set the "${CMAKE_CURRENT_LIST_DIR}/_tmp" is use instead.
 - call `FIND_PACKAGE(CMLIB [COMPONENTS <component_list>])`
 - Everything should works fine now
 
@@ -119,7 +120,7 @@ Cache entries are represented by ordered, nonempty set of uppercase strings call
 If no `KEYWORDS` are specified then the set is created by the library as hash of `URI`, `GIT_PATH` etc.
 
 Cache mechanism is persistent across CMake binary dir instances.
-If user delete our CMake binary dir the cache will regenerate
+If user deletes our CMake binary dir the cache will regenerate
 in next CMake run for the same CMakeLists.txt
 (we assume that cache is located in dir different from CMake binary dir)
 
@@ -132,7 +133,7 @@ in `CMLIB_REQUIRED_ENV_TMP_PATH`.
 ### Dependency cache control
 
 Dependency cache control is optional feature (enabled by default) which ensure that
-there are no that only dependency cached at a time.
+there are only one dependency cached at a time.
 
 If ON we cannot track one dependency under two different `KEYWORDS` sets.
 
@@ -160,12 +161,12 @@ you are doing)
 
 ## Config variables
 
-- `CMLIB_REQUIRED_ENV_TMP_PATH` - where to store tmp patrh where the cache will be stored.
+- `CMLIB_REQUIRED_ENV_TMP_PATH` - where to store tmp path where the cache will be stored.
   Can be set as Environment variable (which must be accessible by $ENV{CMLIB_REQUIRED_ENV_TMP_PATH}).
   Default value is "${CMAKE_CURRENT_LIST_DIR}/_tmp". More info at [CMLIB_REQUIRED_ENV]
 - `CMLIB_DEPENDENCY_CONTROL` - Boolean variable which controls if the Dependency cache control is enabled.
   [CMLIB_DEPENDENCY]
-- `CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS` - if ON show HTTP downlad progress.
+- `CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS` - if ON show HTTP download progress.
   If OFF do not show http download progress
 
 ## Tests
