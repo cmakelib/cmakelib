@@ -75,12 +75,16 @@ ENDMACRO()
 #
 # Run cmake in given directory and expetcts cmake error
 # <function>(
-#		<working_directory>
+#		<test>
 #		<expected_error_string_regex>
 # )
 #
-FUNCTION(TEST_INVALID_CMAKE_RUN working_directory)
-	MESSAGE(STATUS "INVALID_RUN: ${working_directory}")
+FUNCTION(TEST_INVALID_CMAKE_RUN test)
+	MESSAGE(STATUS "INVALID_RUN: ${test}")
+	FILE(TO_CMAKE_PATH "${test}" working_dir)
+	IF(NOT EXISTS "${working_dir}")
+		MESSAGE(FATAL_ERROR "test does not exist: ${working_dir}")
+	ENDIF()
 	SET(expected_error_string "${ARGV1}")
 	SET(arg)
 	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
@@ -90,7 +94,7 @@ FUNCTION(TEST_INVALID_CMAKE_RUN working_directory)
 	ENDIF()
 	EXECUTE_PROCESS(
 		COMMAND "cmake" -DCMLIB_DEBUG=${CMLIB_DEBUG} ${arg}
-		WORKING_DIRECTORY "${working_directory}"
+		WORKING_DIRECTORY "${working_dir}"
 		RESULT_VARIABLE result_var
 		ERROR_VARIABLE errout
 		OUTPUT_VARIABLE stdout
@@ -120,7 +124,10 @@ FUNCTION(TEST_RUN test)
 	MESSAGE(STATUS "TEST ${test}")
 	SET(result_variable 0)
 	SET(error_variable "")
-	FILE(TO_CMAKE_PATH "${CMAKE_CURRENT_LIST_DIR}/${test}" working_dir)
+	FILE(TO_CMAKE_PATH "${test}" working_dir)
+	IF(NOT EXISTS "${working_dir}")
+		MESSAGE(FATAL_ERROR "test does not exist: ${working_dir}")
+	ENDIF()
 	IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
 		EXECUTE_PROCESS(
 			COMMAND "${CMAKE_COMMAND}" -DCMLIB_DEBUG=${CMLIB_DEBUG} .
@@ -130,7 +137,7 @@ FUNCTION(TEST_RUN test)
 		)
 	ELSE()
 		EXECUTE_PROCESS(
-			COMMAND "${CMAKE_COMMAND}" -P CMakeLists.txt
+			COMMAND "${CMAKE_COMMAND}" -DCMLIB_DEBUG=${CMLIB_DEBUG} -P CMakeLists.txt
 			WORKING_DIRECTORY "${working_dir}"
 			RESULT_VARIABLE result_variable
 			ERROR_VARIABLE error_variable

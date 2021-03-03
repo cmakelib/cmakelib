@@ -289,8 +289,6 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Path: '${__GIT_PATH}'")
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Repo dir: '${git_repo_dir}'")
 
-	SET(terminal_porompt_orig_value "$ENV{GIT_TERMINAL_PROMPT}")
-	SET(ENV{GIT_TERMINAL_PROMPT} 0)
 	EXECUTE_PROCESS(
 		COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" clone
 			--depth=1
@@ -302,7 +300,6 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 		RESULT_VARIABLE   git_not_found
 		WORKING_DIRECTORY "${tmp_dir}"
 	)
-	SET(ENV{GIT_TERMINAL_PROMPT} "${terminal_porompt_orig_value}")
 	IF(NOT git_not_found EQUAL 0)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${git_not_found}")
 		_CMLIB_FILE_TMP_DIR_CLEAN()
