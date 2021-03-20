@@ -5,13 +5,7 @@
 # CMLIB_DEPENDENCY
 #
 
-IF(DEFINED CMLIB_DEPENDENCY_INCLUDED)
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_DEPENDENCY already included")
-	RETURN()
-ENDIF()
-
-# Flag that REQUIRED_DEPENDENCY is already included
-SET(CMLIB_DEPENDENCY_INCLUDED "1")
+INCLUDE_GUARD(GLOBAL)
 
 # Value of the KEYDELIM var is used in Cmake regex
 # Please avaid using special regex characters
