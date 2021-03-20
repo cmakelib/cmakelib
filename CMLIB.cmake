@@ -5,12 +5,27 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
 
-IF(DEFINED CMLIB_INCLUDED)
-	RETURN()
+##
+# Compatibility version is na integer positive number.
+# Each instance if CMakeLib has one Compatibility version.
+# Let A, B be an instances of CMakeLib. Let COMP_VER(A) is Compatibility version for A and
+# COMP_VER(B) is compatibility version for B.
+# We say that A is compatible with  B if and only if COMP_VER(A) == COMP_VER(B)
+#
+
+SET(_CMLIB_COMPATIBILITY_VERSION 1)
+IF(DEFINED CMLIB_COMPATIBILITY_VERSION)
+	IF(NOT CMLIB_COMPATIBILITY_VERSION EQUAL _CMLIB_COMPATIBILITY_VERSION)
+		MESSAGE(FATAL_ERROR "Sorry, you have two incopatibility CMake-lib instances!")
+	ENDIF()
 ENDIF()
 
-# Flag that CMLIB is already included
-SET(CMLIB_INCLUDED "1")
+SET(CMLIB_COMPATIBILITY_VERSION ${_CMLIB_COMPATIBILITY_VERSION}
+	CACHE STRING
+	"CMake-lib compatibility version"
+)
+
+INCLUDE_GUARD(GLOBAL)
 
 SET(CMLIB_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
