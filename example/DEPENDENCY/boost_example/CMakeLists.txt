@@ -9,7 +9,16 @@ PROJECT(boost-dependency)
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
 FIND_PACKAGE(CMLIB)
 
-FUNCTION(DOWNLOAD_BOOST version output_var)
+##
+#
+# Generates URI under which the Boost is stored
+#
+# <function>(
+#		<boost_version>
+#		<boost_uri_out>
+# )
+#
+FUNCTION(GET_BOOST_URI version output_var)
 	cmake_host_system_information(RESULT os_name QUERY OS_NAME)
 	SET(system_name)
 	IF("${os_name}" STREQUAL "Linux")
@@ -40,10 +49,24 @@ FUNCTION(DOWNLOAD_BOOST version output_var)
 	ENDIF()
 	STRING(REPLACE "." "_" version_with_underscore "${version}")
 	SET(uri "https://github.com/koudis/boost-build/releases/download/${version_with_underscore}/boost-${version_with_underscore}-${system_name}-PIC.tar.bz2")
-	MESSAGE(STATUS "URI: ${uri}")
+	SET(${output_var} "${uri}" PARENT_SCOPE)
+ENDFUNCTION()
+
+##
+#
+# Download Boost by CMake-lib DEPENDENCY function
+#
+# <function>(
+#	boost_version
+#	boost_root
+# )
+#
+FUNCTION(DOWNLOAD_BOOST version output_var)
+	GET_BOOST_URI(${version} boost_uri)
+	MESSAGE(STATUS "URI: ${boost_uri}")
 	MESSAGE(STATUS "Downloading Boost ${version}")
 	CMLIB_DEPENDENCY(
-		URI "${uri}"
+		URI "${boost_uri}"
 		TYPE ARCHIVE
 		OUTPUT_PATH_VAR _path
 	)
@@ -51,7 +74,11 @@ FUNCTION(DOWNLOAD_BOOST version output_var)
 	SET(${output_var} "${_path}" PARENT_SCOPE)
 ENDFUNCTION()
 
-DOWNLOAD_BOOST(1.72.0 BOOST_ROOT)
+
+
+SET(BOOST_VERSION 1.72.0)
+
+DOWNLOAD_BOOST(${BOOST_VERSION} BOOST_ROOT)
 
 SET(Boost_USE_STATIC_LIBS ON
 	CACHE BOOL
@@ -63,7 +90,7 @@ SET(Boost_NO_SYSTEM_PATHS ON
 	"Link boost as static"
 )
 
-FIND_PACKAGE(Boost 1.72.0
+FIND_PACKAGE(Boost ${BOOST_VERSION}
 	COMPONENTS
 		log_setup log
 	REQUIRED
