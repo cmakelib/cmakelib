@@ -18,6 +18,13 @@ jobs:
     container:
         image: cmakelib/build-linux:${{ matrix.image }}
     steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.GITLAB }}
+          name: id_rsa # optional
+          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
         run: |
@@ -31,6 +38,13 @@ jobs:
     container:
         image: cmakelib/build-linux:${{ matrix.image }}
     steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.GITLAB }}
+          name: id_rsa # optional
+          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
         run: |
@@ -39,6 +53,13 @@ jobs:
   test_macos_11:
     runs-on: macos-latest
     steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.GITLAB }}
+          name: id_rsa # optional
+          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
         run: cd test && cmake -DCMLIB_DEBUG=ON .
@@ -46,6 +67,13 @@ jobs:
   test_macos_11_script:
     runs-on: macos-latest
     steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.GITLAB }}
+          name: id_rsa # optional
+          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
         run: cd test && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
@@ -53,6 +81,13 @@ jobs:
   test_windows:
     runs-on: windows-latest
     steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.GITLAB }}
+          name: id_rsa # optional
+          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
         run: cd test/ && cmake -DCMLIB_DEBUG=ON .
@@ -60,6 +95,13 @@ jobs:
   test_windows_script:
     runs-on: windows-latest
     steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.GITLAB }}
+          name: id_rsa # optional
+          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
         run: cd test/ && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt

@@ -16,6 +16,7 @@
 INCLUDE_GUARD(GLOBAL)
 
 _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
+_CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
 SET(CMLIB_FILE_DOWNLOAD_TIMEOUT 100
 	CACHE INTERNAL
@@ -27,8 +28,20 @@ OPTION(CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS
 	${CMLIB_DEBUG}
 )
 
-_CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
+OPTION(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE
+	"If On the git-archive will NOT be used! Conflicted with CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY!"
+	OFF
+)
 
+OPTION(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY
+	"If On the git-archive will be exclusively used to download files from git repository"
+	OFF
+)
+
+IF(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY AND
+		CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE)
+	MESSAGE(FATAL_ERROR "CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY AND CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE are on together! Conflict state!")
+ENDIF()
 
 
 ##
@@ -241,6 +254,18 @@ ENDFUNCTION()
 # There is not guarntee that path stored in UOTPUT_VAR will
 # persist across multiple invactions of this funtion.
 #
+# It tries to download repository by 'git archive' functionality.
+# If 'git archive' fails it tries to download repository by invoking following cmmands
+# directly on the user computer:
+#	- git clone
+#	- on the clonned repository run 'git archive'
+# git archive produces standard TAR archive which is etracted and extracted
+# content is saved by the cache mechanism.
+#
+# Bebaviour can be controll by
+#	- CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY
+#	- CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE
+#
 # STATUS_VAR is true if everything is OK, false othervise
 #
 # <function>(
@@ -278,41 +303,66 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 	FILE(MAKE_DIRECTORY "${git_repo_dir}")
 	FILE(MAKE_DIRECTORY "${exp_archive_path}")
 
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT URI: '${__URI}'")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT URI:      '${__URI}'")
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Revision: '${__GIT_REVISION}'")
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Path: '${__GIT_PATH}'")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Path:     '${__GIT_PATH}'")
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("GIT Repo dir: '${git_repo_dir}'")
 
-	EXECUTE_PROCESS(
-		COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" clone
-			--depth=1
-			--branch ${__GIT_REVISION}
-			--single-branch
-			"${__URI}" git_repo
-		OUTPUT_VARIABLE   stdout # discard STDOUT
-		ERROR_VARIABLE    stderr # discard STDERR
-		RESULT_VARIABLE   git_not_found
-		WORKING_DIRECTORY "${tmp_dir}"
-	)
-	IF(NOT git_not_found EQUAL 0)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${git_not_found}")
-		_CMLIB_FILE_TMP_DIR_CLEAN()
-		UNSET(${__STATUS_VAR} PARENT_SCOPE)
-		RETURN()
+	SET(file_not_found 1)
+	IF(NOT CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE)
+		EXECUTE_PROCESS(
+			COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" archive
+				--remote=${__URI}
+				-o "${archive_path}"
+				${__GIT_REVISION}
+				"${__GIT_PATH}"
+			RESULT_VARIABLE file_not_found
+			OUTPUT_VARIABLE   stdout # discard STDOUT
+			ERROR_VARIABLE    stderr # discard STDERR
+			WORKING_DIRECTORY "${tmp_dir}"
+		)
 	ENDIF()
-	EXECUTE_PROCESS(
-		COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" archive
-			-o "${archive_path}"
-			${__GIT_REVISION}
-			"${__GIT_PATH}"
-		RESULT_VARIABLE   file_not_found
-		WORKING_DIRECTORY "${git_repo_dir}"
-	)
+
 	IF(NOT file_not_found EQUAL 0)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${file_not_found}\n${git_stderr}")
-		_CMLIB_FILE_TMP_DIR_CLEAN()
-		UNSET(${__STATUS_VAR} PARENT_SCOPE)
-		RETURN()
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("git-archive failed. Status: ${file_not_found}\n${git_stderr}")
+		IF(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY)
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("Cannot download file from git!")
+			_CMLIB_FILE_TMP_DIR_CLEAN()
+			UNSET(${__STATUS_VAR} PARENT_SCOPE)
+			RETURN()
+		ENDIF()
+		EXECUTE_PROCESS(
+			COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" clone
+				--depth=1
+				--branch ${__GIT_REVISION}
+				--single-branch
+				"${__URI}" git_repo
+			OUTPUT_VARIABLE   stdout # discard STDOUT
+			ERROR_VARIABLE    stderr # discard STDERR
+			RESULT_VARIABLE   git_not_found
+			WORKING_DIRECTORY "${tmp_dir}"
+		)
+		IF(NOT git_not_found EQUAL 0)
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("git-clone faied. Status: ${git_not_found}")
+			_CMLIB_FILE_TMP_DIR_CLEAN()
+			UNSET(${__STATUS_VAR} PARENT_SCOPE)
+			RETURN()
+		ENDIF()
+
+		EXECUTE_PROCESS(
+			COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" archive
+				-o "${archive_path}"
+				${__GIT_REVISION}
+				"${__GIT_PATH}"
+			RESULT_VARIABLE   file_not_found
+			WORKING_DIRECTORY "${git_repo_dir}"
+		)
+		IF(NOT file_not_found EQUAL 0)
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("Git process exit status: ${file_not_found}\n${git_stderr}")
+			_CMLIB_FILE_TMP_DIR_CLEAN()
+			UNSET(${__STATUS_VAR} PARENT_SCOPE)
+			RETURN()
+		ENDIF()
 	ENDIF()
 
     EXECUTE_PROCESS(
@@ -369,7 +419,7 @@ ENDFUNCTION()
 # )
 #
 MACRO(_CMLIB_FILE_TMP_DIR_GET var)
-	SET(${var} "${CMLIB_REQUIRED_ENV_TMP_PATH}/cmlib_file/")
+	SET(${var} "${CMLIB_REQUIRED_ENV_TMP_PATH}/cmlib_file")
 ENDMACRO()
 
 
