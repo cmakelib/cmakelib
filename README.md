@@ -40,21 +40,15 @@ Full example can be found at [example/DEPENDENCY/boost_example]
 
 ### API
 
-Library consist of two main parts
-
-- **cmake-lib - dependency tracking (this repository)**
-- cmakelib components - Components represents optional functionality which can be
-managed by `cmakelib`.
-
 The library core is a function
 
 	CMLIB_DEPENDENCY
 
 Which can track/cache various number of dependencies.
 
-Modules do not contain anything except what is needed for `CMLIB_DEPENDENCY` implementation.
+[System modules] do not contain anything except what is needed for `CMLIB_DEPENDENCY` implementation.
 
-Library consist from several modules
+Library consist from following [system modules]
 
 - **[CMLIB_DEPENDENCY] - track and cache remote dependencies** (under remote dependency we
   assume dependency which is not 'directly' attached to the user CMake project)
@@ -71,6 +65,8 @@ There are examples for each modules in [example] directory.
 
 ### CMake-lib components
 
+As optional feaure CMake-lib provides several components which extends functionality of the core library.
+
 Each component has its own git repository in form `cmakelib-component-<component_name>`.
 
 The `master` branch of the given component is always used.
@@ -78,7 +74,7 @@ The `master` branch of the given component is always used.
 List of CMake-lib components
 
 - [CMLIB_STORAGE] - effectively track build resources,
-- [CMDEF] - defined built environment,
+- [CMDEF] - well defined built environment,
 
 ## Installation
 
@@ -164,12 +160,29 @@ you are doing)
   [CMLIB_DEPENDENCY]
 - `CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS` - if ON show HTTP download progress.
   If OFF do not show http download progress
+- `CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE` - if ON no `git archive` is used for downloading
+  resources from the remoe git repository.
+- `CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY` - If ON the `git archive` functionality is required for downloading resouces
+  from remote git repository. OFF value has no effect to standard workflow
 
 ## Tests
 
 For test go to the test/ directory and run
 
+Linux/Mac Os:
+
+```
+	GIT_TERMINAL_PROMPT=0 cmake .
+	GIT_TERMINAL_PROMPT=0 cmake -P ./CMakeLists.txt
+```
+
+Windows PowerShell:
+
+```
+	$env:GIT_TERMINAL_PROMPT=0
 	cmake .
+	cmake -P ./CMakeLists.txt
+```
 
 then just clean up all intermediate files by
 
@@ -202,6 +215,8 @@ Project is licensed under [BSD-3-Clause License](LICENSE)
 [CMLIB_COMPONENT]:       ./system_modules/CMLIB_COMPONENT.cmake
 [CMLIB_STORAGE]:         https://github.com/cmakelib/cmakelib-component-storage
 [CMDEF]:                 https://github.com/cmakelib/cmakelib-component-basedef
+[System modules]:        ./system_modules/
+[system modules]:        ./system_modules/
 [example]:               ./example/
 [example/DEPENDENCY]:    ./example/DEPENDENCY
 [buildbadge_github]:     https://github.com/cmakelib/cmakelib/workflows/Tests/badge.svg

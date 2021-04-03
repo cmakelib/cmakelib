@@ -13,6 +13,7 @@ SET(VALID_HTTP_URI   "http://cmake.org/")
 SET(INVALID_HTTP_URI "http://cmake-does-not-exist.org/")
 SET(VALID_GIT_URI    "https://github.com/cmakelib/cmakelib-test.git")
 SET(INVALID_GIT_URI  "https://github.com/cmakelib/utils-does-not-exist.git")
+SET(VALID_GIT_URI_ARCHIVE "git@gitlab.com:cmakelib/cmakelib-test.git")
 SET(VALID_GIT_FILE_PATH   "cmake/README.txt")
 SET(INVALID_GIT_FILE_PATH "cmake/README_not_found")
 SET(VALID_GIT_REVISION_FILE_PATH      "cmake-test/test_branch_README.txt")
@@ -288,6 +289,31 @@ FUNCTION(GIT_COUNT_FILES)
 	ENDIF()
 ENDFUNCTION()
 
+FUNCTION(GIT_DOWNLOAD_BY_ARCHIVE)
+	SET(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY ON
+		CACHE BOOL
+		"Use git-archive only!"
+		FORCE
+	)
+	SET(output_path "${CMAKE_CURRENT_LIST_DIR}/git_archive_test")
+	CMLIB_FILE_DOWNLOAD(
+		URI "${VALID_GIT_URI_ARCHIVE}"
+		URI_TYPE GIT
+		OUTPUT_PATH "${output_path}"
+	)
+	FILE(GLOB_RECURSE glob "${output_path}/*")
+	LIST(LENGTH glob downloaded_files_size)
+	IF(NOT (downloaded_files_size EQUAL 7))
+		MESSAGE(FATAL_ERROR "Invalid number of files: ${downloaded_files_size}")
+	ENDIF()
+	SET(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY OFF
+		CACHE BOOL
+		"git-clone and git-archive enabled"
+		FORCE
+	)
+ENDFUNCTION()
+
+
 
 
 
@@ -309,4 +335,14 @@ GIT_DOWNLOAD_DIRECTORY(OFF ON ON)
 GIT_DOWNLOAD_DIRECTORY(ON OFF ON)
 GIT_DOWNLOAD_DIRECTORY(OFF ON OFF)
 GIT_COUNT_FILES()
+
+#
+# 'git archive' need an access thru SSH
+# Disable this test if you do not have a SSH key added to the test repo
+#
+GIT_DOWNLOAD_BY_ARCHIVE()
+
+TEST_INVALID_CMAKE_RUN(archive_requirements_test
+	"CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY AND\n +CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE are on together! Conflict state!")
+
 FILE(REMOVE_RECURSE "${CMLIB_REQUIRED_ENV_TMP_PATH}")
