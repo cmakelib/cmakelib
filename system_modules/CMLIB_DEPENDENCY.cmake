@@ -45,6 +45,8 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # unless you known what you are doing.
 #
 # TYPE must be specified.
+# Represents resource type (the resource which will be downloaded from remote)
+# Must be one of <MODULE|ARCHIVE|FILE|DIRECTORY>.
 # Note that for DIRECTORY type only the GIT uri can be used.
 #
 # URI standard HTTP URI or GIT uri supported by 'git clone' command.
