@@ -23,7 +23,7 @@ FUNCTION(GET_BOOST_URI version output_var)
 	SET(system_name)
 	IF("${os_name}" STREQUAL "Linux")
 		FIND_PROGRAM(lsb_release lsb_release REQUIRED)
-		EXECUTE_PROCESS(COMMAND "${lsb_release}" -cs
+		EXECUTE_PROCESS(COMMAND "${lsb_release}" -rs
 			OUTPUT_VARIABLE _os_codename
 			OUTPUT_STRIP_TRAILING_WHITESPACE
 		)
@@ -31,7 +31,8 @@ FUNCTION(GET_BOOST_URI version output_var)
 			OUTPUT_VARIABLE _os_id
 			OUTPUT_STRIP_TRAILING_WHITESPACE
 		)
-		STRING(TOLOWER "${_os_codename}" os_codename)
+		STRING(TOLOWER "${_os_codename}" os_codename_nf)
+		STRING(REPLACE "." "" os_codename "${os_codename_nf}")
 		STRING(TOLOWER "${_os_id}" os_id)
 		SET(system_name "${os_id}_${os_codename}")
 	ELSEIF("${os_name}" STREQUAL "macOS")
