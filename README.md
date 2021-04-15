@@ -27,8 +27,7 @@ LIST(APPEND CMAKE_MODULE_PATH <path_to_cmakelib_repo>)
 FIND_PACKAGE(CMLIB REQUIRED)
 
 # As Boost binary we use https://github.com/koudis/boost-build
-SET(boost_version 1_72_0)
-SET(uri "https://github.com/koudis/boost-build/releases/download/${boost_version}/boost-${boost_version}-ubuntu_2004-PIC.tar.bz2")
+SET(uri "https://github.com/koudis/boost-build/releases/download/${boost_version}/boost-1_72_0-ubuntu_2004-PIC.tar.bz2")
 CMLIB_DEPENDENCY(
 	URI "${uri}"
 	TYPE ARCHIVE
