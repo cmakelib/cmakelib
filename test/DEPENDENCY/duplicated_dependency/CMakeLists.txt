@@ -34,3 +34,4 @@ TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/mixed_no_keywords_first"
 	"${mixed_no_keywords_first_expected_errmsg}")
 TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/keywords_with_different_keywords"
 	"${keywords_with_different_remote_expected_errmsg}")
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/same_remote_without_keywords")
