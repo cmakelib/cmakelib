@@ -18,6 +18,11 @@ INCLUDE_GUARD(GLOBAL)
 _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
 _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
+SET(CMLIB_FILE_DOWNLOAD_DEFAULT_REVISION "master"
+	CACHE STRING
+	"Git repository default branch"
+)
+
 SET(CMLIB_FILE_DOWNLOAD_TIMEOUT 100
 	CACHE INTERNAL
 	"Inactivity timeout for File Downlad"
@@ -70,12 +75,15 @@ ENDIF()
 # - if the GIT_REVISION is specified then the content will be downloaded
 #   from given branch.
 # - if the GIT_REVISION is NOT specified then the content will be downloaded from
-#   master branch.
+#   branch stored in CMLIB_FILE_DOWNLOAD_DEFAULT_REVISION cache variable.
 #
 # URI_TYPE can be one of { GIT, HTTP }.
 # URI_TYPE is determined automatically if not specified.
 # If URI_TYPE specified the type is not determiner nor validated.
 # (so we can set URI_TYPE whatever we want independent on URI )
+#
+# FILE_HASH_OUTPUT_VAR is a variable where the hash of the file
+# wil be stored.
 #
 # <function>(
 #		URI <uri>
@@ -84,6 +92,7 @@ ENDIF()
 #		[GIT_PATH <git_path>]
 #		[GIT_REVISION <git_revision>]
 #		[URI_TYPE <GIT|HTTP>]
+#		[FILE_HASH_OUTPUT_VAR <file_hash_output_var>]
 # )
 #
 FUNCTION(CMLIB_FILE_DOWNLOAD)
@@ -95,6 +104,7 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 			GIT_PATH
 			GIT_REVISION
 			URI_TYPE
+			FILE_HASH_OUTPUT_VAR
 		REQUIRED
 			URI
 			OUTPUT_PATH
@@ -119,10 +129,11 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 	ENDIF()
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("URI Type: '${uri_type}'")
 
+	SET(file_hash)
 	SET(path)
 	SET(status)
 	IF("${uri_type}" STREQUAL "GIT")
-		SET(git_revision_command GIT_REVISION "master")
+		SET(git_revision_command GIT_REVISION "${CMLIB_FILE_DOWNLOAD_DEFAULT_REVISION}")
 		IF(DEFINED __GIT_REVISION)
 			SET(git_revision_command GIT_REVISION "${__GIT_REVISION}")
 		ENDIF()
@@ -140,12 +151,14 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 			${git_revision_command}
 			OUTPUT_VAR path
 			STATUS_VAR status
+			FILE_HASH_OUTPUT_VAR file_hash
 		)
 	ELSEIF("${uri_type}" STREQUAL "HTTP")
 		_CMLIB_FILE_DOWNLOAD_FROM_HTTP(
 			URI        "${__URI}"
 			OUTPUT_VAR path
 			STATUS_VAR status
+			FILE_HASH_OUTPUT_VAR file_hash
 		)
 	ELSE()
 		MESSAGE(FATAL_ERROR "Invalid URI_TYPE '${uri_type}'. Cannot continue.")
@@ -175,6 +188,9 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 		)
 	ENDIF()
 
+	IF(__FILE_HASH_OUTPUT_VAR)
+		SET(${__FILE_HASH_OUTPUT_VAR} ${file_hash} PARENT_SCOPE)
+	ENDIF()
 	SET(${__STATUS_VAR} ON PARENT_SCOPE)
 	_CMLIB_FILE_TMP_DIR_CLEAN()
 ENDFUNCTION()
@@ -196,6 +212,7 @@ ENDFUNCTION()
 #		URI <uri>
 #		OUTPUT_VAR <output_var>
 #		STATUS_VAR <status_var>
+#		FILE_HASH_OUTPUT_VAR <file_hash_output_var>
 # )
 #
 FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_HTTP)
@@ -203,6 +220,7 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_HTTP)
 		ONE_VALUE
 			URI
 			OUTPUT_VAR
+			FILE_HASH_OUTPUT_VAR
 			STATUS_VAR
 		REQUIRED
 			URI
@@ -240,7 +258,15 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_HTTP)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Download from '${__URI}' failed: ${download_status_list}")
 	ENDIF()
 
-	SET(${__OUTPUT_VAR} "${tmp_dir}/${filename}" PARENT_SCOPE)
+	SET(file_path "${tmp_dir}/${filename}")
+	IF(__FILE_HASH_OUTPUT_VAR)
+		FILE(SHA3_512 "${file_path}" file_hash)
+		_CMLIB_FILE_STRIP_FILE_HASH(file_hash_stripped ${file_hash})
+		SET(${__FILE_HASH_OUTPUT_VAR} ${file_hash_stripped} PARENT_SCOPE)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("HTTP file hash: ${file_hash_stripped}")
+	ENDIF()
+
+	SET(${__OUTPUT_VAR} "${file_path}" PARENT_SCOPE)
 
 ENDFUNCTION()
 
@@ -272,6 +298,7 @@ ENDFUNCTION()
 # 		URI <uri>
 #		OUTPUT_VAR <output_var>
 #		STATUS_VAR <status_var>
+#		[FILE_HASH_OUTPUT_VAR <file_hash_output_var>]
 # )
 #
 FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
@@ -282,6 +309,7 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 			GIT_REVISION
 			OUTPUT_VAR
 			STATUS_VAR
+			FILE_HASH_OUTPUT_VAR
 		REQUIRED
 			URI
 			GIT_PATH
@@ -374,6 +402,13 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 		_CMLIB_FILE_TMP_DIR_CLEAN()
 		UNSET(${__STATUS_VAR} PARENT_SCOPE)
 		RETURN()
+	ENDIF()
+
+	IF(__FILE_HASH_OUTPUT_VAR)
+		_CMLIB_FILE_COMPUTE_HASH(file_hash ${exp_archive_path})
+		_CMLIB_FILE_STRIP_FILE_HASH(file_hash_stripped ${file_hash})
+		SET(${__FILE_HASH_OUTPUT_VAR} ${file_hash_stripped} PARENT_SCOPE)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git file hash: ${file_hash_stripped}:${file_hash}")
 	ENDIF()
 
 	FILE(REMOVE ${archive_path})
@@ -477,3 +512,56 @@ FUNCTION(_CMLIB_FILE_DETERMINE_URI_TYPE var uri)
 	MESSAGE(FATAL_ERROR "Invalid URI. Cannot determine URI type")
 ENDFUNCTION()
 
+
+
+## Helper
+#
+#
+#
+FUNCTION(_CMLIB_FILE_COMPUTE_HASH output_var source_path)
+	SET(file_list)
+	IF(IS_DIRECTORY "${source_path}")
+		FILE(GLOB_RECURSE file_list
+			LIST_DIRECTORIES FALSE
+			"${source_path}/*"
+		)
+	ELSE()
+		SET(file_list "${source_path}")
+	ENDIF()
+	LIST(SORT file_list
+		ORDER   ASCENDING
+		CASE    SENSITIVE
+		COMPARE FILE_BASENAME
+	)
+	SET(main_hash)
+	FOREACH(file IN LISTS file_list)
+		FILE(SHA512 "${file}" file_hash)	
+		STRING(SHA512 main_hash "${main_hash}${file_hash}")
+	ENDFOREACH()
+	SET(${output_var} ${main_hash} PARENT_SCOPE)
+ENDFUNCTION()
+
+
+
+## Helper
+#
+# It strips the given hash to 1/5 of original length
+#
+# <function>(
+#		<output_var> <file_hash>
+# )
+#
+FUNCTION(_CMLIB_FILE_STRIP_FILE_HASH stripped_hash_output_var file_hash)
+	STRING(LENGTH "${file_hash}" file_hash_length)
+	IF(file_hash_length LESS 5)
+		MESSAGE(FATAL_ERROR "Input hash '${file_hash}' is too short!")
+	ENDIF()
+
+	SET(regex_repeat "")
+	FOREACH(I RANGE 5)
+		SET(regex_repeat "${regex_repeat}[0-9A-Za-z]")
+	ENDFOREACH()
+	STRING(REGEX REPLACE "${regex_repeat}([0-9A-Za-z])" "\\1" each_e ${file_hash})
+	STRING(TOUPPER "${each_e}" file_hash_upper)
+	SET(${stripped_hash_output_var} "${file_hash_upper}" PARENT_SCOPE)
+ENDFUNCTION()

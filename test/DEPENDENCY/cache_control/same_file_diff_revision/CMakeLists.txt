@@ -1,8 +1,9 @@
 ## Main
 #
-# Check if DEPENDENCY imit and error if
-# we try to add same resurce as a DEPENDENCY
-# under multiple keywords
+# Check if DEPENDENCY emit an error if we
+# try to add different remotes - same URI different revision.
+#
+# TEST must FAIL
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
@@ -18,7 +19,6 @@ SET(GIT_DOWNLOAD_URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
 
 
 CMLIB_DEPENDENCY(
-	KEYWORDS GIT ZIP FILE
 	TYPE FILE
 	URI "${GIT_DOWNLOAD_URI}"
 	GIT_REVISION "test-branch"
@@ -27,18 +27,9 @@ CMLIB_DEPENDENCY(
 )
 
 CMLIB_DEPENDENCY(
-	KEYWORDS GIT ZIP FILE2
 	TYPE FILE
 	URI "${GIT_DOWNLOAD_URI}"
-	GIT_PATH     "TEST_MODULE.cmake"
-	OUTPUT_PATH_VAR output_path
-)
-
-CMLIB_DEPENDENCY(
-	KEYWORDS GIT ZIP FILE3
-	TYPE FILE
-	URI "${GIT_DOWNLOAD_URI}"
-	GIT_REVISION "test-branch"
+	GIT_REVISION "master"
 	GIT_PATH     "TEST_MODULE.cmake"
 	OUTPUT_PATH_VAR output_path
 )

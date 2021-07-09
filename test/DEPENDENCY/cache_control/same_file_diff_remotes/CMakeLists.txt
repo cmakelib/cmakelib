@@ -1,7 +1,9 @@
 ## Main
 #
-# Check if DEPENDENCY emit an error if we
-# try to add different remotes under same keyword set
+# Check if DEPENDENCY emit and error if
+# we try to add same file from defferent remotes
+#
+# TEST must FAIL
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
@@ -12,25 +14,22 @@ ENDIF()
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../")
 FIND_PACKAGE(CMLIB)
 
-SET(GIT_DOWNLOAD_URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
+SET(GIT_DOWNLOAD_URI_A "git@github.com:cmakelib/cmakelib-test.git")
+SET(GIT_DOWNLOAD_URI_B "https://gitlab.com/cmakelib/cmakelib-test.git")
 
 
 
 CMLIB_DEPENDENCY(
 	TYPE FILE
-	KEYWORDS A B C
-	URI "${GIT_DOWNLOAD_URI}"
-	GIT_REVISION "test-branch"
+	URI "${GIT_DOWNLOAD_URI_A}"
 	GIT_PATH     "TEST_MODULE.cmake"
 	OUTPUT_PATH_VAR output_path
 )
 
 CMLIB_DEPENDENCY(
 	TYPE FILE
-	KEYWORDS A B C
-	URI "${GIT_DOWNLOAD_URI}"
-	GIT_REVISION "test-branch"
-	GIT_PATH     "README.md"
+	URI "${GIT_DOWNLOAD_URI_B}"
+	GIT_PATH     "TEST_MODULE.cmake"
 	OUTPUT_PATH_VAR output_path
 )
 
