@@ -104,7 +104,6 @@ FUNCTION(CMLIB_DEPENDENCY)
 			KEYWORDS
 		REQUIRED
 			TYPE
-			#KEYWORDS
 		P_ARGN ${ARGN}
 	)
 	_CMLIB_DEPENDENCY_VALIDATE_TYPE(${__TYPE})
@@ -335,7 +334,7 @@ FUNCTION(_CMLIB_DEPENDENCY_COMPUTE_HASH)
 	)
 
 	SET(keywords_delim "${CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM}")
-	SET(cache_string   "${__URI}${keywords_delim}${__GIT_PATH}${keywords_delim}${__GIT_REVISION}")
+	SET(cache_string   "${__URI}${keywords_delim}${__GIT_PATH}")
 	STRING(SHA3_512 hash "${cache_string}")
 
 	SET(regex_repeat "")
@@ -388,23 +387,6 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		SET(git_revision "master")
 	ENDIF()
 
-	SET(processed_keywords)
-	IF(CMLIB_DEBUG)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS in Debug mode")
-		GET_FILENAME_COMPONENT(stripped_uri "${__URI}" NAME_WE)
-		SET(keywords_list "${stripped_uri}" "${git_revision}" "${git_path}")
-		SET(keywords_list_normalized)
-		FOREACH(keyword IN LISTS keywords_list)
-			STRING(MAKE_C_IDENTIFIER "${keyword}" keyword_normalized_with_)
-			STRING(REPLACE "_" "" keyword_normalized_without_ "${keyword_normalized_with_}")
-			STRING(TOUPPER "${keyword_normalized_without_}" keyword_normalized)
-			_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS Keyword: ${keyword_normalized}")
-			LIST(APPEND keywords_list_normalized "${keyword_normalized}")
-		ENDFOREACH()
-		SET(processed_keywords ${keywords_list_normalized})
-		LIST(INSERT processed_keywords 0 "DEBUG")
-	ENDIF()
-
 	_CMLIB_DEPENDENCY_COMPUTE_HASH(
 		URI             "${__URI}"
 		GIT_PATH        "${git_path}"
@@ -416,6 +398,7 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK(
 			HASH              ${hash_keyword}
 			ORIGINAL_KEYWORDS "${__ORIGINAL_KEYWORDS}"
+			GIT_REVISION      ${__GIT_REVISION}
 		)
 	ENDIF()
 
@@ -445,7 +428,7 @@ ENDFUNCTION()
 FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
-			HASH
+			HASH GIT_REVISION
 		MULTI_VALUE
 			ORIGINAL_KEYWORDS
 		REQUIRED
@@ -477,6 +460,10 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 	ENDIF()
 
 	FILE(READ "${control_file_path}" real_file_content)
+	IF("${file_content}" STREQUAL "${real_file_content}")
+		RETURN()
+	ENDIF()
+
 	STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]*);(.+)$" matched "${real_file_content}")
 	IF(NOT matched)
 		MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
@@ -484,20 +471,25 @@ FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control real file content: '${real_file_content}'")
 	SET(cached_keywords "${CMAKE_MATCH_1}")
 
-	IF(NOT "${file_content}" STREQUAL "${real_file_content}")
-		IF(NOT cached_keywords)
-			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords"
-				" but keywords provided '${__ORIGINAL_KEYWORDS}'")
-		ELSEIF(NOT DEFINED __ORIGINAL_KEYWORDS)
-			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created with keywords ${cached_keywords}"
-				" but no keywords provided")
-		ELSE()
-			STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
-			MESSAGE(FATAL_ERROR
-				"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'"
-				" are not same as required keywords '${original_keywords_string}'"
-			)
-		ENDIF()
+	STRING(REGEX MATCHALL ";([^;]+)$" matched_x "${real_file_content}")
+	SET(cached_branch_name "${CMAKE_MATCH_1}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached branch name: '${cached_branch_name}|${__GIT_REVISION}'")
+	IF(NOT __GIT_REVISION STREQUAL cached_branch_name)
+		MESSAGE(FATAL_ERROR
+			"DEPENDENCY version mishmash - different versions of the same file '${cached_branch_name}' vs '${__GIT_REVISION}'")
+	ENDIF()
+
+	IF(NOT cached_keywords)
+		MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords"
+			" but keywords provided '${__ORIGINAL_KEYWORDS}'")
+	ELSEIF(NOT DEFINED __ORIGINAL_KEYWORDS)
+		MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created with keywords ${cached_keywords}"
+			" but no keywords provided")
+	ELSE()
+		STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
+		MESSAGE(FATAL_ERROR
+			"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'"
+			" are not same as required keywords '${original_keywords_string}'")
 	ENDIF()
 ENDFUNCTION()
 
