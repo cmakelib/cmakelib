@@ -11,7 +11,7 @@ SET(_CMLIB_COMPONENT_REPO_NAME_PREFIX "cmakelib-component-"
 	"Filename prefix for components"
 )
 
-SET(_CMLIB_COMPONENT_AVAILABLE_LIST cmdef storage util
+SET(_CMLIB_COMPONENT_AVAILABLE_LIST cmdef storage cmutil
 	CACHE INTERNAL
 	"List of available components."
 )
@@ -43,6 +43,8 @@ MACRO(CMLIB_COMPONENT)
 	_CMLIB_COMPONENT(
 		COMPONENTS ${__COMPONENTS}
 	)
+	SET(_cmlib_find_components ${CMLIB_FIND_COMPONENTS})
+	UNSET(CMLIB_FIND_COMPONENTS)
 	FOREACH(component IN LISTS __COMPONENTS)
 		FIND_PACKAGE(${component} QUIET)
 		IF(NOT ${component}_FOUND)
@@ -53,6 +55,8 @@ MACRO(CMLIB_COMPONENT)
 			ENDIF()
 		ENDIF()
 	ENDFOREACH()
+	SET(CMLIB_FIND_COMPONENTS ${_cmlib_find_components})
+	UNSET(_cmlib_find_components)
 	UNSET(__COMPONENTS)
 ENDMACRO()
 

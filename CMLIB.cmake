@@ -25,8 +25,6 @@ SET(CMLIB_COMPATIBILITY_VERSION ${_CMLIB_COMPATIBILITY_VERSION}
 	"CMake-lib compatibility version"
 )
 
-INCLUDE_GUARD(GLOBAL)
-
 SET(CMLIB_PATH "${CMAKE_CURRENT_LIST_DIR}")
 
 # Package name for find command
