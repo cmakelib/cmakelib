@@ -22,7 +22,7 @@ SET(CMLIB_CACHE_CONTROL_META_CONTROL_DIR "${CMLIB_CACHE_CONTROL_META_BASE_DIR}/k
 SET(CMLIB_CACHE_CONTROL_TEMPLATE
 	"<KEYWORDS_STRING>,<URI>,<GIT_PATH>,<GIT_REVISION>,<FILE_HASH>"
 	CACHE INTERNAL
-	"Template for cache control file"
+	"Template for cache control file.AS delimiter the ',' must be used"
 )
 
 
@@ -203,6 +203,17 @@ FUNCTION(_CMLIB_CACHE_CONTROL_CONCRETIZE)
 		SET(control_file_content ${CMLIB_CACHE_CONTROL_TEMPLATE})
 	ENDIF()
 
+	FOREACH(key_index RANGE 0 ${items_length} 2)
+		MATH(EXPR value_index "${key_index} + 1")
+		LIST(GET __ITEMS ${value_index} value)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONCRETIZE value for check: ${value}")
+		STRING(REGEX MATCHALL "^[^,]*$" value_matched "${value}")
+		IF(NOT value_matched)
+			LIST(GET __ITEMS ${key_index} key)
+			MESSAGE(FATAL_ERROR "Value '${value}' of key '${key}' contains forbidden char ','")
+		ENDIF()
+	ENDFOREACH()
+
 	CMLIB_TEMPLATE_EXPAND(expanded "${control_file_content}" ${__ITEMS})
 
 	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
@@ -249,6 +260,22 @@ ENDFUNCTION()
 
 
 ## Helper
+# Creates all needed meda directories
+#
+# <function>()
+#
+FUNCTION(_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS)
+	IF(NOT EXISTS "${CMLIB_CACHE_CONTROL_META_BASE_DIR}")
+		FILE(MAKE_DIRECTORY "${CMLIB_CACHE_CONTROL_META_BASE_DIR}")
+	ENDIF()
+	IF(NOT EXISTS "${CMLIB_CACHE_CONTROL_META_CONTROL_DIR}")
+		FILE(MAKE_DIRECTORY "${CMLIB_CACHE_CONTROL_META_CONTROL_DIR}")
+	ENDIF()
+ENDFUNCTION()
+
+
+
+## Helper
 # Returns control file path for given hash
 #
 # <function>(
@@ -262,16 +289,25 @@ ENDMACRO()
 
 
 
+
 ## Helper
-# Creates all needed meda directories
 #
-# <function>()
+# <function>(
+#		TEMPLATE_INSTANCE <template_instance> // Instance of the template
+#		ITEMS_KEYS        <keys>              // keys which will be extracted
+# )
 #
-FUNCTION(_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS)
-	IF(NOT EXISTS "${CMLIB_CACHE_CONTROL_META_BASE_DIR}")
-		FILE(MAKE_DIRECTORY "${CMLIB_CACHE_CONTROL_META_BASE_DIR}")
-	ENDIF()
-	IF(NOT EXISTS "${CMLIB_CACHE_CONTROL_META_CONTROL_DIR}")
-		FILE(MAKE_DIRECTORY "${CMLIB_CACHE_CONTROL_META_CONTROL_DIR}")
-	ENDIF()
+FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS)
+	CMLIB_PARSE_ARGUMENTS(
+		ONE_VALUE
+			TEMPLATE_INSTANCE
+		MULTI_VALUE
+			ITEMS_KEYS
+		REQUIRED
+			TEMPLATE_INSTANCE ITEMS_KEYS
+		P_ARGN ${ARGN}
+	)
+
+	CMLIB_TEMPLATE_EXPAND(expanded ${CMLIB_CACHE_CONTROL_TEMPLATE} )
+
 ENDFUNCTION()
