@@ -75,7 +75,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 
 	SET(keywords_delim "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}")
 
-	CMLIB_CACHE_CONTROL_COMPUTE_HASH(
+	_CMLIB_CACHE_CONTROL_COMPUTE_HASH(
 		URI             "${__URI}"
 		GIT_PATH        "${__GIT_PATH}"
 		OUTPUT_HASH_VAR hash
@@ -107,7 +107,18 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 		RETURN()
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_
+	_CMLIB_CACHE_CONTROL_IS_SAME(
+		OUTPUT_VAR is_same
+		HASH ${hash}
+		ITEMS
+			KEYWORDS_STRING "${keywords_string}"
+			URI             "${__URI}"
+			GIT_PATH        "${__GIT_PATH}"
+			GIT_REVISION    "${__GIT_REVISION}"
+	)
+	IF(is_same)
+		RETURN()
+	ENDIF()
 
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
 		HASH       ${hash}
@@ -151,7 +162,7 @@ ENDFUNCTION()
 #		[GIT_PATH     <git_path>]
 # )
 #
-FUNCTION(CMLIB_CACHE_CONTROL_COMPUTE_HASH)
+FUNCTION(_CMLIB_CACHE_CONTROL_COMPUTE_HASH)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			URI GIT_PATH
@@ -177,25 +188,82 @@ ENDFUNCTION()
 
 
 
+## Helper
+# Check if the control file represented by ITEMS is same
+# as control file represented by HASH.
+#
+# If control file for the given HASH exist it reads
+# the control file content, construct new one by ITEMS and compre them.
+# If they are equal set OUTPUT_VAR to ON.
+# If they are not equal set OUTPUT_VAR to OFF.
+#
+# If control file for the given HASH does not exit
+# set OUTPUT_VAR to OFF. 
+#
+# <function>(
+#		HASH       <hash>       // control hash
+#		ITEMS      <items>      // key-value pairs of template replacement
+#		OUTPUT_VAR <output_var>
+# )
+#
+FUNCTION(_CMLIB_CACHE_CONTROL_IS_SAME)
+	CMLIB_PARSE_ARGUMENTS(
+		ONE_VALUE
+			HASH OUTPUT_VAR
+		MULTI_VALUE
+			ITEMS
+		REQUIRED
+			HASH ITEMS OUTPUT_VAR
+		P_ARGN ${ARGN}
+	)
 
+	_CMLIB_CACHE_CONTROL_GET_CONTROL_FILE_PATH(control_file_path ${__HASH})
+	IF(NOT EXISTS "${control_file_path}")
+		SET(${__OUTPUT_VAR} OFF PARENT_SCOPE)
+		RETURN()
+	ENDIF()
 
+	FILE(READ "${control_file_path}" control_file_content)
+	_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT(
+		HASH              ${__HASH}
+		TEMPLATE_INSTANCE "${control_file_content}"
+		ITEMS             ${__ITEMS}
+		OUTPUT_VAR        constructed_content
+	)
+	IF(control_file_path STREQUAL constructed_content)
+		SET(${__OUTPUT_VAR} ON PARENT_SCOPE)
+	ELSE()
+		SET(${__OUTPUT_VAR} OFF PARENT_SCOPE)
+	ENDIF()
+ENDFUNCTION()
 
 
 
 ## Helper
 # Concretize given control file.
-# If the control file does not exist it creats one and
-# write partly/fully concretized 
+# It generates content by _CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT
+# and write is to the control file.
+# If the control file does not exist it creates one and as template instance
+# the CMLIB_CACHE_CONTROL_TEMPLATE is used.
+# if the file exist it uses control file content as a template instance.
+#
+# If OUTPUT_CONTENT_VAR is specified no control file is created
+# instead the OUTPUT_CONTENT_VAR variable is filled up with
+# the control file content.
+#
+# If OUTPUT_CONTENT_VAR is not specified the control file is concretized
+# or created if does not exist.
 #
 # <function>(
-#		HASH <hash>
-#		[ITEMS <items>] // key-value pairs of template replacement
+#		HASH                <hash>
+#		ITEMS               <items>       // key-value pairs of template replacement
+#		[OUTPUT_CONTENT_VAR <output_var>] 
 # )
 #
 FUNCTION(_CMLIB_CACHE_CONTROL_CONCRETIZE)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
-			HASH
+			HASH OUTPUT_CONTENT_VAR
 		MULTI_VALUE
 			ITEMS
 		REQUIRED
@@ -219,8 +287,12 @@ FUNCTION(_CMLIB_CACHE_CONTROL_CONCRETIZE)
 		OUTPUT_VAR        expanded
 	)
 
-	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
-	FILE(WRITE "${control_file_path}" "${expanded}")
+	IF(DEFINED __OUTPUT_CONTENT_VAR)
+		SET(${__OUTPUT_CONTENT_VAR} ${expanded} PARENT_SCOPE)
+	ELSE()
+		_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
+		FILE(WRITE "${control_file_path}" "${expanded}")
+	ENDIF()
 
 ENDFUNCTION()
 
@@ -256,23 +328,16 @@ ENDFUNCTION()
 
 
 ## Helper
-#
-# <function>(
-# )
-#
-FUNCTION(_CMLIB_CACHE_CONTROL_HAS)
-ENDFUNCTION()
-
-
-
-## Helper
 # Construct content of the control file.
+#
+# TEMPLATE_INSTANCE is an instance of the CMLIB_CACHE_CONTROL_TEMPLATE
+# or template itself (because template is a template instance...)
 #
 # <function>(
 #		HASH              <hash>              // control hash
 #		TEMPLATE_INSTANCE <template_instance> // instance of CMLIB_CACHE_CONTROL_TEMPLATE
-#		ITEMS <items>                         // key-value pairs of template replacement
-#
+#		ITEMS             <items>             // key-value pairs of template replacement
+#		OUTPUT_VAR        <output_var>        // 
 # )
 #
 FUNCTION(_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT)
