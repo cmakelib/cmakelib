@@ -88,24 +88,31 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 				GIT_PATH        "${__GIT_PATH}"
 				GIT_REVISION    "${__GIT_REVISION}"
 		)
-		FILE(WRITE "${control_file_path}" "${file_content}")
 		RETURN()
 	ENDIF()
 
-	FILE(READ "${control_file_path}" real_file_content)
-	IF("${file_content}" STREQUAL "${real_file_content}")
-		RETURN()
-	ENDIF()
+#	FILE(READ "${control_file_path}" real_file_content)
+#	IF("${file_content}" STREQUAL "${real_file_content}")
+#		RETURN()
+#	ENDIF()
+#
+#	STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]*);(.+)$" matched "${real_file_content}")
+#	IF(NOT matched)
+#		MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
+#	ENDIF()
 
-	STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]*);(.+)$" matched "${real_file_content}")
-	IF(NOT matched)
-		MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
-	ENDIF()
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control real file content: '${real_file_content}'")
-	SET(cached_keywords "${CMAKE_MATCH_1}")
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
+		HASH ${__HASH}
+		KEY KEYWORDS_STRING
+		OUTPUT_VAR cached_keywords
+	)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached_keywords '${cached_keywords}'")
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
+		HASH ${__HASH}
+		KEY GIT_REVISION
+		OUTPUT_VAR cached_branch_name
+	)
 
-	STRING(REGEX MATCHALL ";([^;]+)$" matched_x "${real_file_content}")
-	SET(cached_branch_name "${CMAKE_MATCH_1}")
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached branch name: '${cached_branch_name}|${__GIT_REVISION}'")
 	IF(NOT __GIT_REVISION STREQUAL cached_branch_name)
 		MESSAGE(FATAL_ERROR
@@ -291,23 +298,49 @@ ENDMACRO()
 
 
 ## Helper
+# It gets value stored under given template key.
+# It reads a control file represented by HASH and extracts
+# value for give template key.
 #
 # <function>(
-#		TEMPLATE_INSTANCE <template_instance> // Instance of the template
-#		ITEMS_KEYS        <keys>              // keys which will be extracted
+#		HASH       <hash>         // control hash
+#		ITEM_KEY   <key>          // Key which will be extracted
+#		OUTPUT_VAR <output_var>   // Name of the var. where the value
+#                                 // for given key will be stored
 # )
 #
 FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
-			TEMPLATE_INSTANCE
+			HASH OUTPUT_VAR
 		MULTI_VALUE
-			ITEMS_KEYS
+			ITEM_KEY
 		REQUIRED
-			TEMPLATE_INSTANCE ITEMS_KEYS
+			HASH ITEM_KEY OUTPUT_VAR
 		P_ARGN ${ARGN}
 	)
 
-	CMLIB_TEMPLATE_EXPAND(expanded ${CMLIB_CACHE_CONTROL_TEMPLATE} )
+	_CMLIB_CACHE_CONTROL_GET_CONTROL_FILE_PATH(control_file_path ${__HASH})
+	IF(NOT EXISTS "${control_file_path}")
+		MESSAGE(FATAL_ERROR "Control file path does not exist! You cannot obtain")
+	ENDIF()
+	FILE(READ "${control_file_path}" control_file_content)
 
+	STRING(REGEX REPLACE "<|>" "" stripped_template "${CMLIB_CACHE_CONTROL_TEMPLATE}")
+	STRING(REGEX REPLACE "," ";" template_arguments_list "${stripped_template}")
+	STRING(REGEX REPLACE "," ";" template_instance_list "${control_file_content}")
+
+	LIST(LENGTH arguments_length template_arguments_list)
+	LIST(LENGTH instance_length template_instance_list)
+	IF(NOT arguments_length EQUAL instance_length)
+		MESSAGE(FATAL_ERROR
+			"instance template '${control_file_content}' is not in sync with template '${CMLIB_CACHE_CONTROL_TEMPLATE}'")
+	ENDIF()
+
+	LIST(FIND template_arguments_list "${__ITEM_KEY}" index)
+	IF(index EQUAL -1)
+		MESSAGE(FATAL_ERROR "key '${__ITEM_KEY}' is not a part of template '${CMLIB_CACHE_CONTROL_TEMPLATE}'")
+	ENDIF()
+	LIST(GET template_instance_list ${index} value)
+	SET("${__OUTPUT_VAR}" "${value}" PARENT_SCOPE)
 ENDFUNCTION()
