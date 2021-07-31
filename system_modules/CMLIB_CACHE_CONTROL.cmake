@@ -6,9 +6,10 @@
 INCLUDE_GUARD(GLOBAL)
 
 _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
+_CMLIB_LIBRARY_MANAGER(CMLIB_TEMPLATE)
 _CMLIB_LIBRARY_MANAGER(CMLIB_CACHE)
 
-SET(CMLIB_CACHE_COTROL_META_BASE_DIR "${CMLIB_REQUIRED_ENV_TMP_PATH}/cache_control"
+SET(CMLIB_CACHE_CONTROL_META_BASE_DIR "${CMLIB_REQUIRED_ENV_TMP_PATH}/cache_control"
 	CACHE INTERNAL
 	"Bas drectory for meta information for cache control"
 )
@@ -18,12 +19,25 @@ SET(CMLIB_CACHE_CONTROL_META_CONTROL_DIR "${CMLIB_CACHE_CONTROL_META_BASE_DIR}/k
 	"Base directory for control files of cache control"
 )
 
-
-SET(CMLIB_CACHE_CONTROL_TEMPLATE
-	"<KEYWORDS_STRING>,<URI>,<GIT_PATH>,<GIT_REVISION>,<FILE_HASH>"
+# Value of the KEYDELIM var is used in Cmake regex
+# Please avaid using special regex characters
+SET(CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM "|"
 	CACHE INTERNAL
-	"Template for cache control file.AS delimiter the ',' must be used"
+	"Delimiter for keywords in control file"
 )
+
+SET(CMLIB_CACHE_CONTROL_ITEMS_DELIM ","
+	CACHE INTERNAL
+	""
+)
+
+SET(d ${CMLIB_CACHE_CONTROL_ITEMS_DELIM})
+SET(CMLIB_CACHE_CONTROL_TEMPLATE
+	"<KEYWORDS_STRING>${d}<URI>${d}<GIT_PATH>${d}<GIT_REVISION>${d}<FILE_HASH>"
+	CACHE INTERNAL
+	"Template for cache control file.AS delimiter the '${d}' must be used"
+)
+UNSET(d)
 
 
 
@@ -51,22 +65,23 @@ ENDFUNCTION()
 FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
-			HASH GIT_REVISION
+			GIT_REVISION GIT_PATH URI
 		MULTI_VALUE
 			ORIGINAL_KEYWORDS
 		REQUIRED
-			HASH
+			URI
 		P_ARGN ${ARGN}
 	)
 
-	SET(control_dir_path  "${CMLIB_CACHE_CONTROL_META_BASE_DIR}")
-	SET(control_file_path "${control_dir_path}/${__HASH}")
-	SET(keywords_delim    "${CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM}")
+	SET(keywords_delim "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}")
 
-	#STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
-	#SET(file_content "${keywords_string};${__URI};${__GIT_PATH};${__GIT_REVISION}")
+	CMLIB_CACHE_CONTROL_COMPUTE_HASH(
+		URI             "${__URI}"
+		GIT_PATH        "${__GIT_PATH}"
+		OUTPUT_HASH_VAR hash
+	)
 
-	_CMLIB_CACHE_CONTROL_IS_RAW(HASH ${__HASH} OUTPUT_VAR is_raw)
+	_CMLIB_CACHE_CONTROL_IS_RAW(HASH ${hash} OUTPUT_VAR is_raw)
 	IF(is_raw)
 		STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK Cache control file create")
@@ -80,8 +95,9 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 				MESSAGE(FATAL_ERROR "The cache under keywords '${original_keywords_string}' already exist for different remote")
 			ENDIF()
 		ENDIF()
+		STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
 		_CMLIB_CACHE_CONTROL_CONCRETIZE(
-			HASH ${__HASH}
+			HASH ${hash}
 			ITEMS
 				KEYWORDS_STRING "${keywords_string}"
 				URI             "${__URI}"
@@ -90,34 +106,17 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 		)
 		RETURN()
 	ENDIF()
-
-#	FILE(READ "${control_file_path}" real_file_content)
-#	IF("${file_content}" STREQUAL "${real_file_content}")
-#		RETURN()
-#	ENDIF()
-#
-#	STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]*);(.+)$" matched "${real_file_content}")
-#	IF(NOT matched)
-#		MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
-#	ENDIF()
-
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
-		HASH ${__HASH}
+		HASH ${hash}
 		KEY KEYWORDS_STRING
 		OUTPUT_VAR cached_keywords
 	)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached_keywords '${cached_keywords}'")
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
-		HASH ${__HASH}
+		HASH ${hash}
 		KEY GIT_REVISION
 		OUTPUT_VAR cached_branch_name
 	)
-
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached branch name: '${cached_branch_name}|${__GIT_REVISION}'")
-	IF(NOT __GIT_REVISION STREQUAL cached_branch_name)
-		MESSAGE(FATAL_ERROR
-			"DEPENDENCY version mishmash - different versions of the same file '${cached_branch_name}' vs '${__GIT_REVISION}'")
-	ENDIF()
 
 	IF(NOT cached_keywords)
 		MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords"
@@ -125,11 +124,13 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 	ELSEIF(NOT DEFINED __ORIGINAL_KEYWORDS)
 		MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created with keywords ${cached_keywords}"
 			" but no keywords provided")
-	ELSE()
-		STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
+	ELSEIF(NOT __GIT_REVISION STREQUAL cached_branch_name)
+		MESSAGE(FATAL_ERROR
+			"DEPENDENCY version mishmash - different versions of the same file '${cached_branch_name}' vs '${__GIT_REVISION}'")
+	ELSEIF(NOT "${ORIGINAL_KEYWORDS}" STREQUAL "${cached_keywords}")
 		MESSAGE(FATAL_ERROR
 			"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'"
-			" are not same as required keywords '${original_keywords_string}'")
+			" are not same as required keywords '${__ORIGINAL_KEYWORDS}'")
 	ENDIF()
 ENDFUNCTION()
 
@@ -138,27 +139,26 @@ ENDFUNCTION()
 ## Helper
 #
 # Compute hash from string
-#	"${URI}|${GIT_PATH}|${GIT_REVISION}"
+#	"${URI}|${GIT_PATH}"
 # The hash uniquely identifies resource managed by
 # CMLIB_DEPENDENCY function.
 #
 # <function>(
 #		URI          <uri>
 #		[GIT_PATH     <git_path>]
-#		[GIT_REVISION <git_revision>]
 # )
 #
-FUNCTION(_CMLIB_CACHE_CONTROL_COMPUTE_HASH)
+FUNCTION(CMLIB_CACHE_CONTROL_COMPUTE_HASH)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
-			URI GIT_PATH GIT_REVISION
+			URI GIT_PATH
 			OUTPUT_HASH_VAR
 		REQUIRED
 			URI OUTPUT_HASH_VAR
 		P_ARGN ${ARGN}
 	)
 
-	SET(keywords_delim "${CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM}")
+	SET(keywords_delim "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}")
 	SET(cache_string   "${__URI}${keywords_delim}${__GIT_PATH}")
 	STRING(SHA3_512 hash "${cache_string}")
 
@@ -171,6 +171,10 @@ FUNCTION(_CMLIB_CACHE_CONTROL_COMPUTE_HASH)
 	STRING(TOUPPER "${each_e}" hash_upper)
 	SET(${__OUTPUT_HASH_VAR} "${hash_upper}" PARENT_SCOPE)
 ENDFUNCTION()
+
+
+
+
 
 
 
@@ -209,19 +213,22 @@ FUNCTION(_CMLIB_CACHE_CONTROL_CONCRETIZE)
 	ELSE()
 		SET(control_file_content ${CMLIB_CACHE_CONTROL_TEMPLATE})
 	ENDIF()
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONCRETIZE control file content: '${control_file_content}'")
 
-	FOREACH(key_index RANGE 0 ${items_length} 2)
+	MATH(EXPR items_length_last_index "${items_length} - 1")
+	FOREACH(key_index RANGE 0 ${items_length_last_index} 2)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONCRETIZE key_index: ${key_index}")
 		MATH(EXPR value_index "${key_index} + 1")
 		LIST(GET __ITEMS ${value_index} value)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONCRETIZE value for check: ${value}")
-		STRING(REGEX MATCHALL "^[^,]*$" value_matched "${value}")
+		STRING(REGEX MATCH "^[^;]*$" value_matched "${value}")
 		IF(NOT value_matched)
 			LIST(GET __ITEMS ${key_index} key)
 			MESSAGE(FATAL_ERROR "Value '${value}' of key '${key}' contains forbidden char ','")
 		ENDIF()
 	ENDFOREACH()
 
-	CMLIB_TEMPLATE_EXPAND(expanded "${control_file_content}" ${__ITEMS})
+	CMLIB_TEMPLATE_EXPAND(expanded control_file_content ${__ITEMS})
 
 	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
 	FILE(WRITE "${control_file_path}" "${expanded}")
@@ -314,9 +321,9 @@ FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS)
 		ONE_VALUE
 			HASH OUTPUT_VAR
 		MULTI_VALUE
-			ITEM_KEY
+			KEY
 		REQUIRED
-			HASH ITEM_KEY OUTPUT_VAR
+			HASH KEY OUTPUT_VAR
 		P_ARGN ${ARGN}
 	)
 
@@ -327,20 +334,21 @@ FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS)
 	FILE(READ "${control_file_path}" control_file_content)
 
 	STRING(REGEX REPLACE "<|>" "" stripped_template "${CMLIB_CACHE_CONTROL_TEMPLATE}")
-	STRING(REGEX REPLACE "," ";" template_arguments_list "${stripped_template}")
-	STRING(REGEX REPLACE "," ";" template_instance_list "${control_file_content}")
+	STRING(REGEX REPLACE "${CMLIB_CACHE_CONTROL_ITEMS_DELIM}" ";" template_arguments_list "${stripped_template}")
+	STRING(REGEX REPLACE "${CMLIB_CACHE_CONTROL_ITEMS_DELIM}" ";" template_instance_list "${control_file_content}")
 
-	LIST(LENGTH arguments_length template_arguments_list)
-	LIST(LENGTH instance_length template_instance_list)
+	LIST(LENGTH template_arguments_list arguments_length)
+	LIST(LENGTH template_instance_list instance_length)
 	IF(NOT arguments_length EQUAL instance_length)
 		MESSAGE(FATAL_ERROR
 			"instance template '${control_file_content}' is not in sync with template '${CMLIB_CACHE_CONTROL_TEMPLATE}'")
 	ENDIF()
 
-	LIST(FIND template_arguments_list "${__ITEM_KEY}" index)
+	LIST(FIND template_arguments_list "${__KEY}" index)
 	IF(index EQUAL -1)
-		MESSAGE(FATAL_ERROR "key '${__ITEM_KEY}' is not a part of template '${CMLIB_CACHE_CONTROL_TEMPLATE}'")
+		MESSAGE(FATAL_ERROR "key '${__KEY}' is not a part of template '${CMLIB_CACHE_CONTROL_TEMPLATE}'")
 	ENDIF()
 	LIST(GET template_instance_list ${index} value)
-	SET("${__OUTPUT_VAR}" "${value}" PARENT_SCOPE)
+	STRING(REPLACE "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}" ";" value_rep "${value}")
+	SET("${__OUTPUT_VAR}" "${value_rep}" PARENT_SCOPE)
 ENDFUNCTION()

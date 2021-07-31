@@ -7,13 +7,6 @@
 
 INCLUDE_GUARD(GLOBAL)
 
-# Value of the KEYDELIM var is used in Cmake regex
-# Please avaid using special regex characters
-SET(CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM ","
-	CACHE INTERNAL
-	"Delimiter for keywords in control file"
-)
-
 SET(CMLIB_DEPENDENCY_CONTROL ON
 	CACHE BOOL
 	"Enable depenendcy Conrol if ON, Disable dependency conrol if OFF"
@@ -351,18 +344,12 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		SET(git_revision "master")
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_COMPUTE_HASH(
-		URI             "${__URI}"
-		GIT_PATH        "${git_path}"
-		GIT_REVISION    "${git_revision}"
-		OUTPUT_HASH_VAR hash_keyword
-	)
-
 	IF(CMLIB_DEPENDENCY_CONTROL)
-		_CMLIB_CACHE_CONTROL_KEYWORDS_CHECK(
-			HASH              ${hash_keyword}
+		CMLIB_CACHE_CONTROL_KEYWORDS_CHECK(
+			URI               "${__URI}"
 			ORIGINAL_KEYWORDS "${__ORIGINAL_KEYWORDS}"
-			GIT_REVISION      ${__GIT_REVISION}
+			GIT_PATH          "${git_path}"
+			GIT_REVISION      "${git_revision}"
 		)
 	ENDIF()
 

@@ -1,7 +1,7 @@
 ## Main
 #
-# Check if DEPENDENCY imit and error if
-# we try to add same resurce as a DEPENDENCY
+# Check if DEPENDENCY emit an error if
+# we try to add same resource as a DEPENDENCY
 # under multiple keywords
 #
 
@@ -22,14 +22,6 @@ CMLIB_DEPENDENCY(
 	TYPE FILE
 	URI "${GIT_DOWNLOAD_URI}"
 	GIT_REVISION "test-branch"
-	GIT_PATH     "TEST_MODULE.cmake"
-	OUTPUT_PATH_VAR output_path
-)
-
-CMLIB_DEPENDENCY(
-	KEYWORDS GIT ZIP FILE2
-	TYPE FILE
-	URI "${GIT_DOWNLOAD_URI}"
 	GIT_PATH     "TEST_MODULE.cmake"
 	OUTPUT_PATH_VAR output_path
 )
