@@ -81,8 +81,8 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 		OUTPUT_HASH_VAR hash
 	)
 
-	_CMLIB_CACHE_CONTROL_IS_RAW(HASH ${hash} OUTPUT_VAR is_raw)
-	IF(is_raw)
+	_CMLIB_CACHE_CONTROL_HAS_CONTROL_FILE(HASH ${hash} OUTPUT_VAR has_control_file)
+	IF(has_control_file)
 		STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK Cache control file create")
 		IF(DEFINED __ORIGINAL_KEYWORDS)
@@ -106,15 +106,18 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 		)
 		RETURN()
 	ENDIF()
+
+	_CMLIB_CACHE_CONTROL_
+
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
-		HASH ${hash}
-		KEY KEYWORDS_STRING
+		HASH       ${hash}
+		KEY        KEYWORDS_STRING
 		OUTPUT_VAR cached_keywords
 	)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached_keywords '${cached_keywords}'")
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
-		HASH ${hash}
-		KEY GIT_REVISION
+		HASH       ${hash}
+		KEY        GIT_REVISION
 		OUTPUT_VAR cached_branch_name
 	)
 
@@ -127,7 +130,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 	ELSEIF(NOT __GIT_REVISION STREQUAL cached_branch_name)
 		MESSAGE(FATAL_ERROR
 			"DEPENDENCY version mishmash - different versions of the same file '${cached_branch_name}' vs '${__GIT_REVISION}'")
-	ELSEIF(NOT "${ORIGINAL_KEYWORDS}" STREQUAL "${cached_keywords}")
+	ELSE()
 		MESSAGE(FATAL_ERROR
 			"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'"
 			" are not same as required keywords '${__ORIGINAL_KEYWORDS}'")
@@ -199,12 +202,6 @@ FUNCTION(_CMLIB_CACHE_CONTROL_CONCRETIZE)
 			HASH ITEMS
 		P_ARGN ${ARGN}
 	)
-
-	LIST(LENGTH __ITEMS items_length)	
-	MATH(EXPR is_divisible_be_two "(${items_length} + 1) % 2")
-	IF(NOT is_divisible_be_two)	
-		MESSAGE(FATAL_ERROR "Invalid number of items! Not all are key-value pairs!")
-	ENDIF()
 	
 	_CMLIB_CACHE_CONTROL_GET_CONTROL_FILE_PATH(control_file_path ${__HASH})
 	SET(control_file_content)
@@ -215,20 +212,12 @@ FUNCTION(_CMLIB_CACHE_CONTROL_CONCRETIZE)
 	ENDIF()
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONCRETIZE control file content: '${control_file_content}'")
 
-	MATH(EXPR items_length_last_index "${items_length} - 1")
-	FOREACH(key_index RANGE 0 ${items_length_last_index} 2)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONCRETIZE key_index: ${key_index}")
-		MATH(EXPR value_index "${key_index} + 1")
-		LIST(GET __ITEMS ${value_index} value)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONCRETIZE value for check: ${value}")
-		STRING(REGEX MATCH "^[^;]*$" value_matched "${value}")
-		IF(NOT value_matched)
-			LIST(GET __ITEMS ${key_index} key)
-			MESSAGE(FATAL_ERROR "Value '${value}' of key '${key}' contains forbidden char ','")
-		ENDIF()
-	ENDFOREACH()
-
-	CMLIB_TEMPLATE_EXPAND(expanded control_file_content ${__ITEMS})
+	_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT(
+		HASH              ${__HASH}
+		TEMPLATE_INSTANCE "${control_file_content}"
+		ITEMS             ${__ITEMS}
+		OUTPUT_VAR        expanded
+	)
 
 	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
 	FILE(WRITE "${control_file_path}" "${expanded}")
@@ -238,16 +227,17 @@ ENDFUNCTION()
 
 
 ## Helper
-# The cache control for given HASH is raw if and only if
-# there is no cache control file or the file content of the control file is
-# the same as the control file template.
+# Check if the control file for given HASH exist
+#
+# OUTPUT_VAR is name of the variable where the result will be stored.
+# returned values: ON - exist, OFF does not exist
 #
 # <function>(
-#		HASH       <hash>
+#		HASH       <hash>       // control hash
 #		OUTPUT_VAR <output_var>
 # )
 #
-FUNCTION(_CMLIB_CACHE_CONTROL_IS_RAW)
+FUNCTION(_CMLIB_CACHE_CONTROL_HAS_CONTROL_FILE)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			HASH OUTPUT_VAR
@@ -255,20 +245,72 @@ FUNCTION(_CMLIB_CACHE_CONTROL_IS_RAW)
 			HASH OUTPUT_VAR
 		P_ARGN ${ARGN}
 	)
-
 	_CMLIB_CACHE_CONTROL_GET_CONTROL_FILE_PATH(control_file_path ${__HASH})
 	IF(NOT EXISTS "${control_file_path}")
 		SET(${__OUTPUT_VAR} ON PARENT_SCOPE)
 		RETURN()
 	ENDIF()
-
-	FILE(READ "${control_file_path}" control_file_content)
-	IF(CMLIB_CACHE_CONTROL_TEMPLATE STREQUAL control_file_path)
-		SET(${__OUTPUT_VAR} ON PARENT_SCOPE)
-		RETURN()
-	ENDIF()
-
 	SET(${__OUTPUT_VAR} OFF PARENT_SCOPE)
+ENDFUNCTION()
+
+
+
+## Helper
+#
+# <function>(
+# )
+#
+FUNCTION(_CMLIB_CACHE_CONTROL_HAS)
+ENDFUNCTION()
+
+
+
+## Helper
+# Construct content of the control file.
+#
+# <function>(
+#		HASH              <hash>              // control hash
+#		TEMPLATE_INSTANCE <template_instance> // instance of CMLIB_CACHE_CONTROL_TEMPLATE
+#		ITEMS <items>                         // key-value pairs of template replacement
+#
+# )
+#
+FUNCTION(_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT)
+	CMLIB_PARSE_ARGUMENTS(
+		ONE_VALUE
+			TEMPLATE_INSTANCE
+			HASH OUTPUT_VAR
+		MULTI_VALUE
+			ITEMS
+		REQUIRED
+			TEMPLATE_INSTANCE
+			HASH ITEMS
+		P_ARGN ${ARGN}
+	)
+
+	LIST(LENGTH __ITEMS items_length)	
+	MATH(EXPR is_divisible_be_two "(${items_length} + 1) % 2")
+	IF(NOT is_divisible_be_two)	
+		MESSAGE(FATAL_ERROR "Invalid number of items! Not all are key-value pairs!")
+	ENDIF()
+	
+
+	MATH(EXPR items_length_last_index "${items_length} - 1")
+	FOREACH(key_index RANGE 0 ${items_length_last_index} 2)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT key_index: ${key_index}")
+		MATH(EXPR value_index "${key_index} + 1")
+		LIST(GET __ITEMS ${value_index} value)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT value for check: ${value}")
+		STRING(REGEX MATCH "^[^;]*$" value_matched "${value}")
+		IF(NOT value_matched)
+			LIST(GET __ITEMS ${key_index} key)
+			MESSAGE(FATAL_ERROR "Value '${value}' of key '${key}' contains forbidden char ','")
+		ENDIF()
+	ENDFOREACH()
+
+	CMLIB_TEMPLATE_EXPAND(expanded ${__TEMPLATE_INSTANCE} ${__ITEMS})
+	SET("${__OUTPUT_VAR}" ${expanded} PARENT_SCOPE)
+
 ENDFUNCTION()
 
 
