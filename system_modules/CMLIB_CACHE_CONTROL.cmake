@@ -69,17 +69,29 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 		MULTI_VALUE
 			ORIGINAL_KEYWORDS
 		REQUIRED
-			URI
+			URI GIT_REVISION GIT_PATH
 		P_ARGN ${ARGN}
 	)
 
 	SET(keywords_delim "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}")
+	STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
 
 	_CMLIB_CACHE_CONTROL_COMPUTE_HASH(
 		URI             "${__URI}"
 		GIT_PATH        "${__GIT_PATH}"
 		OUTPUT_HASH_VAR hash
 	)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK hash: ${hash}")
+
+	LIST(APPEND control_items
+		URI          "${__URI}"
+		GIT_PATH     "${__GIT_PATH}"
+		GIT_REVISION "${__GIT_REVISION}"
+	)
+	IF(DEFINED __ORIGINAL_KEYWORDS)
+		STRING(JOIN "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}" keywords_string ${__ORIGINAL_KEYWORDS})
+		LIST(APPEND control_items KEYWORDS_STRING "${keywords_string}")
+	ENDIF()
 
 	_CMLIB_CACHE_CONTROL_HAS_CONTROL_FILE(HASH ${hash} OUTPUT_VAR has_control_file)
 	IF(has_control_file)
@@ -95,28 +107,18 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 				MESSAGE(FATAL_ERROR "The cache under keywords '${original_keywords_string}' already exist for different remote")
 			ENDIF()
 		ENDIF()
-		STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
-		_CMLIB_CACHE_CONTROL_CONCRETIZE(
-			HASH ${hash}
-			ITEMS
-				KEYWORDS_STRING "${keywords_string}"
-				URI             "${__URI}"
-				GIT_PATH        "${__GIT_PATH}"
-				GIT_REVISION    "${__GIT_REVISION}"
+		_CMLIB_CACHE_CONTROL_CONCRETIZE(HASH ${hash}
+			ITEMS ${control_items}
 		)
 		RETURN()
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_IS_SAME(
+	_CMLIB_CACHE_CONTROL_IS_SAME(HASH ${hash}
 		OUTPUT_VAR is_same
-		HASH ${hash}
-		ITEMS
-			KEYWORDS_STRING "${keywords_string}"
-			URI             "${__URI}"
-			GIT_PATH        "${__GIT_PATH}"
-			GIT_REVISION    "${__GIT_REVISION}"
+		ITEMS ${control_items}
 	)
 	IF(is_same)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cache control OK")
 		RETURN()
 	ENDIF()
 
@@ -132,15 +134,17 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 		OUTPUT_VAR cached_branch_name
 	)
 
+	IF(NOT __GIT_REVISION STREQUAL cached_branch_name)
+		MESSAGE(FATAL_ERROR
+			"DEPENDENCY version mishmash - different versions of the same file '${cached_branch_name}' vs '${__GIT_REVISION}'")
+	ENDIF()
+
 	IF(NOT cached_keywords)
 		MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords"
 			" but keywords provided '${__ORIGINAL_KEYWORDS}'")
 	ELSEIF(NOT DEFINED __ORIGINAL_KEYWORDS)
 		MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created with keywords ${cached_keywords}"
 			" but no keywords provided")
-	ELSEIF(NOT __GIT_REVISION STREQUAL cached_branch_name)
-		MESSAGE(FATAL_ERROR
-			"DEPENDENCY version mishmash - different versions of the same file '${cached_branch_name}' vs '${__GIT_REVISION}'")
 	ELSE()
 		MESSAGE(FATAL_ERROR
 			"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'"
@@ -226,13 +230,14 @@ FUNCTION(_CMLIB_CACHE_CONTROL_IS_SAME)
 	FILE(READ "${control_file_path}" control_file_content)
 	_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT(
 		HASH              ${__HASH}
-		TEMPLATE_INSTANCE "${control_file_content}"
+		TEMPLATE_INSTANCE "${CMLIB_CACHE_CONTROL_TEMPLATE}"
 		ITEMS             ${__ITEMS}
 		OUTPUT_VAR        constructed_content
 	)
-	IF(control_file_path STREQUAL constructed_content)
+	IF(control_file_content STREQUAL constructed_content)
 		SET(${__OUTPUT_VAR} ON PARENT_SCOPE)
 	ELSE()
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_IS_SAME '${control_file_content}' is not same as '${constructed_content}'")
 		SET(${__OUTPUT_VAR} OFF PARENT_SCOPE)
 	ENDIF()
 ENDFUNCTION()
@@ -353,6 +358,7 @@ FUNCTION(_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT)
 		P_ARGN ${ARGN}
 	)
 
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT tmeplate instance: ${__TEMPLATE_INSTANCE}")
 	LIST(LENGTH __ITEMS items_length)	
 	MATH(EXPR is_divisible_be_two "(${items_length} + 1) % 2")
 	IF(NOT is_divisible_be_two)	
@@ -373,7 +379,7 @@ FUNCTION(_CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT)
 		ENDIF()
 	ENDFOREACH()
 
-	CMLIB_TEMPLATE_EXPAND(expanded ${__TEMPLATE_INSTANCE} ${__ITEMS})
+	CMLIB_TEMPLATE_EXPAND(expanded __TEMPLATE_INSTANCE ${__ITEMS})
 	SET("${__OUTPUT_VAR}" ${expanded} PARENT_SCOPE)
 
 ENDFUNCTION()
@@ -455,7 +461,14 @@ FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS)
 	IF(index EQUAL -1)
 		MESSAGE(FATAL_ERROR "key '${__KEY}' is not a part of template '${CMLIB_CACHE_CONTROL_TEMPLATE}'")
 	ENDIF()
+
 	LIST(GET template_instance_list ${index} value)
-	STRING(REPLACE "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}" ";" value_rep "${value}")
-	SET("${__OUTPUT_VAR}" "${value_rep}" PARENT_SCOPE)
+	IF("<${__KEY}>" STREQUAL value)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS value '${value}' marked as empty")
+		UNSET(value)
+	ELSE()
+		STRING(REPLACE "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}" ";" value "${value}")
+	ENDIF()
+
+	SET("${__OUTPUT_VAR}" "${value}" PARENT_SCOPE)
 ENDFUNCTION()
