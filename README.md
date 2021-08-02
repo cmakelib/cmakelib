@@ -29,7 +29,7 @@ Small example for Ubuntu 20.04
 FIND_PACKAGE(CMLIB REQUIRED)
 
 CMLIB_DEPENDENCY(
-	# We use koudis/boost-prebuilt-inaries
+	# We use koudis/boost-prebuilt-binaries
 	URI "https://bit.ly/3rQsAXd"
 	TYPE ARCHIVE
 	OUTPUT_PATH_VAR BOOST_ROOT
