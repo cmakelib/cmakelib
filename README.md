@@ -21,24 +21,54 @@ For examples look at the [example] directory
 ## Usage
 
 - clone directory by `git clone https://github.com/cmakelib/cmakelib.git <path_to_cmakelib_repo>`
+- export CMLIB_DIR=<path_to_cmakelib_repo>
+
+Small example for Ubuntu 20.04
 
 ```
-LIST(APPEND CMAKE_MODULE_PATH <path_to_cmakelib_repo>)
 FIND_PACKAGE(CMLIB REQUIRED)
 
-# As Boost binary we use https://github.com/koudis/boost-build
-SET(uri "https://github.com/koudis/boost-build/releases/download/${boost_version}/boost-1_72_0-ubuntu_2004-PIC.tar.bz2")
 CMLIB_DEPENDENCY(
-	URI "${uri}"
+	# We use koudis/boost-prebuilt-binaries
+	URI "https://bit.ly/3rQsAXd"
 	TYPE ARCHIVE
 	OUTPUT_PATH_VAR BOOST_ROOT
 )
-FIND_PACKAGE(Boost 1.72.0 COMPONENTS log_setup log REQUIRED)
+FIND_PACKAGE(Boost 1.76.0 COMPONENTS log_setup log REQUIRED)
 ```
 
 Full example can be found at [example/DEPENDENCY/boost_example]
 
-### API
+## Installation
+
+### Prerequisites
+
+- CMake >=3.18 installed and registered in PATH env. variable
+- Git installed and bin/ directory of git registered in PATH env. variable
+
+### Library install
+
+It is intended that the user has only one global instance of library. However it is possible use `cmakelib`
+as submodule but it is not recommanded.
+
+#### Global install
+
+Library is stored on User computer and the global CMake variable `CMLIB_DIR`
+must be defined.
+
+- Choose directory where cmakelib will be stored. We will call this directory
+<cmlib_root>
+- Clone repository to local computer to <cmlib_root>
+- Define System ENV var `CMLIB_DIR` as absolute path to already cloned repository
+- You may define system ENV var `CMLIB_REQUIRED_ENV_TMP_PATH` to path to existing directory.
+  This variable represents Cache directory where the cache will be stored.
+  If not set the "${CMAKE_CURRENT_LIST_DIR}/_tmp" is use instead.
+- call `FIND_PACKAGE(CMLIB REQUIRED)`
+- Everything should works fine now
+
+Examples for `CMLIB_DEPENDENCY` can be found at [example/DEPENDENCY]
+
+## API
 
 The library core is a function
 
@@ -76,34 +106,7 @@ List of CMake-lib components
 - [CMLIB_STORAGE] - effectively track build resources,
 - [CMDEF] - well defined built environment,
 
-## Installation
-
-### Prerequisites
-
-- CMake >=3.18 installed and registered in PATH env. variable
-- Git installed and bin/ directory of git registered in PATH env. variable
-
-### Library install
-
-It is intended that the user has only one global instance of library. However it is possible use `cmakelib`
-as submodule but it is not recommanded.
-
-#### Global install
-
-Library is stored on User computer and the global CMake variable `CMLIB_DIR`
-must be defined.
-
-- Choose directory where cmakelib will be stored. We will call this directory
-<cmlib_root>
-- Clone repository to local computer to <cmlib_root>
-- Define System ENV var `CMLIB_DIR` as absolute path to already cloned repository
-- You may define system ENV var `CMLIB_REQUIRED_ENV_TMP_PATH` to path to existing directory.
-  This variable represents Cache directory where the cache will be stored.
-  If not set the "${CMAKE_CURRENT_LIST_DIR}/_tmp" is use instead.
-- call `FIND_PACKAGE(CMLIB [COMPONENTS <component_list>])`
-- Everything should works fine now
-
-Examples for `CMLIB_DEPENDENCY` can be found at [example/DEPENDENCY]
+Components can be used by `FIND_PACKAGE(CMLIB REQUIRED COMPONENTS <component_list>)`
 
 ## Cache mechanism
 
