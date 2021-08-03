@@ -21,14 +21,14 @@ SET(CMLIB_CACHE_CONTROL_META_CONTROL_DIR "${CMLIB_CACHE_CONTROL_META_BASE_DIR}/k
 
 # Value of the KEYDELIM var is used in Cmake regex
 # Please avaid using special regex characters
-SET(CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM "|"
+SET(CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM "/"
 	CACHE INTERNAL
-	"Delimiter for keywords in control file"
+	"Delimiter for keywords in control file. Do NOT use ';'"
 )
 
 SET(CMLIB_CACHE_CONTROL_ITEMS_DELIM ","
 	CACHE INTERNAL
-	""
+	"Delimiter for items in control template. Look at CMLIB_CACHE_CONTROL_TEMPLATE."
 )
 
 SET(d ${CMLIB_CACHE_CONTROL_ITEMS_DELIM})
@@ -122,17 +122,18 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 		RETURN()
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
 		HASH       ${hash}
 		KEY        KEYWORDS_STRING
 		OUTPUT_VAR cached_keywords
 	)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached_keywords '${cached_keywords}'")
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS(
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
 		HASH       ${hash}
 		KEY        GIT_REVISION
 		OUTPUT_VAR cached_branch_name
 	)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached_branch '${cached_branch_name}'")
 
 	IF(NOT __GIT_REVISION STREQUAL cached_branch_name)
 		MESSAGE(FATAL_ERROR
@@ -196,8 +197,8 @@ ENDFUNCTION()
 # Check if the control file represented by ITEMS is same
 # as control file represented by HASH.
 #
-# If control file for the given HASH exist it reads
-# the control file content, construct new one by ITEMS and compre them.
+# If control file for the given HASH exist the function reads
+# the control file content, construct new one by ITEMS and compare them.
 # If they are equal set OUTPUT_VAR to ON.
 # If they are not equal set OUTPUT_VAR to OFF.
 #
@@ -247,10 +248,10 @@ ENDFUNCTION()
 ## Helper
 # Concretize given control file.
 # It generates content by _CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT
-# and write is to the control file.
+# and write it to the control file.
 # If the control file does not exist it creates one and as template instance
 # the CMLIB_CACHE_CONTROL_TEMPLATE is used.
-# if the file exist it uses control file content as a template instance.
+# If the file exist it uses control file content as a template instance.
 #
 # If OUTPUT_CONTENT_VAR is specified no control file is created
 # instead the OUTPUT_CONTENT_VAR variable is filled up with
@@ -389,7 +390,8 @@ ENDFUNCTION()
 ## Helper
 # Creates all needed meda directories
 #
-# <function>()
+# <function>(
+# )
 #
 FUNCTION(_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS)
 	IF(NOT EXISTS "${CMLIB_CACHE_CONTROL_META_BASE_DIR}")
@@ -399,21 +401,6 @@ FUNCTION(_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS)
 		FILE(MAKE_DIRECTORY "${CMLIB_CACHE_CONTROL_META_CONTROL_DIR}")
 	ENDIF()
 ENDFUNCTION()
-
-
-
-## Helper
-# Returns control file path for given hash
-#
-# <function>(
-#		<output_var>
-#		<hash>
-# )
-#
-MACRO(_CMLIB_CACHE_CONTROL_GET_CONTROL_FILE_PATH output_var hash)
-	SET(${output_var} "${CMLIB_CACHE_CONTROL_META_BASE_DIR}/${hash}")
-ENDMACRO()
-
 
 
 
@@ -429,7 +416,7 @@ ENDMACRO()
 #                                 // for given key will be stored
 # )
 #
-FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS)
+FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			HASH OUTPUT_VAR
@@ -464,7 +451,7 @@ FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS)
 
 	LIST(GET template_instance_list ${index} value)
 	IF("<${__KEY}>" STREQUAL value)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS value '${value}' marked as empty")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM value '${value}' marked as empty")
 		UNSET(value)
 	ELSE()
 		STRING(REPLACE "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}" ";" value "${value}")
@@ -472,3 +459,17 @@ FUNCTION(_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEMS)
 
 	SET("${__OUTPUT_VAR}" "${value}" PARENT_SCOPE)
 ENDFUNCTION()
+
+
+
+## Helper
+# Returns control file path for given hash
+#
+# <function>(
+#		<output_var>
+#		<hash>
+# )
+#
+MACRO(_CMLIB_CACHE_CONTROL_GET_CONTROL_FILE_PATH output_var hash)
+	SET(${output_var} "${CMLIB_CACHE_CONTROL_META_BASE_DIR}/${hash}")
+ENDMACRO()

@@ -378,7 +378,7 @@ FUNCTION(_CMLIB_DEPENDENCY_CHECK_TYPE_OUTPUT_VAR_REQUIREMENTS_INVERSE type)
 	IF("${type}" STREQUAL "DIRECTORY" OR
 			"${type}" STREQUAL "ARCHIVE" OR
 			"${type}" STREQUAL "FILE")
-		MESSAGE(FATAL_ERROR "Requirements for OUTPUT_VAR are not met!")
+		MESSAGE(FATAL_ERROR "Requirements for OUTPUT_VAR are not met! (Not defined? Invalid format?)")
 	ENDIF()
 ENDFUNCTION()
 
