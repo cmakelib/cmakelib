@@ -14,7 +14,7 @@ SET(CMLIB_CACHE_CONTROL_META_BASE_DIR "${CMLIB_REQUIRED_ENV_TMP_PATH}/cache_cont
 	"Bas drectory for meta information for cache control"
 )
 
-SET(CMLIB_CACHE_CONTROL_META_CONTROL_DIR "${CMLIB_CACHE_CONTROL_META_BASE_DIR}/keys_control"
+SET(CMLIB_CACHE_CONTROL_META_CONTROL_DIR "${CMLIB_REQUIRED_ENV_TMP_PATH}/keys_control"
 	CACHE INTERNAL
 	"Base directory for control files of cache control"
 )
@@ -43,19 +43,41 @@ UNSET(d)
 
 ##
 #
+#
 # <function>(
+#		HASH      <hash>
+#		FILE_HASH <file_hash>
 # )
 #
 FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
+	CMLIB_PARSE_ARGUMENTS(
+		ONE_VALUE
+			GIT_REVISION GIT_PATH URI
+			HASH
+		MULTI_VALUE
+			ORIGINAL_KEYWORDS
+		REQUIRED
+			URI GIT_REVISION GIT_PATH
+			HASH
+		P_ARGN ${ARGN}
+	)
+
+	_CMLIB_CACHE_CONTROL_GET_FILE_HASH_PATH(file_hash_path ${__FILE_HASH})
+	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
+
+	SET(file_hash_hash)
+	IF(NOT EXISTS "${file_hash_path}")
+		FILE(WRITE "${file_hash_path}" ${__HASH})
+		SET(file_hash_hash "${__HASH}")
+	ELSE()
+		FILE(READ "${file_hash_path}" ${file_hash_hash})
+	ENDIF()
 ENDFUNCTION()
 
 
 
 ##
 #
-# Check if HASH and ORIGINAL_KEYWORDS are in sync.
-# Multiple invocation of this funct with same HASH must have
-# same ORIGINAL_KEYWORDS or error occurred.
 #
 # <function>(
 #		HASH              <hash>
@@ -472,4 +494,18 @@ ENDFUNCTION()
 #
 MACRO(_CMLIB_CACHE_CONTROL_GET_CONTROL_FILE_PATH output_var hash)
 	SET(${output_var} "${CMLIB_CACHE_CONTROL_META_BASE_DIR}/${hash}")
+ENDMACRO()
+
+
+
+## Helper
+# Returns file hash control file path for given file hash
+#
+# <function>(
+#		<output_var>
+#		<file_hash>
+# )
+#
+MACRO(_CMLIB_CACHE_CONTROL_GET_FILE_HASH_PATH output_var file_hash)
+	SET(${output_var} "${CMLIB_CACHE_CONTROL_META_CONTROL_DIR}/${file_hash}")
 ENDMACRO()
