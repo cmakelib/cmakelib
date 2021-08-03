@@ -344,8 +344,14 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		SET(git_revision "master")
 	ENDIF()
 
+	CMLIB_CACHE_CONTROL_COMPUTE_HASH(
+		URI            "${__URI}"
+		GIT_PATH       "${git_path}"
+		OUTPUT_HASH_VAR hash
+	)
 	IF(CMLIB_DEPENDENCY_CONTROL)
 		CMLIB_CACHE_CONTROL_KEYWORDS_CHECK(
+			HASH              "${hash}"
 			URI               "${__URI}"
 			ORIGINAL_KEYWORDS "${__ORIGINAL_KEYWORDS}"
 			GIT_PATH          "${git_path}"
@@ -358,7 +364,7 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS using ORIGINAL_KEYWORDS as cache keywords for ${__URI}")
 	ELSE()
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS using HASH keywords for ${__URI}")
-		SET(processed_keywords "HASH" "${hash_keyword}")
+		SET(processed_keywords "HASH" "${hash}")
 		SET(${__KEYWORDS_VAR} ${processed_keywords} PARENT_SCOPE)
 	ENDIF()
 ENDFUNCTION()

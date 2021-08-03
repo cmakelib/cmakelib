@@ -60,28 +60,28 @@ ENDFUNCTION()
 # <function>(
 #		HASH              <hash>
 #		ORIGINAL_KEYWORDS <original_keywords>
+#		URI               <uri>
+#		GIT_REVISION      <git_revision>
+#		GIT_PATH          <git_path>
 # )
 #
 FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			GIT_REVISION GIT_PATH URI
+			HASH
 		MULTI_VALUE
 			ORIGINAL_KEYWORDS
 		REQUIRED
 			URI GIT_REVISION GIT_PATH
+			HASH
 		P_ARGN ${ARGN}
 	)
 
 	SET(keywords_delim "${CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM}")
 	STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
 
-	_CMLIB_CACHE_CONTROL_COMPUTE_HASH(
-		URI             "${__URI}"
-		GIT_PATH        "${__GIT_PATH}"
-		OUTPUT_HASH_VAR hash
-	)
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK hash: ${hash}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK hash: ${__HASH}")
 
 	LIST(APPEND control_items
 		URI          "${__URI}"
@@ -93,7 +93,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 		LIST(APPEND control_items KEYWORDS_STRING "${keywords_string}")
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_HAS_CONTROL_FILE(HASH ${hash} OUTPUT_VAR has_control_file)
+	_CMLIB_CACHE_CONTROL_HAS_CONTROL_FILE(HASH ${__HASH} OUTPUT_VAR has_control_file)
 	IF(has_control_file)
 		STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK Cache control file create")
@@ -107,13 +107,13 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 				MESSAGE(FATAL_ERROR "The cache under keywords '${original_keywords_string}' already exist for different remote")
 			ENDIF()
 		ENDIF()
-		_CMLIB_CACHE_CONTROL_CONCRETIZE(HASH ${hash}
+		_CMLIB_CACHE_CONTROL_CONCRETIZE(HASH ${__HASH}
 			ITEMS ${control_items}
 		)
 		RETURN()
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_IS_SAME(HASH ${hash}
+	_CMLIB_CACHE_CONTROL_IS_SAME(HASH ${__HASH}
 		OUTPUT_VAR is_same
 		ITEMS ${control_items}
 	)
@@ -123,13 +123,13 @@ FUNCTION(CMLIB_CACHE_CONTROL_KEYWORDS_CHECK)
 	ENDIF()
 
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${hash}
+		HASH       ${__HASH}
 		KEY        KEYWORDS_STRING
 		OUTPUT_VAR cached_keywords
 	)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK cached_keywords '${cached_keywords}'")
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${hash}
+		HASH       ${__HASH}
 		KEY        GIT_REVISION
 		OUTPUT_VAR cached_branch_name
 	)
@@ -167,7 +167,7 @@ ENDFUNCTION()
 #		[GIT_PATH     <git_path>]
 # )
 #
-FUNCTION(_CMLIB_CACHE_CONTROL_COMPUTE_HASH)
+FUNCTION(CMLIB_CACHE_CONTROL_COMPUTE_HASH)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			URI GIT_PATH
