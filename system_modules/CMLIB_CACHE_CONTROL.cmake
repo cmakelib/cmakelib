@@ -52,13 +52,9 @@ UNSET(d)
 FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
-			GIT_REVISION GIT_PATH URI
-			HASH
-		MULTI_VALUE
-			ORIGINAL_KEYWORDS
+			HASH FILE_HASH
 		REQUIRED
-			URI GIT_REVISION GIT_PATH
-			HASH
+		HASH FILE_HASH
 		P_ARGN ${ARGN}
 	)
 
@@ -70,7 +66,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		FILE(WRITE "${file_hash_path}" ${__HASH})
 		SET(file_hash_hash "${__HASH}")
 	ELSE()
-		FILE(READ "${file_hash_path}" ${file_hash_hash})
+		FILE(READ "${file_hash_path}" file_hash_hash)
 	ENDIF()
 
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
@@ -79,7 +75,33 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		OUTPUT_VAR file_hash
 	)
 	IF(NOT DEFINED file_hash)
+		_CMLIB_CACHE_CONTROL_CONCRETIZE(HASH ${__HASH}
+			ITEMS FILE_HASH "${__FILE_HASH}"
+		)
+		RETURN()
 	ENDIF()
+
+	IF(NOT file_hash STREQUAL file_hash_hash)
+		RETURN()
+	ENDIF()
+
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${__HASH}
+		KEY        URI
+		OUTPUT_VAR cached_uri
+	)
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${__HASH}
+		KEY        GIT_PATH
+		OUTPUT_VAR cached_git_path
+	)
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${__HASH}
+		KEY        GIT_REVISION
+		OUTPUT_VAR cached_git_revision
+	)
+	MESSAGE(FATAL_ERROR "The file ${__URI};${__GIT_PATH};${__GIT_REVISION} is already cached under ${cached_uri};${cached_git_path};${cached_git_revision}")
+
 ENDFUNCTION()
 
 

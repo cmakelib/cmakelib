@@ -158,6 +158,7 @@ FUNCTION(CMLIB_DEPENDENCY)
 			${git_path}
 			${git_revision}
 			OUTPUT_PATH "${download_tmp_dir}"
+			FILE_HASH_OUTPUT_VAR file_hash
 		)
 		IF("${__TYPE}" STREQUAL "DIRECTORY" OR
 				("${__TYPE}" STREQUAL "MODULE" AND IS_DIRECTORY "${download_tmp_dir}"))
@@ -179,6 +180,10 @@ FUNCTION(CMLIB_DEPENDENCY)
 			KEYWORDS ${hash_keyword}
 			PATH "${downloaded_files}"
 			CACHE_PATH_VAR cache_var
+		)
+		CMLIB_CACHE_CONTROL_FILE_HASH_CHECK(
+			HASH ${hash_keyword}
+			FILE_HASH ${file_hash}
 		)
 		IF(NOT DEFINED cache_var)
 			MESSAGE(FATAL_ERROR "Cannot add dependency to cache")
