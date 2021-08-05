@@ -109,6 +109,7 @@ FUNCTION(CMLIB_DEPENDENCY)
 		GIT_PATH          "${__GIT_PATH}"
 		GIT_REVISION      "${__GIT_REVISION}"
 		KEYWORDS_VAR      hash_keyword
+		CONTROL_HASH_VAR  hash
 	)
 
 	CMLIB_CACHE_GET(
@@ -182,7 +183,7 @@ FUNCTION(CMLIB_DEPENDENCY)
 			CACHE_PATH_VAR cache_var
 		)
 		CMLIB_CACHE_CONTROL_FILE_HASH_CHECK(
-			HASH ${hash_keyword}
+			HASH ${hash}
 			FILE_HASH ${file_hash}
 		)
 		IF(NOT DEFINED cache_var)
@@ -317,12 +318,16 @@ ENDFUNCTION()
 #
 # KEYWORDS_VAR is name of the variable which will hold processed keywords
 #
+# CONTROL_HASH_VAR is a name of the variable which will hold
+# computed control HASH.
+#
 # URI, GIT_PATH, GIT_REVISION has same meaning as for
 # CMLIB_DEPENDENCY function.
 #
 # <function>(
 #		URI                <uri>
 #		KEYWORDS_VAR       <keywords_var> M
+#		CONTROL_HASH_VAR   <hash_var>
 #		[GIT_PATH          <git_path>]
 #		[GIT_REVISION      <git_revision>]
 # )
@@ -331,11 +336,12 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			URI GIT_PATH GIT_REVISION
-			KEYWORDS_VAR
+			KEYWORDS_VAR CONTROL_HASH_VAR
 		MULTI_VALUE
 			ORIGINAL_KEYWORDS
 		REQUIRED
 			URI KEYWORDS_VAR
+			CONTROL_HASH_VAR
 		P_ARGN ${ARGN}
 	)
 
@@ -372,6 +378,7 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		SET(processed_keywords "HASH" "${hash}")
 		SET(${__KEYWORDS_VAR} ${processed_keywords} PARENT_SCOPE)
 	ENDIF()
+	SET(${__CONTROL_HASH_VAR} ${hash} PARENT_SCOPE)
 ENDFUNCTION()
 
 

@@ -33,7 +33,7 @@ SET(CMLIB_CACHE_CONTROL_ITEMS_DELIM ","
 
 SET(d ${CMLIB_CACHE_CONTROL_ITEMS_DELIM})
 SET(CMLIB_CACHE_CONTROL_TEMPLATE
-	"<KEYWORDS_STRING>${d}<URI>${d}<GIT_PATH>${d}<GIT_REVISION>${d}<FILE_HASH>"
+	"<KEYWORDS_STRING>${d}<URI>${d}<GIT_PATH>${d}<GIT_REVISION>"
 	CACHE INTERNAL
 	"Template for cache control file.AS delimiter the '${d}' must be used"
 )
@@ -59,31 +59,27 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 	)
 
 	_CMLIB_CACHE_CONTROL_GET_FILE_HASH_PATH(file_hash_path ${__FILE_HASH})
+	_CMLIB_CACHE_CONTROL_GET_FILE_HASH_PATH(control_hash_path ${__HASH})
 	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
 
-	SET(file_hash_hash)
-	IF(NOT EXISTS "${file_hash_path}")
-		FILE(WRITE "${file_hash_path}" ${__HASH})
-		SET(file_hash_hash "${__FILE_HASH}")
-	ELSE()
-		FILE(READ "${file_hash_path}" file_hash_hash)
+	set(cached_file_hash)
+	SET(cached_control_hash)
+
+	IF(EXISTS "${file_hash_path}")
+		FILE(READ "${file_hash_path}" cached_control_hash)
+		IF(cached_control_hash STREQUAL __HASH)
+			RETURN()
+		ENDIF()
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${__HASH}
-		KEY        FILE_HASH
-		OUTPUT_VAR file_hash
-	)
-	IF(NOT DEFINED file_hash)
-		_CMLIB_CACHE_CONTROL_CONCRETIZE(HASH ${__HASH}
-			ITEMS FILE_HASH "${__FILE_HASH}"
-		)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("Filehash for hash ${__HASH} is not defined")
-		RETURN()
+	IF(EXISTS "${control_hash_path}")
+		FILE(READ "${control_hash_path}" cached_file_hash)
+		IF(cached_file_hash STREQUAL __FILE_HASH)
+			RETURN()
+		ENDIF()
 	ENDIF()
 
-	IF(NOT file_hash STREQUAL file_hash_hash)
-		RETURN()
+	IF((NOT cached_control_hash) OR (NOT cached_file_hash))
 	ENDIF()
 
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
@@ -101,7 +97,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		KEY        GIT_REVISION
 		OUTPUT_VAR cached_git_revision
 	)
-	MESSAGE(FATAL_ERROR "The file ${__URI};${__GIT_PATH};${__GIT_REVISION} is already cached under ${cached_uri};${cached_git_path};${cached_git_revision}")
+#MESSAGE(FATAL_ERROR "The file ${__URI};${__GIT_PATH};${__GIT_REVISION} is already cached under ${cached_uri};${cached_git_path};${cached_git_revision}")
 
 ENDFUNCTION()
 
