@@ -250,7 +250,7 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_HTTP)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Download from '${__URI}' failed: ${download_status_list}")
 	ENDIF()
 
-	SET(file_path "${tmp_dir}/${file_name}")
+	SET(file_path "${tmp_dir}/${filename}")
 	IF(__FILE_HASH_OUTPUT_VAR)
 		FILE(SHA3_512 "${file_path}" file_hash)
 		_CMLIB_FILE_STRIP_FILE_HASH(file_hash_stripped ${file_hash})
