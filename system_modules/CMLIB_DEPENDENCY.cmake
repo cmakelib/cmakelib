@@ -26,7 +26,7 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # Download and cache dependency.
 #
 # The remote resource is uniquely identified by combination of all elments from
-# REMOTE_ID_SET = { URI, GIT_PATH, GIT_REVISION } and additionaly by KEYWORDS set.
+# REMOTE_ID_SET = { URI, GIT_PATH } and additionaly by KEYWORDS set.
 #
 # There can be only one combination of REMOTE_ID_SET and KEYWORDS set for each REMOTE_ID_SET.
 # If you try to add same dependency with same REMOTE_ID_SET but under two different KEYWORDS set

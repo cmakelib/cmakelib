@@ -58,6 +58,8 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		P_ARGN ${ARGN}
 	)
 
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("Check file duplicity")
+
 	_CMLIB_CACHE_CONTROL_GET_FILE_HASH_PATH(file_hash_path ${__FILE_HASH})
 	_CMLIB_CACHE_CONTROL_GET_FILE_HASH_PATH(control_hash_path ${__HASH})
 	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
@@ -68,6 +70,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 	IF(EXISTS "${file_hash_path}")
 		FILE(READ "${file_hash_path}" cached_control_hash)
 		IF(cached_control_hash STREQUAL __HASH)
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("Cached control hash is equal to expected one: ${__HASH}")
 			RETURN()
 		ENDIF()
 	ELSE()
@@ -77,6 +80,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 	IF(EXISTS "${control_hash_path}")
 		FILE(READ "${control_hash_path}" cached_file_hash)
 		IF(cached_file_hash STREQUAL __FILE_HASH)
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("Cached file hash is equal to expected one: ${__FILE_HASH}")
 			RETURN()
 		ENDIF()
 	ELSE()
@@ -88,6 +92,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 	ENDIF()
 
 	MESSAGE(FATAL_ERROR "Invalid keys_control entries!")
+
 
 #	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
 #		HASH       ${__HASH}
