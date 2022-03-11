@@ -54,7 +54,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		ONE_VALUE
 			HASH FILE_HASH
 		REQUIRED
-		HASH FILE_HASH
+			HASH FILE_HASH
 		P_ARGN ${ARGN}
 	)
 
@@ -62,7 +62,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 	_CMLIB_CACHE_CONTROL_GET_FILE_HASH_PATH(control_hash_path ${__HASH})
 	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
 
-	set(cached_file_hash)
+	SET(cached_file_hash)
 	SET(cached_control_hash)
 
 	IF(EXISTS "${file_hash_path}")
@@ -70,6 +70,8 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		IF(cached_control_hash STREQUAL __HASH)
 			RETURN()
 		ENDIF()
+	ELSE()
+		FILE(WRITE "${file_hash_path}" ${__HASH})
 	ENDIF()
 
 	IF(EXISTS "${control_hash_path}")
@@ -77,26 +79,31 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		IF(cached_file_hash STREQUAL __FILE_HASH)
 			RETURN()
 		ENDIF()
+	ELSE()
+		FILE(WRITE "${control_hash_path}" ${__FILE_HASH})
 	ENDIF()
 
-	IF((NOT cached_control_hash) OR (NOT cached_file_hash))
+	IF((NOT cached_control_hash) AND (NOT cached_file_hash))
+	RETURn()
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${__HASH}
-		KEY        URI
-		OUTPUT_VAR cached_uri
-	)
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${__HASH}
-		KEY        GIT_PATH
-		OUTPUT_VAR cached_git_path
-	)
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${__HASH}
-		KEY        GIT_REVISION
-		OUTPUT_VAR cached_git_revision
-	)
+	MESSAGE(FATAL_ERROR "Invalid keys_control entries!")
+
+#	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+#		HASH       ${__HASH}
+#		KEY        URI
+#		OUTPUT_VAR cached_uri
+#	)
+#	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+#		HASH       ${__HASH}
+#		KEY        GIT_PATH
+#		OUTPUT_VAR cached_git_path
+#	)
+#	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+#		HASH       ${__HASH}
+#		KEY        GIT_REVISION
+#		OUTPUT_VAR cached_git_revision
+#	)
 #MESSAGE(FATAL_ERROR "The file ${__URI};${__GIT_PATH};${__GIT_REVISION} is already cached under ${cached_uri};${cached_git_path};${cached_git_revision}")
 
 ENDFUNCTION()
@@ -105,6 +112,10 @@ ENDFUNCTION()
 
 ##
 #
+# Function Checks if the combination of KEYWORDS, GIT_REVISION, GIT_PATH and URI
+# is consistent with the cache.
+#
+# HASH represents hash of the static IDs (look at CMLIB_CACHE_CONTROL_COMPUTE_HASH)
 #
 # <function>(
 #		HASH              <hash>
@@ -243,6 +254,7 @@ ENDFUNCTION()
 
 
 ## Helper
+#
 # Check if the control file represented by ITEMS is same
 # as control file represented by HASH.
 #
@@ -295,6 +307,7 @@ ENDFUNCTION()
 
 
 ## Helper
+#
 # Concretize given control file.
 # It generates content by _CMLIB_CACHE_CONTROL_CONSTRUCT_CONTENT
 # and write it to the control file.
@@ -354,6 +367,7 @@ ENDFUNCTION()
 
 
 ## Helper
+#
 # Check if the control file for given HASH exist
 #
 # OUTPUT_VAR is name of the variable where the result will be stored.
@@ -383,6 +397,7 @@ ENDFUNCTION()
 
 
 ## Helper
+#
 # Construct content of the control file.
 #
 # TEMPLATE_INSTANCE is an instance of the CMLIB_CACHE_CONTROL_TEMPLATE
@@ -437,6 +452,7 @@ ENDFUNCTION()
 
 
 ## Helper
+#
 # Creates all needed meda directories
 #
 # <function>(
@@ -454,6 +470,7 @@ ENDFUNCTION()
 
 
 ## Helper
+#
 # It gets value stored under given template key.
 # It reads a control file represented by HASH and extracts
 # value for give template key.
@@ -511,6 +528,7 @@ ENDFUNCTION()
 
 
 ## Helper
+#
 # Returns control file path for given hash
 #
 # <function>(
@@ -525,6 +543,7 @@ ENDMACRO()
 
 
 ## Helper
+#
 # Returns file hash control file path for given file hash
 #
 # <function>(

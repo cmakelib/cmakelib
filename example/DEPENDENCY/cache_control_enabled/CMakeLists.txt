@@ -71,13 +71,13 @@ MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 # obtain only path from cache.
 # The TYPE is not used by CMLIB_DEPENDENCY but cannot be omitted.
 #
-UNSET(output_path)
-CMLIB_DEPENDENCY(
-	KEYWORDS A B DIRECTORY
-	TYPE DIRECTORY
-	OUTPUT_PATH_VAR output_path
-)
-MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+#UNSET(output_path)
+#CMLIB_DEPENDENCY(
+#	KEYWORDS A B DIRECTORY
+#	TYPE DIRECTORY
+#OUTPUT_PATH_VAR output_path
+#)
+#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 
 #
 # Dependency cache control works for every type.

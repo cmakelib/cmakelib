@@ -77,6 +77,9 @@ ENDIF()
 # If URI_TYPE specified the type is not determiner nor validated.
 # (so we can set URI_TYPE whatever we want independent on URI )
 #
+# FILE_HASH_OUTPUT_VAR is a variable where the hash of the file
+# wil be stored.
+#
 # <function>(
 #		URI <uri>
 #		OUTPUT_PATH <output_path>
@@ -84,7 +87,7 @@ ENDIF()
 #		[GIT_PATH <git_path>]
 #		[GIT_REVISION <git_revision>]
 #		[URI_TYPE <GIT|HTTP>]
-#		[FILE_HASH_OUTPUT_VAR <file_has_output_var>]
+#		[FILE_HASH_OUTPUT_VAR <file_hash_output_var>]
 # )
 #
 FUNCTION(CMLIB_FILE_DOWNLOAD)

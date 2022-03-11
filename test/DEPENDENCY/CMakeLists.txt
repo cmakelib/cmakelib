@@ -20,10 +20,10 @@ SET(HTTP_DOWNLOAD_URI_ZIP2      "https://github.com/cmakelib/cmakelib-test/archi
 SET(HTTP_DOWNLOAD_URI_ZIP3      "https://github.com/cmakelib/cmakelib-test/archive/v1.2.0.zip")
 SET(GIT_DOWNLOAD_URI            "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
 SET(GIT_PATH_FILE               "cmake/README.txt")
-SET(GIT_PATH_ZIP                "cmake/dir_a/test.zip")
+SET(GIT_PATH_ZIP                "cmake/same/test.zip")
 SET(GIT_PATH_DIRECTORY          "cmake/")
 SET(GIT_REVISION_PATH_FILE      "cmake-test/test_branch_README.txt")
-SET(GIT_REVISION_PATH_ZIP       "cmake-test/test_branch_dir_a/test.zip")
+SET(GIT_REVISION_PATH_ZIP       "cmake-test/test_branch_same/test.zip")
 SET(GIT_REVISION_PATH_DIRECTORY "cmake-test/")
 SET(GIT_REVISION_NAME           "test-branch")
 
