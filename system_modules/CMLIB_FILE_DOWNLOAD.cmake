@@ -400,7 +400,8 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 	ENDIF()
 
 	IF(__FILE_HASH_OUTPUT_VAR)
-		FILE(SHA3_512 "${archive_path}" file_hash)
+		#FILE(SHA3_512 "${archive_path}" file_hash)
+		_CMLIB_FILE_COMPUTE_HASH(file_hash ${exp_archive_path})
 		_CMLIB_FILE_STRIP_FILE_HASH(file_hash_stripped ${file_hash})
 		SET(${__FILE_HASH_OUTPUT_VAR} ${file_hash_stripped} PARENT_SCOPE)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git file hash: ${file_hash_stripped}:${file_hash}")
@@ -505,6 +506,35 @@ FUNCTION(_CMLIB_FILE_DETERMINE_URI_TYPE var uri)
 		RETURN()
 	ENDIF()
 	MESSAGE(FATAL_ERROR "Invalid URI. Cannot determine URI type")
+ENDFUNCTION()
+
+
+
+## Helper
+#
+#
+#
+FUNCTION(_CMLIB_FILE_COMPUTE_HASH output_var source_path)
+	SET(file_list)
+	IF(IS_DIRECTORY "${source_path}")
+		FILE(GLOB_RECURSE file_list
+			LIST_DIRECTORIES FALSE
+			"${source_path}/*"
+		)
+	ELSE()
+		SET(file_list "${source_path}")
+	ENDIF()
+	LIST(SORT file_list
+		ORDER   ASCENDING
+		CASE    SENSITIVE
+		COMPARE FILE_BASENAME
+	)
+	SET(main_hash)
+	FOREACH(file IN LISTS file_list)
+		FILE(SHA_512 "${file}" file_hash)	
+		STRING(SHA_512 main_hash "${file_hash}")
+	ENDFOREACH()
+	SET(${output_var} ${main_hash} PARENT_SCOPE)
 ENDFUNCTION()
 
 
