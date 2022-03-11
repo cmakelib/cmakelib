@@ -14,10 +14,12 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
 FIND_PACKAGE(CMLIB)
 
 SET(HTTP_DOWNLOAD_URI_ZIP "https://github.com/cmakelib/cmakelib-test/archive/v1.0.0.zip")
-SET(GIT_DOWNLOAD_URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
+SET(GIT_DOWNLOAD_URI "git@gitlab.com:cmakelib/cmakelib-test.git")
 SET(GIT_TEST_BRANCH "test-branch")
 SET(GIT_CMAKE_MODULE_PATH "TEST_MODULE.cmake")
 SET(GIT_CMAKE_MODULE_NAME "TEST_MODULE")
+SET(GIT_CMAKE_SAME_FILE_PATH "cmake/same/same.zip")
+SET(GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH "cmake-test/test_branch_same/same.zip")
 
 
 
@@ -26,13 +28,13 @@ SET(GIT_CMAKE_MODULE_NAME "TEST_MODULE")
 # Cache file under keywords A;B;FILE
 # and store path to the file to 'output_path' variable
 #
-CMLIB_DEPENDENCY(
-	KEYWORDS A B FILE
-	TYPE FILE
-	URI "${HTTP_DOWNLOAD_URI_ZIP}"
-	OUTPUT_PATH_VAR output_path
-)
-MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+#CMLIB_DEPENDENCY(
+#	KEYWORDS A B FILE
+#	TYPE FILE
+#	URI "${HTTP_DOWNLOAD_URI_ZIP}"
+#	OUTPUT_PATH_VAR output_path
+#)
+#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 
 #
 # If we add another cache entry with same remote but different
@@ -52,15 +54,15 @@ MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 # Download whole git repository and cache result.
 # Return directory path in 'output_path' variable
 #
-UNSET(output_path)
-CMLIB_DEPENDENCY(
-	KEYWORDS A B DIRECTORY
-	TYPE DIRECTORY
-	URI "${GIT_DOWNLOAD_URI}"
-	GIT_PATH "./"
-	OUTPUT_PATH_VAR output_path
-)
-MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+#UNSET(output_path)
+#CMLIB_DEPENDENCY(
+#	KEYWORDS A B DIRECTORY
+#	TYPE DIRECTORY
+#	URI "${GIT_DOWNLOAD_URI}"
+#	GIT_PATH "./"
+#	OUTPUT_PATH_VAR output_path
+#)
+#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 
 #
 # Download "./cmake" directory from given git repository.
@@ -104,40 +106,67 @@ MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 # This will proceed because the remote is different
 # because we download resource from branch and git path.
 #
+#UNSET(output_path)
+#SET(_tmp_cmake_module_path ${CMAKE_MODULE_PATH})
+#CMLIB_DEPENDENCY(
+#	KEYWORDS A B TESTMODULE
+#	TYPE MODULE
+#	URI        "${GIT_DOWNLOAD_URI}"
+#	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
+#	GIT_REVISION "${GIT_TEST_BRANCH}"
+#	OUTPUT_PATH_VAR output_path
+#)
+#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+#
+#INCLUDE(${GIT_CMAKE_MODULE_NAME})
+#TEST_MODULE_MACRO()
+#
+##
+## Download file as MODULE.
+## If we do not specify GIT_REVISION the master branch is taken.
+##
+#SET(CMAKE_MODULE_PATH "${_tmp_cmake_module_path}")
+#CMLIB_DEPENDENCY(
+#	KEYWORDS A B MASTERTESTMODULE
+#	TYPE MODULE
+#	URI        "${GIT_DOWNLOAD_URI}"
+#	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
+#	OUTPUT_PATH_VAR output_path
+#)
+#
+##
+## output_path is not modified for type "MODULE".
+##
+#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+#
+#
+#INCLUDE(${GIT_CMAKE_MODULE_NAME})
+#TEST_MODULE_MACRO()
+#
+#UNSET(output_path)
+
+
 UNSET(output_path)
-SET(_tmp_cmake_module_path ${CMAKE_MODULE_PATH})
 CMLIB_DEPENDENCY(
-	KEYWORDS A B TESTMODULE
-	TYPE MODULE
-	URI        "${GIT_DOWNLOAD_URI}"
-	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
-	GIT_REVISION "${GIT_TEST_BRANCH}"
+	KEYWORDS        A B TESTMODULE
+	TYPE            FILE
+	URI             "${GIT_DOWNLOAD_URI}"
+	GIT_PATH        "${GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH}"
+	GIT_REVISION    "${GIT_TEST_BRANCH}"
 	OUTPUT_PATH_VAR output_path
 )
 MESSAGE(STATUS "DEPENDENCY: ${output_path}")
-
-INCLUDE(${GIT_CMAKE_MODULE_NAME})
-TEST_MODULE_MACRO()
-
-#
-# Download file as MODULE.
-# If we do not specify GIT_REVISION the master branch is taken.
-#
-SET(CMAKE_MODULE_PATH "${_tmp_cmake_module_path}")
-CMLIB_DEPENDENCY(
-	KEYWORDS A B MASTERTESTMODULE
-	TYPE MODULE
-	URI        "${GIT_DOWNLOAD_URI}"
-	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
-	OUTPUT_PATH_VAR output_path
-)
-
-#
-# output_path is not modified for type "MODULE".
-#
-MESSAGE(STATUS "DEPENDENCY: ${output_path}")
-
-INCLUDE(${GIT_CMAKE_MODULE_NAME})
-TEST_MODULE_MACRO()
+FILE(SHA3_512 "${output_path}" file_hash)
+MESSAGE(STATUS "HASH: ${file_hash}")
 
 UNSET(output_path)
+CMLIB_DEPENDENCY(
+	KEYWORDS A B MASTERTESTMODULESAME
+	TYPE FILE
+	URI        "${GIT_DOWNLOAD_URI}"
+	GIT_PATH   "${GIT_CMAKE_SAME_FILE_PATH}"
+	OUTPUT_PATH_VAR output_path
+)
+MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+FILE(SHA3_512 "${output_path}" file_hash)
+MESSAGE(STATUS "HASH: ${file_hash}")
