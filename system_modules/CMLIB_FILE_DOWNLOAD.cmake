@@ -403,7 +403,7 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 		FILE(SHA3_512 "${archive_path}" file_hash)
 		_CMLIB_FILE_STRIP_FILE_HASH(file_hash_stripped ${file_hash})
 		SET(${__FILE_HASH_OUTPUT_VAR} ${file_hash_stripped} PARENT_SCOPE)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git file hash: ${file_hash_stripped}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Git file hash: ${file_hash_stripped}:${file_hash}")
 	ENDIF()
 
 	FILE(REMOVE ${archive_path})

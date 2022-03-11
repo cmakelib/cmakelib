@@ -84,7 +84,7 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 	ENDIF()
 
 	IF((NOT cached_control_hash) AND (NOT cached_file_hash))
-	RETURn()
+		RETURN()
 	ENDIF()
 
 	MESSAGE(FATAL_ERROR "Invalid keys_control entries!")
