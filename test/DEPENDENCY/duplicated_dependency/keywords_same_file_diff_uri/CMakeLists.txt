@@ -2,6 +2,7 @@
 #
 # Check if DEPENDENCY emit an error if we
 # try to add same file with different URI
+# under explicit deffirent keyword sets
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
@@ -17,6 +18,7 @@ SET(GIT_DOWNLOAD_URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
 
 
 CMLIB_DEPENDENCY(
+	KEYWORDS A B C
 	TYPE FILE
 	URI "${GIT_DOWNLOAD_URI}"
 	GIT_REVISION "test-branch"
@@ -25,6 +27,7 @@ CMLIB_DEPENDENCY(
 )
 
 CMLIB_DEPENDENCY(
+	KEYWORDS A B XYZ
 	TYPE FILE
 	URI "${GIT_DOWNLOAD_URI}"
 	GIT_REVISION "master"

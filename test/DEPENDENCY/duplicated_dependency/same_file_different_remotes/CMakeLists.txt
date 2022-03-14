@@ -1,5 +1,9 @@
 ## Main
 #
+# Check if DEPENDENCY emit and error if
+# we try to add same file from defferent remotes
+#
+# The test must FAIL.
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)

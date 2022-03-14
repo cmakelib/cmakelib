@@ -177,14 +177,14 @@ FUNCTION(CMLIB_DEPENDENCY)
 			ENDIF()
 		ENDIF()
 
-		CMLIB_CACHE_ADD(
-			KEYWORDS ${hash_keyword}
-			PATH "${downloaded_files}"
-			CACHE_PATH_VAR cache_var
-		)
 		CMLIB_CACHE_CONTROL_FILE_HASH_CHECK(
-			HASH ${hash}
+			HASH      ${hash}
 			FILE_HASH ${file_hash}
+		)
+		CMLIB_CACHE_ADD(
+			KEYWORDS       ${hash_keyword}
+			PATH           "${downloaded_files}"
+			CACHE_PATH_VAR cache_var
 		)
 		IF(NOT DEFINED cache_var)
 			MESSAGE(FATAL_ERROR "Cannot add dependency to cache")

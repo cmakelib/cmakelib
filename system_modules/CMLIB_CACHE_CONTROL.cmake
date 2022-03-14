@@ -21,7 +21,7 @@ SET(CMLIB_CACHE_CONTROL_META_CONTROL_DIR "${CMLIB_REQUIRED_ENV_TMP_PATH}/keys_co
 
 # Value of the KEYDELIM var is used in Cmake regex
 # Please avaid using special regex characters
-SET(CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM "/"
+SET(CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM "|"
 	CACHE INTERNAL
 	"Delimiter for keywords in control file. Do NOT use ';'"
 )
@@ -43,6 +43,7 @@ UNSET(d)
 
 ##
 #
+# Check if the given hash 
 #
 # <function>(
 #		HASH      <hash>
@@ -64,52 +65,57 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 	_CMLIB_CACHE_CONTROL_GET_FILE_HASH_PATH(control_hash_path ${__HASH})
 	_CMLIB_CACHE_CONTROL_CREATE_ALL_META_DIRS()
 
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("FILE HASH PATH: ${file_hash_path}")
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("CONTROL HASH PATH: ${control_hash_path}")
+
 	SET(cached_file_hash)
 	SET(cached_control_hash)
 
-	IF(EXISTS "${file_hash_path}")
+	IF(EXISTS "${file_hash_path}" AND EXISTS "${control_hash_path}")
 		FILE(READ "${file_hash_path}" cached_control_hash)
-		IF(cached_control_hash STREQUAL __HASH)
+		FILE(READ "${control_hash_path}" cached_file_hash)
+		IF((cached_control_hash STREQUAL __HASH) AND
+				(cached_file_hash STREQUAL __FILE_HASH))
 			_CMLIB_LIBRARY_DEBUG_MESSAGE("Cached control hash is equal to expected one: ${__HASH}")
 			RETURN()
 		ENDIF()
-	ELSE()
+	ELSEIF(NOT (EXISTS "${file_hash_path}" AND EXISTS "${control_hash_path}"))
 		FILE(WRITE "${file_hash_path}" ${__HASH})
-	ENDIF()
-
-	IF(EXISTS "${control_hash_path}")
-		FILE(READ "${control_hash_path}" cached_file_hash)
-		IF(cached_file_hash STREQUAL __FILE_HASH)
-			_CMLIB_LIBRARY_DEBUG_MESSAGE("Cached file hash is equal to expected one: ${__FILE_HASH}")
-			RETURN()
-		ENDIF()
-	ELSE()
 		FILE(WRITE "${control_hash_path}" ${__FILE_HASH})
-	ENDIF()
-
-	IF((NOT cached_control_hash) AND (NOT cached_file_hash))
 		RETURN()
 	ENDIF()
 
-	MESSAGE(FATAL_ERROR "Invalid keys_control entries!")
-
-
-#	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-#		HASH       ${__HASH}
-#		KEY        URI
-#		OUTPUT_VAR cached_uri
-#	)
-#	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-#		HASH       ${__HASH}
-#		KEY        GIT_PATH
-#		OUTPUT_VAR cached_git_path
-#	)
-#	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-#		HASH       ${__HASH}
-#		KEY        GIT_REVISION
-#		OUTPUT_VAR cached_git_revision
-#	)
-#MESSAGE(FATAL_ERROR "The file ${__URI};${__GIT_PATH};${__GIT_REVISION} is already cached under ${cached_uri};${cached_git_path};${cached_git_revision}")
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${cached_control_hash}
+		KEY        URI
+		OUTPUT_VAR cached_uri
+	)
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${cached_control_hash}
+		KEY        GIT_PATH
+		OUTPUT_VAR cached_git_path
+	)
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${cached_control_hash}
+		KEY        GIT_REVISION
+		OUTPUT_VAR cached_git_revision
+	)
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${__HASH}
+		KEY        URI
+		OUTPUT_VAR uri
+	)
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${__HASH}
+		KEY        GIT_PATH
+		OUTPUT_VAR git_path
+	)
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${__HASH}
+		KEY        GIT_REVISION
+		OUTPUT_VAR git_revision
+	)
+	MESSAGE(FATAL_ERROR "Cache entry ${uri};${git_path};${git_revision} is already cached under ${cached_uri};${cached_git_path};${cached_git_revision}")
 
 ENDFUNCTION()
 

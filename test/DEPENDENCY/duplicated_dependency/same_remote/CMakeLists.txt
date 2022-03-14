@@ -1,7 +1,7 @@
 ## Main
 #
 # Check if DEPENDENCY emit an error if we
-# try to add different remotes under same keyword set
+# try to add different remotes without explicit keywords
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
