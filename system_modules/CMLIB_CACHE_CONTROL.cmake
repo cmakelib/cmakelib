@@ -85,21 +85,10 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		RETURN()
 	ENDIF()
 
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${cached_control_hash}
-		KEY        URI
-		OUTPUT_VAR cached_uri
-	)
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${cached_control_hash}
-		KEY        GIT_PATH
-		OUTPUT_VAR cached_git_path
-	)
-	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
-		HASH       ${cached_control_hash}
-		KEY        GIT_REVISION
-		OUTPUT_VAR cached_git_revision
-	)
+	IF(EXISTS "${file_hash_path}" AND NOT EXISTS "${control_hash_path}")
+		FILE(READ "${file_hash_path}" cached_control_hash)
+	ENDIF()
+
 	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
 		HASH       ${__HASH}
 		KEY        URI
@@ -115,8 +104,37 @@ FUNCTION(CMLIB_CACHE_CONTROL_FILE_HASH_CHECK)
 		KEY        GIT_REVISION
 		OUTPUT_VAR git_revision
 	)
-	MESSAGE(FATAL_ERROR "Cache entry ${uri};${git_path};${git_revision} is already cached under ${cached_uri};${cached_git_path};${cached_git_revision}")
+	_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+		HASH       ${__HASH}
+		KEY        KEYWORDS_STRING
+		OUTPUT_VAR keywords
+	)
 
+	IF(cached_control_hash)
+		_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+			HASH       ${cached_control_hash}
+			KEY        URI
+			OUTPUT_VAR cached_uri
+		)
+		_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+			HASH       ${cached_control_hash}
+			KEY        GIT_PATH
+			OUTPUT_VAR cached_git_path
+		)
+		_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+			HASH       ${cached_control_hash}
+			KEY        GIT_REVISION
+			OUTPUT_VAR cached_git_revision
+		)
+		_CMLIB_CACHE_CONTROL_GET_TEMPLATE_INSTANCE_ITEM(
+			HASH       ${cached_control_hash}
+			KEY        KEYWORDS_STRING
+			OUTPUT_VAR cached_keywords
+		)
+		MESSAGE(FATAL_ERROR "The file represented by ${uri};${git_path};${git_revision};${keywords} is already cached under ${cached_uri};${cached_git_path};${cached_git_revision};${cached_keywords}")
+	ELSE()
+		MESSAGE(FATAL_ERROR "Try to cache file that is already cached under ${uri};${git_path};${git_revision}")
+	ENDIF()
 ENDFUNCTION()
 
 
