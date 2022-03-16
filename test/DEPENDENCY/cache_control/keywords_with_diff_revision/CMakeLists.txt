@@ -4,6 +4,8 @@
 # we try to add same file with same KEYWORDS
 # and different GIT_REVISION
 #
+# TEST must FAIL
+#
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
 	CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
