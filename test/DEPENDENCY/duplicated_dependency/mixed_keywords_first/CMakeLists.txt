@@ -2,7 +2,7 @@
 #
 # Check if DEPENDENCY emit and error if
 # we try to add same resurce as a DEPENDENCY
-# under multiple keywords
+# under multiple keywords and remote.
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)

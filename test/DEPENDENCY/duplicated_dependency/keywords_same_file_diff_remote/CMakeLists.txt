@@ -2,7 +2,7 @@
 #
 # Check if DEPENDENCY emit an error if we
 # try to add same file with different URI
-# under explicit deffirent keyword sets
+# under explicit diffirent keyword sets.
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
@@ -13,7 +13,8 @@ ENDIF()
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../")
 FIND_PACKAGE(CMLIB)
 
-SET(GIT_DOWNLOAD_URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
+SET(GIT_DOWNLOAD_URI  "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
+SET(GIT_DOWNLOAD_URI2 "https://github.com/cmakelib/cmakelib-test.git")
 
 
 
@@ -21,7 +22,7 @@ CMLIB_DEPENDENCY(
 	KEYWORDS A B C
 	TYPE FILE
 	URI "${GIT_DOWNLOAD_URI}"
-	GIT_REVISION "test-branch"
+	GIT_REVISION "master"
 	GIT_PATH     "TEST_MODULE.cmake"
 	OUTPUT_PATH_VAR output_path
 )
@@ -29,7 +30,7 @@ CMLIB_DEPENDENCY(
 CMLIB_DEPENDENCY(
 	KEYWORDS A B XYZ
 	TYPE FILE
-	URI "${GIT_DOWNLOAD_URI}"
+	URI "${GIT_DOWNLOAD_URI2}"
 	GIT_REVISION "master"
 	GIT_PATH     "TEST_MODULE.cmake"
 	OUTPUT_PATH_VAR output_path

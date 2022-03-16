@@ -1,8 +1,8 @@
 ## Main
 #
 # Check if DEPENDENCY emit and error if
-# we try to add same resurce under explicit kyewornd and
-# with explicit keywords
+# we try to add same resurce under explicit keywords and
+# without explicit keywords
 #
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
