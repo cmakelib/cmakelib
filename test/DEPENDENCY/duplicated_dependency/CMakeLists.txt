@@ -14,7 +14,7 @@ FIND_PACKAGE(CMLIB)
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../TEST.cmake")
 
-SET(keywords_same_file_diff_uri_expected_errmsg
+SET(keywords_same_file_diff_remote_expected_errmsg
 	"The file represented by\n *https://github.com/cmakelib/cmakelib-test.git;TEST_MODULE.cmake;master;A;B;XYZ\n *is already cached under\n *git@github.com:cmakelib/cmakelib-test.git;TEST_MODULE.cmake;master;A;B;C")
 
 SET(keywords_expected_errmsg
@@ -32,12 +32,15 @@ SET(keywords_with_diff_remote_expected_msg
 SET(keywords_with_diff_revision_expected_msg 
 	"DEPENDENCY version mishmash - different versions of the same file\n *'test-branch' vs 'master'")
 
-SET(same_remote_without_keywords_expected_msg 
+SET(same_file_diff_revision_expected_msg 
 	"DEPENDENCY version mishmash - different versions of the same file\n *'test-branch' vs 'master'")
 
+SET(same_file_diff_remotes_expected_msg 
+	"The file represented by\n *https://gitlab.com/cmakelib/cmakelib-test.git;TEST_MODULE.cmake;master; is\n *already cached under\n *git@github.com:cmakelib/cmakelib-test.git;TEST_MODULE.cmake;master;")
 
-TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/keywords_same_file_diff_uri"
-	"${keywords_same_file_diff_uri_expected_errmsgg}")
+
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/keywords_same_file_diff_remote"
+	"${keywords_same_file_diff_remote_expected_errmsgg}")
 TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/keywords"
 	"${keywords_expected_errmsg}")
 TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/mixed_keywords_first"
@@ -48,5 +51,7 @@ TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/keywords_with_diff_remote"
 	"${keywords_with_diff_remote_expected_errmsg}")
 TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/keywords_with_diff_revision"
 	"${keywords_with_diff_revision_expected_errmsg}")
-TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/same_remote_without_keywords"
-	"${same_remote_without_keywords_expected_msg}")
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/same_file_diff_revision"
+	"${same_file_diff_revision_expected_msg}")
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/same_file_diff_remotes"
+	"${same_file_diff_remotes_expected_msg}")

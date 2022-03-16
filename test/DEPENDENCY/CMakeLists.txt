@@ -20,10 +20,10 @@ SET(HTTP_DOWNLOAD_URI_ZIP2      "https://github.com/cmakelib/cmakelib-test/archi
 SET(HTTP_DOWNLOAD_URI_ZIP3      "https://github.com/cmakelib/cmakelib-test/archive/v1.2.0.zip")
 SET(GIT_DOWNLOAD_URI            "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
 SET(GIT_PATH_FILE               "cmake/README.txt")
-SET(GIT_PATH_ZIP                "cmake/same/test.zip")
+SET(GIT_PATH_ZIP                "cmake/same/same.zip")
 SET(GIT_PATH_DIRECTORY          "cmake/")
 SET(GIT_REVISION_PATH_FILE      "cmake-test/test_branch_README.txt")
-SET(GIT_REVISION_PATH_ZIP       "cmake-test/test_branch_same/test.zip")
+SET(GIT_REVISION_PATH_ZIP       "cmake-test/test_branch_same/same.zip")
 SET(GIT_REVISION_PATH_DIRECTORY "cmake-test/")
 SET(GIT_REVISION_NAME           "test-branch")
 
@@ -118,22 +118,6 @@ FUNCTION(DEPENDENCY_GIT_DOWNLOAD test_branch_files)
 	TEST_MODULE_MACRO()
 	SET(CMAKE_MODULE_PATH ${_tmp_cmake_path})
 
-	SET(test_output_path "testtest")
-	CMLIB_DEPENDENCY(
-		KEYWORDS GIT MODULE TESTBRANCH
-		TYPE MODULE
-		URI "${GIT_DOWNLOAD_URI}"
-		GIT_PATH "TEST_MODULE.cmake"
-		GIT_REVISION "${GIT_REVISION_NAME}"
-		OUTPUT_PATH_VAR test_output_path
-	)
-	IF(NOT ("${test_output_path}" STREQUAL "testtest"))
-		MESSAGE(FATAL_ERROR "test_output_var modified! ${test_output_path}")
-	ENDIF()
-	INCLUDE(TEST_MODULE)
-	TEST_MODULE_MACRO()
-	SET(CMAKE_MODULE_PATH ${_tmp_cmake_path})
-
 #
 # These tests does not pass in Github actions.
 # I really do not known why
@@ -186,8 +170,8 @@ ENDFUNCTION()
 
 DEPENDENCY_HTTP_DOWNLOAD()
 DEPENDENCY_GIT_DOWNLOAD(ON)
-DEPENDENCY_GIT_DOWNLOAD(OFF)
-DEPENDENCY_INVALID_ARGUMENTS()
-DEPENDENCY_CHECK_CACHE_PATH_WITHOUT_KEYWORDS()
+#DEPENDENCY_GIT_DOWNLOAD(OFF)
+#DEPENDENCY_INVALID_ARGUMENTS()
+#DEPENDENCY_CHECK_CACHE_PATH_WITHOUT_KEYWORDS()
 
-TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/duplicated_dependency")
+#TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/duplicated_dependency")
