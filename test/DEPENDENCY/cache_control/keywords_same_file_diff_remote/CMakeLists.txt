@@ -13,7 +13,7 @@ ENDIF()
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../")
 FIND_PACKAGE(CMLIB)
 
-SET(GIT_DOWNLOAD_URI  "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
+SET(GIT_DOWNLOAD_URI  "git@github.com:cmakelib/cmakelib-test.git")
 SET(GIT_DOWNLOAD_URI2 "https://github.com/cmakelib/cmakelib-test.git")
 
 
