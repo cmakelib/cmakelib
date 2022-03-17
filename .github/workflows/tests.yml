@@ -38,12 +38,19 @@ jobs:
     container:
         image: cmakelib/build-linux:${{ matrix.image }}
     steps:
-      - name: Install SSH key
+      - name: Install SSH key GITLAB
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.GITLAB }}
           name: id_rsa # optional
           known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
+      - name: Install SSH key GITHUB
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.GITHUB }}
+          name: id_rsa # optional
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
