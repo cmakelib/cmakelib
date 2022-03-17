@@ -28,13 +28,13 @@ SET(GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH "cmake-test/test_branch_same/same.zip")
 # Cache file under keywords A;B;FILE
 # and store path to the file to 'output_path' variable
 #
-#CMLIB_DEPENDENCY(
-#	KEYWORDS A B FILE
-#	TYPE FILE
-#	URI "${HTTP_DOWNLOAD_URI_ZIP}"
-#	OUTPUT_PATH_VAR output_path
-#)
-#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+CMLIB_DEPENDENCY(
+	KEYWORDS A B FILE
+	TYPE FILE
+	URI "${HTTP_DOWNLOAD_URI_ZIP}"
+	OUTPUT_PATH_VAR output_path
+)
+MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 
 #
 # If we add another cache entry with same remote but different
@@ -54,15 +54,15 @@ SET(GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH "cmake-test/test_branch_same/same.zip")
 # Download whole git repository and cache result.
 # Return directory path in 'output_path' variable
 #
-#UNSET(output_path)
-#CMLIB_DEPENDENCY(
-#	KEYWORDS A B DIRECTORY
-#	TYPE DIRECTORY
-#	URI "${GIT_DOWNLOAD_URI}"
-#	GIT_PATH "./"
-#	OUTPUT_PATH_VAR output_path
-#)
-#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+UNSET(output_path)
+CMLIB_DEPENDENCY(
+	KEYWORDS A B DIRECTORY
+	TYPE DIRECTORY
+	URI "${GIT_DOWNLOAD_URI}"
+	GIT_PATH "./"
+	OUTPUT_PATH_VAR output_path
+)
+MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 
 #
 # Download "./cmake" directory from given git repository.
@@ -73,13 +73,13 @@ SET(GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH "cmake-test/test_branch_same/same.zip")
 # obtain only path from cache.
 # The TYPE is not used by CMLIB_DEPENDENCY but cannot be omitted.
 #
-#UNSET(output_path)
-#CMLIB_DEPENDENCY(
-#	KEYWORDS A B DIRECTORY
-#	TYPE DIRECTORY
-#OUTPUT_PATH_VAR output_path
-#)
-#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+UNSET(output_path)
+CMLIB_DEPENDENCY(
+	KEYWORDS A B DIRECTORY
+	TYPE DIRECTORY
+	OUTPUT_PATH_VAR output_path
+)
+MESSAGE(STATUS "DEPENDENCY: ${output_path}")
 
 #
 # Dependency cache control works for every type.
@@ -106,25 +106,26 @@ SET(GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH "cmake-test/test_branch_same/same.zip")
 # This will proceed because the remote is different
 # because we download resource from branch and git path.
 #
-#UNSET(output_path)
-#SET(_tmp_cmake_module_path ${CMAKE_MODULE_PATH})
-#CMLIB_DEPENDENCY(
-#	KEYWORDS A B TESTMODULE
-#	TYPE MODULE
-#	URI        "${GIT_DOWNLOAD_URI}"
-#	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
-#	GIT_REVISION "${GIT_TEST_BRANCH}"
-#	OUTPUT_PATH_VAR output_path
-#)
-#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+UNSET(output_path)
+SET(_tmp_cmake_module_path ${CMAKE_MODULE_PATH})
+CMLIB_DEPENDENCY(
+	KEYWORDS A B TESTMODULE
+	TYPE MODULE
+	URI        "${GIT_DOWNLOAD_URI}"
+	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
+	GIT_REVISION "${GIT_TEST_BRANCH}"
+	OUTPUT_PATH_VAR output_path
+)
+MESSAGE(STATUS "DEPENDENCY: ${output_path}")
+
+INCLUDE(${GIT_CMAKE_MODULE_NAME})
+TEST_MODULE_MACRO()
+
 #
-#INCLUDE(${GIT_CMAKE_MODULE_NAME})
-#TEST_MODULE_MACRO()
+# Download file as MODULE.
+# If we do not specify GIT_REVISION the master branch is taken.
+# It fails because we already have the file cached!
 #
-##
-## Download file as MODULE.
-## If we do not specify GIT_REVISION the master branch is taken.
-##
 #SET(CMAKE_MODULE_PATH "${_tmp_cmake_module_path}")
 #CMLIB_DEPENDENCY(
 #	KEYWORDS A B MASTERTESTMODULE
@@ -133,22 +134,9 @@ SET(GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH "cmake-test/test_branch_same/same.zip")
 #	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
 #	OUTPUT_PATH_VAR output_path
 #)
-#
-##
-## output_path is not modified for type "MODULE".
-##
-#MESSAGE(STATUS "DEPENDENCY: ${output_path}")
-#
-#
-#INCLUDE(${GIT_CMAKE_MODULE_NAME})
-#TEST_MODULE_MACRO()
-#
-#UNSET(output_path)
-
 
 UNSET(output_path)
 CMLIB_DEPENDENCY(
-	KEYWORDS        A B TESTMODULE
 	TYPE            FILE
 	URI             "${GIT_DOWNLOAD_URI}"
 	GIT_PATH        "${GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH}"
@@ -156,17 +144,3 @@ CMLIB_DEPENDENCY(
 	OUTPUT_PATH_VAR output_path
 )
 MESSAGE(STATUS "DEPENDENCY: ${output_path}")
-FILE(SHA3_512 "${output_path}" file_hash)
-MESSAGE(STATUS "HASH: ${file_hash}")
-
-UNSET(output_path)
-CMLIB_DEPENDENCY(
-	KEYWORDS A B MASTERTESTMODULESAME
-	TYPE FILE
-	URI        "${GIT_DOWNLOAD_URI}"
-	GIT_PATH   "${GIT_CMAKE_SAME_FILE_PATH}"
-	OUTPUT_PATH_VAR output_path
-)
-MESSAGE(STATUS "DEPENDENCY: ${output_path}")
-FILE(SHA3_512 "${output_path}" file_hash)
-MESSAGE(STATUS "HASH: ${file_hash}")
