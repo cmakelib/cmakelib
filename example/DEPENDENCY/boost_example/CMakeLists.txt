@@ -23,7 +23,7 @@ FUNCTION(GET_BOOST_URI version output_var)
 	SET(system_name)
 	IF("${os_name}" STREQUAL "Linux")
 		FIND_PROGRAM(lsb_release lsb_release REQUIRED)
-		EXECUTE_PROCESS(COMMAND "${lsb_release}" -rs
+		EXECUTE_PROCESS(COMMAND "${lsb_release}" -cs
 			OUTPUT_VARIABLE _os_codename
 			OUTPUT_STRIP_TRAILING_WHITESPACE
 		)
@@ -77,7 +77,7 @@ ENDFUNCTION()
 
 
 
-SET(BOOST_VERSION 1.72.0)
+SET(BOOST_VERSION 1.78.0)
 
 DOWNLOAD_BOOST(${BOOST_VERSION} BOOST_ROOT)
 
