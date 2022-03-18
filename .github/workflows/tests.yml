@@ -21,9 +21,9 @@ jobs:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.GITLAB }}
+          key: ${{ secrets.SSHKEY }}
           name: id_rsa # optional
-          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
@@ -41,9 +41,9 @@ jobs:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.GITLAB }}
+          key: ${{ secrets.SSHKEY }}
           name: id_rsa # optional
-          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
@@ -56,9 +56,9 @@ jobs:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.GITLAB }}
+          key: ${{ secrets.SSHKEY }}
           name: id_rsa # optional
-          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
@@ -70,9 +70,9 @@ jobs:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.GITLAB }}
+          key: ${{ secrets.SSHKEY }}
           name: id_rsa # optional
-          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
@@ -84,9 +84,9 @@ jobs:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.GITLAB }}
+          key: ${{ secrets.SSHKEY }}
           name: id_rsa # optional
-          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
@@ -98,9 +98,9 @@ jobs:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
-          key: ${{ secrets.GITLAB }}
+          key: ${{ secrets.SSHKEY }}
           name: id_rsa # optional
-          known_hosts: ${{ secrets.GITLAB_KNOWN_HOSTS }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
       - name: Run tests
