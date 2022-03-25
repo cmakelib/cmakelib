@@ -174,7 +174,7 @@ FUNCTION(CMLIB_DEPENDENCY)
 			FILE(GLOB downloaded_files "${download_tmp_dir}/*")
 			LIST(LENGTH downloaded_files downloaded_files_size)
 			IF(NOT (downloaded_files_size EQUAL 1))
-				MESSAGE(FATAL_ERROR "Download files problem")
+				MESSAGE(FATAL_ERROR "Download files problem - ${__URI}")
 			ENDIF()
 		ENDIF()
 
