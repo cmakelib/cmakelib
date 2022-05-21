@@ -16,7 +16,7 @@ jobs:
         image: ["latest-debian-buster", "latest-ubuntu-2004", "latest-ubuntu-1804"]
     runs-on: ubuntu-latest
     container:
-        image: cmakelib/build-linux:${{ matrix.image }}
+        image: koudis/cmakelib-build-linux:${{ matrix.image }}
     steps:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -33,10 +33,10 @@ jobs:
   test_linux_script:
     strategy:
       matrix:
-        image: ["latest-debian-buster", "latest-ubuntu-2004", "latest-ubuntu-1804"]
+        image: ["latest-debian-buster", "latest-ubuntu-2004", "latest-ubuntu-1804" ]
     runs-on: ubuntu-latest
     container:
-        image: cmakelib/build-linux:${{ matrix.image }}
+        image: koudis/cmakelib-build-linux:${{ matrix.image }}
     steps:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
