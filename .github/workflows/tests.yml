@@ -29,7 +29,7 @@ jobs:
       - name: Run tests
         run: |
             git config --global --add safe.directory "$(pwd)"
-            git remote set-url origin "${{ env.GITHUB_SERVER_URL }}/${{ github.repository }}"
+            git remote set-url origin "${{ github.server_url }}/${{ github.repository }}"
             cd test/ && cmake -DCMLIB_DEBUG=ON .
             
   test_linux_script:
@@ -51,7 +51,7 @@ jobs:
       - name: Run tests
         run: |
             git config --global --add safe.directory "$(pwd)"
-            git remote set-url origin "${{ env.GITHUB_SERVER_URL }}/${{ github.repository }}"
+            git remote set-url origin "${{ github.server_url }}/${{ github.repository }}"
             cd test/ && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
 
   test_macos_11:
