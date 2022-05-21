@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Add origin
         run: |
-            git remote add origin ${{ github.repository }}
+            git remote add origin ${{ env.GITHUB_SERVER_URL }}/${{ github.repository }}
       - name: Run tests
         run: |
             cd test/ && cmake -DCMLIB_DEBUG=ON .
@@ -51,7 +51,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Add origin
         run: |
-            git remote add origin ${{ github.repository }}
+            git remote add origin ${{ env.GITHUB_SERVER_URL }}/${{ github.repository }}
       - name: Run tests
         run: |
             cd test/ && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
