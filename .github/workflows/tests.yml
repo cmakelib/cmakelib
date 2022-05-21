@@ -28,8 +28,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run tests
         run: |
-            git config --global --add safe.directory /__w/cmakelib/cmakelib
-            git remote add origin "https://github.com/cmakelib/cmakelib.git"
+            git remote set-url origin "https://github.com/cmakelib/cmakelib.git"
             cd test/ && cmake -DCMLIB_DEBUG=ON .
             
   test_linux_script:
@@ -50,8 +49,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Run tests
         run: |
-            git config --global --add safe.directory /__w/cmakelib/cmakelib
-            git remote add origin "https://github.com/cmakelib/cmakelib.git"
+            git remote set-url origin "https://github.com/cmakelib/cmakelib.git"
             cd test/ && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
 
   test_macos_11:
