@@ -321,8 +321,8 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 			ERROR_VARIABLE    error_git_message # discard STDERR
 			WORKING_DIRECTORY "${tmp_dir}"
 		)
-		MESSAGE("download output: ${output_git_message}")
-		MESSAGE("download error: ${error_git_message}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("download output: ${output_git_message}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("download error: ${error_git_message}")
 	ENDIF()
 
 	IF(NOT file_not_found EQUAL 0)
@@ -344,8 +344,8 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 			RESULT_VARIABLE   git_not_found
 			WORKING_DIRECTORY "${tmp_dir}"
 		)
-		MESSAGE("download output: ${output_git_message}")
-		MESSAGE("download error: ${error_git_message}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("download output: ${output_git_message}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("download error: ${error_git_message}")
 		IF(NOT git_not_found EQUAL 0)
 			_CMLIB_LIBRARY_DEBUG_MESSAGE("git-clone failed. Status: ${git_not_found}")
 			_CMLIB_FILE_TMP_DIR_CLEAN()
