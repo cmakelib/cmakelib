@@ -317,12 +317,12 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 				${__GIT_REVISION}
 				"${__GIT_PATH}"
 			RESULT_VARIABLE file_not_found
-			OUTPUT_VARIABLE   "${output_git_message}" # discard STDOUT
-			ERROR_VARIABLE    "${error_git_message}" # discard STDERR
+			OUTPUT_VARIABLE   output_git_message # discard STDOUT
+			ERROR_VARIABLE    error_git_message # discard STDERR
 			WORKING_DIRECTORY "${tmp_dir}"
 		)
 		MESSAGE("download output: ${output_git_message}")
-		MESSAGE("download output: ${error_git_message}")
+		MESSAGE("download error: ${error_git_message}")
 	ENDIF()
 
 	IF(NOT file_not_found EQUAL 0)
@@ -339,13 +339,15 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 				--branch ${__GIT_REVISION}
 				--single-branch
 				"${__URI}" git_repo
-			OUTPUT_VARIABLE   stdout # discard STDOUT
-			ERROR_VARIABLE    stderr # discard STDERR
+			OUTPUT_VARIABLE   output_git_message # discard STDOUT
+			ERROR_VARIABLE    error_git_message # discard STDERR
 			RESULT_VARIABLE   git_not_found
 			WORKING_DIRECTORY "${tmp_dir}"
 		)
+		MESSAGE("download output: ${output_git_message}")
+		MESSAGE("download error: ${error_git_message}")
 		IF(NOT git_not_found EQUAL 0)
-			_CMLIB_LIBRARY_DEBUG_MESSAGE("git-clone faied. Status: ${git_not_found}")
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("git-clone failed. Status: ${git_not_found}")
 			_CMLIB_FILE_TMP_DIR_CLEAN()
 			UNSET(${__STATUS_VAR} PARENT_SCOPE)
 			RETURN()
