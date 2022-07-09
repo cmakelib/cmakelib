@@ -317,10 +317,12 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 				${__GIT_REVISION}
 				"${__GIT_PATH}"
 			RESULT_VARIABLE file_not_found
-			OUTPUT_VARIABLE   stdout # discard STDOUT
-			ERROR_VARIABLE    stderr # discard STDERR
+			OUTPUT_VARIABLE   "${output_git_message}" # discard STDOUT
+			ERROR_VARIABLE    "${error_git_message}" # discard STDERR
 			WORKING_DIRECTORY "${tmp_dir}"
 		)
+		MESSAGE("download output: ${output_git_message}")
+		MESSAGE("download output: ${error_git_message}")
 	ENDIF()
 
 	IF(NOT file_not_found EQUAL 0)
