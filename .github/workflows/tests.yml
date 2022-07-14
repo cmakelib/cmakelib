@@ -69,6 +69,8 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Run tests
         run: cd test && cmake -DCMLIB_DEBUG=ON .
 
