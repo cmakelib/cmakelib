@@ -26,6 +26,8 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Run tests
         run: |
             git config --global --add safe.directory "$(pwd)"
@@ -48,6 +50,8 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Run tests
         run: |
             git config --global --add safe.directory "$(pwd)"
@@ -79,6 +83,8 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Run tests
         run: cd test && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
 
@@ -93,6 +99,8 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Run tests
         run: cd test/ && cmake -DCMLIB_DEBUG=ON .
 
@@ -107,6 +115,8 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
           if_key_exists: fail # replace / ignore / fail; optional (defaults to fail)
       - uses: actions/checkout@v3
+        with:
+          submodules: recursive
       - name: Run tests
         run: cd test/ && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
   
