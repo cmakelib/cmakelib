@@ -1,0 +1,9 @@
+[submodule "components/CMUTIL"]
+	path = components/CMUTIL
+	url = https://github.com/cmakelib/cmakelib-component-cmutil.git
+[submodule "components/CMDEF"]
+	path = components/CMDEF
+	url = https://github.com/cmakelib/cmakelib-component-cmdef.git
+[submodule "components/STORAGE"]
+	path = components/STORAGE
+	url = https://github.com/cmakelib/cmakelib-component-storage.git

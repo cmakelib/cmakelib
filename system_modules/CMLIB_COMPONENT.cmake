@@ -16,6 +16,8 @@ SET(_CMLIB_COMPONENT_AVAILABLE_LIST cmdef storage cmutil
 	"List of available components."
 )
 
+SET(_CMLIB_COMPONENT_BASE_PATH "${CMAKE_CURRENT_LIST_DIR}/../components")
+
 _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
 _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
@@ -95,16 +97,17 @@ FUNCTION(_CMLIB_COMPONENT)
 			MESSAGE(FATAL_ERROR "Component '${component}' is not registered!")
 		ENDIF()
 
-		SET(component_uri ${CMLIB_REQUIRED_ENV_REMOTE_URL}/${_CMLIB_COMPONENT_REPO_NAME_PREFIX}${component_lower})
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: ${component_uri}")
-
-		CMLIB_DEPENDENCY(
-			KEYWORDS CMLIB COMPONENT ${component_upper}
-			TYPE MODULE
-			URI "${component_uri}"
-			URI_TYPE GIT
-			OUTPUT_PATH_VAR component_path
-		)
+#		SET(component_uri ${CMLIB_REQUIRED_ENV_REMOTE_URL}/${_CMLIB_COMPONENT_REPO_NAME_PREFIX}${component_lower})
+#		_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: ${component_uri}")
+#
+#		CMLIB_DEPENDENCY(
+#			KEYWORDS CMLIB COMPONENT ${component_upper}
+#			TYPE MODULE
+#			URI "${component_uri}"
+#			URI_TYPE GIT
+#			OUTPUT_PATH_VAR component_path
+#		)
+		SET(component_path "${_CMLIB_COMPONENT_BASE_PATH}/${component_upper}")
 		LIST(APPEND CMAKE_MODULE_PATH "${component_path}")
 	ENDFOREACH()
 	SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
