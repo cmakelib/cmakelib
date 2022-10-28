@@ -18,6 +18,11 @@ INCLUDE_GUARD(GLOBAL)
 _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
 _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
+SET(CMLIB_FILE_DOWNLOAD_DEFAULT_BRANCH "master"
+	CACHE STRING
+	"Git repository default branch"
+)
+
 SET(CMLIB_FILE_DOWNLOAD_TIMEOUT 100
 	CACHE INTERNAL
 	"Inactivity timeout for File Downlad"
@@ -70,7 +75,7 @@ ENDIF()
 # - if the GIT_REVISION is specified then the content will be downloaded
 #   from given branch.
 # - if the GIT_REVISION is NOT specified then the content will be downloaded from
-#   master branch.
+#   branch stored in CMLIB_FILE_DOWNLOAD_DEFAULT_BRANCH cache variable.
 #
 # URI_TYPE can be one of { GIT, HTTP }.
 # URI_TYPE is determined automatically if not specified.
@@ -128,7 +133,7 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 	SET(path)
 	SET(status)
 	IF("${uri_type}" STREQUAL "GIT")
-		SET(git_revision_command GIT_REVISION "master")
+		SET(git_revision_command GIT_REVISION "${CMLIB_FILE_DOWNLOAD_DEFAULT_BRANCH}")
 		IF(DEFINED __GIT_REVISION)
 			SET(git_revision_command GIT_REVISION "${__GIT_REVISION}")
 		ENDIF()
