@@ -1,6 +1,6 @@
-## Main
+## MAIN
 #
-#
+# CMake-lib component management
 #
 #
 
@@ -31,6 +31,12 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # Download and initialize given component.
 #
 # Standard FIND_PACKAGE mechanism is used after the component is downloaded.
+#
+# If the variable CMLIB_COMPONENT_LOCAL_BASE_PATH is not set or empty components are downloaded
+# from the remote repositories.
+#
+# If the variable CMLIB_COMPONENT_LOCAL_BASE_PATH is set the value is used
+# as a directory where components are searched for.
 #
 # <function> (
 #		COMPONENTS <components> M
