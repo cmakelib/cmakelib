@@ -7,13 +7,6 @@
 
 INCLUDE_GUARD(GLOBAL)
 
-# Value of the KEYDELIM var is used in Cmake regex
-# Please avaid using special regex characters
-SET(CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM ","
-	CACHE INTERNAL
-	"Delimiter for keywords in control file"
-)
-
 SET(CMLIB_DEPENDENCY_CONTROL ON
 	CACHE BOOL
 	"Enable depenendcy Conrol if ON, Disable dependency conrol if OFF"
@@ -23,6 +16,7 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
 _CMLIB_LIBRARY_MANAGER(CMLIB_FILE_DOWNLOAD)
 _CMLIB_LIBRARY_MANAGER(CMLIB_ARCHIVE)
 _CMLIB_LIBRARY_MANAGER(CMLIB_CACHE)
+_CMLIB_LIBRARY_MANAGER(CMLIB_CACHE_CONTROL)
 _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
 
@@ -32,7 +26,7 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # Download and cache dependency.
 #
 # The remote resource is uniquely identified by combination of all elments from
-# REMOTE_ID_SET = { URI, GIT_PATH, GIT_REVISION } and additionaly by KEYWORDS set.
+# REMOTE_ID_SET = { URI, GIT_PATH } and additionaly by KEYWORDS set.
 #
 # There can be only one combination of REMOTE_ID_SET and KEYWORDS set for each REMOTE_ID_SET.
 # If you try to add same dependency with same REMOTE_ID_SET but under two different KEYWORDS set
@@ -47,6 +41,7 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # TYPE must be specified.
 # Represents resource type (the resource which will be downloaded from remote)
 # Must be one of <MODULE|ARCHIVE|FILE|DIRECTORY>.
+# Type does not 
 # Note that for DIRECTORY type only the GIT uri can be used.
 #
 # URI standard HTTP URI or GIT uri supported by 'git clone' command.
@@ -104,7 +99,6 @@ FUNCTION(CMLIB_DEPENDENCY)
 			KEYWORDS
 		REQUIRED
 			TYPE
-			#KEYWORDS
 		P_ARGN ${ARGN}
 	)
 	_CMLIB_DEPENDENCY_VALIDATE_TYPE(${__TYPE})
@@ -116,6 +110,7 @@ FUNCTION(CMLIB_DEPENDENCY)
 		GIT_PATH          "${__GIT_PATH}"
 		GIT_REVISION      "${__GIT_REVISION}"
 		KEYWORDS_VAR      hash_keyword
+		CONTROL_HASH_VAR  hash
 	)
 
 	CMLIB_CACHE_GET(
@@ -165,6 +160,7 @@ FUNCTION(CMLIB_DEPENDENCY)
 			${git_path}
 			${git_revision}
 			OUTPUT_PATH "${download_tmp_dir}"
+			FILE_HASH_OUTPUT_VAR file_hash
 		)
 		IF("${__TYPE}" STREQUAL "DIRECTORY" OR
 				("${__TYPE}" STREQUAL "MODULE" AND IS_DIRECTORY "${download_tmp_dir}"))
@@ -172,19 +168,25 @@ FUNCTION(CMLIB_DEPENDENCY)
 			FILE(GLOB glob "${download_tmp_dir}/*")
 			LIST(LENGTH glob downloaded_files_size)
 			IF((downloaded_files_size EQUAL 0))
-				MESSAGE(FATAL_ERROR "Download directory problem")
+				MESSAGE(FATAL_ERROR "Download directory problem ${__URI}")
 			ENDIF()
 		ELSE()
 			FILE(GLOB downloaded_files "${download_tmp_dir}/*")
 			LIST(LENGTH downloaded_files downloaded_files_size)
 			IF(NOT (downloaded_files_size EQUAL 1))
-				MESSAGE(FATAL_ERROR "Download files problem")
+				MESSAGE(FATAL_ERROR "Download files problem - ${__URI}")
 			ENDIF()
 		ENDIF()
 
+		IF(CMLIB_DEPENDENCY_CONTROL)
+			CMLIB_CACHE_CONTROL_FILE_HASH_CHECK(
+				HASH      ${hash}
+				FILE_HASH ${file_hash}
+			)
+		ENDIF()
 		CMLIB_CACHE_ADD(
-			KEYWORDS ${hash_keyword}
-			PATH "${downloaded_files}"
+			KEYWORDS       ${hash_keyword}
+			PATH           "${downloaded_files}"
 			CACHE_PATH_VAR cache_var
 		)
 		IF(NOT DEFINED cache_var)
@@ -311,43 +313,6 @@ ENDFUNCTION()
 
 
 
-## Helper
-#
-# Compute hash from string
-#	"${URI}|${GIT_PATH}|${GIT_REVISION}"
-# The hash uniquely identifies resource managed by
-# CMLIB_DEPENDENCY function.
-#
-# <function>(
-#		URI          <uri>
-#		[GIT_PATH     <git_path>]
-#		[GIT_REVISION <git_revision>]
-# )
-#
-FUNCTION(_CMLIB_DEPENDENCY_COMPUTE_HASH)
-	CMLIB_PARSE_ARGUMENTS(
-		ONE_VALUE
-			URI GIT_PATH GIT_REVISION
-			OUTPUT_HASH_VAR
-		REQUIRED
-			URI OUTPUT_HASH_VAR
-		P_ARGN ${ARGN}
-	)
-
-	SET(keywords_delim "${CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM}")
-	SET(cache_string   "${__URI}${keywords_delim}${__GIT_PATH}${keywords_delim}${__GIT_REVISION}")
-	STRING(SHA3_512 hash "${cache_string}")
-
-	SET(regex_repeat "")
-	FOREACH(I RANGE 5)
-		SET(regex_repeat "${regex_repeat}[0-9A-Za-z]")
-	ENDFOREACH()
-	STRING(REGEX REPLACE "${regex_repeat}([0-9A-Za-z])" "\\1" each_e ${hash})
-
-	STRING(TOUPPER "${each_e}" hash_upper)
-	SET(${__OUTPUT_HASH_VAR} "${hash_upper}" PARENT_SCOPE)
-ENDFUNCTION()
-
 
 
 ## Helper
@@ -356,12 +321,16 @@ ENDFUNCTION()
 #
 # KEYWORDS_VAR is name of the variable which will hold processed keywords
 #
+# CONTROL_HASH_VAR is a name of the variable which will hold
+# computed control HASH.
+#
 # URI, GIT_PATH, GIT_REVISION has same meaning as for
 # CMLIB_DEPENDENCY function.
 #
 # <function>(
 #		URI                <uri>
 #		KEYWORDS_VAR       <keywords_var> M
+#		CONTROL_HASH_VAR   <hash_var>
 #		[GIT_PATH          <git_path>]
 #		[GIT_REVISION      <git_revision>]
 # )
@@ -370,13 +339,20 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			URI GIT_PATH GIT_REVISION
-			KEYWORDS_VAR
+			KEYWORDS_VAR CONTROL_HASH_VAR
 		MULTI_VALUE
 			ORIGINAL_KEYWORDS
 		REQUIRED
-			URI KEYWORDS_VAR
+			KEYWORDS_VAR
+			CONTROL_HASH_VAR
 		P_ARGN ${ARGN}
 	)
+
+	IF((NOT __URI) AND __ORIGINAL_KEYWORDS)
+		SET(${__KEYWORDS_VAR} ${__ORIGINAL_KEYWORDS} PARENT_SCOPE)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS using ORIGINAL_KEYWORDS because no URI defined!")
+		RETURN()
+	ENDIF()
 
 	SET(git_path "${__GIT_PATH}")
 	IF("${git_path}" STREQUAL "")
@@ -388,34 +364,18 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		SET(git_revision "master")
 	ENDIF()
 
-	SET(processed_keywords)
-	IF(CMLIB_DEBUG)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS in Debug mode")
-		GET_FILENAME_COMPONENT(stripped_uri "${__URI}" NAME_WE)
-		SET(keywords_list "${stripped_uri}" "${git_revision}" "${git_path}")
-		SET(keywords_list_normalized)
-		FOREACH(keyword IN LISTS keywords_list)
-			STRING(MAKE_C_IDENTIFIER "${keyword}" keyword_normalized_with_)
-			STRING(REPLACE "_" "" keyword_normalized_without_ "${keyword_normalized_with_}")
-			STRING(TOUPPER "${keyword_normalized_without_}" keyword_normalized)
-			_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS Keyword: ${keyword_normalized}")
-			LIST(APPEND keywords_list_normalized "${keyword_normalized}")
-		ENDFOREACH()
-		SET(processed_keywords ${keywords_list_normalized})
-		LIST(INSERT processed_keywords 0 "DEBUG")
-	ENDIF()
-
-	_CMLIB_DEPENDENCY_COMPUTE_HASH(
-		URI             "${__URI}"
-		GIT_PATH        "${git_path}"
-		GIT_REVISION    "${git_revision}"
-		OUTPUT_HASH_VAR hash_keyword
+	CMLIB_CACHE_CONTROL_COMPUTE_HASH(
+		URI            "${__URI}"
+		GIT_PATH       "${git_path}"
+		OUTPUT_HASH_VAR hash
 	)
-
 	IF(CMLIB_DEPENDENCY_CONTROL)
-		_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK(
-			HASH              ${hash_keyword}
+		CMLIB_CACHE_CONTROL_KEYWORDS_CHECK(
+			HASH              "${hash}"
+			URI               "${__URI}"
 			ORIGINAL_KEYWORDS "${__ORIGINAL_KEYWORDS}"
+			GIT_PATH          "${git_path}"
+			GIT_REVISION      "${git_revision}"
 		)
 	ENDIF()
 
@@ -424,81 +384,10 @@ FUNCTION(_CMLIB_DEPENDENCY_DETERMINE_KEYWORDS)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS using ORIGINAL_KEYWORDS as cache keywords for ${__URI}")
 	ELSE()
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("DETERMINE_KEYWORDS using HASH keywords for ${__URI}")
-		SET(processed_keywords "HASH" "${hash_keyword}")
+		SET(processed_keywords "HASH" "${hash}")
 		SET(${__KEYWORDS_VAR} ${processed_keywords} PARENT_SCOPE)
 	ENDIF()
-ENDFUNCTION()
-
-
-
-## Helper
-#
-# Check if HASH and ORIGINAL_KEYWORDS are in sync.
-# Multiple invocation of this funct with same HASH must have
-# same ORIGINAL_KEYWORDS or error occurred.
-#
-# <function>(
-#		HASH              <hash>
-#		ORIGINAL_KEYWORDS <original_keywords>
-# )
-#
-FUNCTION(_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK)
-	CMLIB_PARSE_ARGUMENTS(
-		ONE_VALUE
-			HASH
-		MULTI_VALUE
-			ORIGINAL_KEYWORDS
-		REQUIRED
-			HASH
-		P_ARGN ${ARGN}
-	)
-
-	SET(control_dir_path  "${CMLIB_REQUIRED_ENV_TMP_PATH}/cache_control")
-	SET(control_file_path "${control_dir_path}/${__HASH}")
-	SET(keywords_delim    "${CMLIB_DEPENDENCY_CONTROL_FILE_KEYDELIM}")
-
-	STRING(JOIN "${keywords_delim}" keywords_string ${__ORIGINAL_KEYWORDS})
-	SET(file_content "${keywords_string};${__URI};${__GIT_PATH};${__GIT_REVISION}")
-
-	IF(NOT EXISTS "${control_file_path}")
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK Cache control file create")
-		IF(DEFINED __ORIGINAL_KEYWORDS)
-			CMLIB_CACHE_HAS_FILE(
-				KEYWORDS ${__ORIGINAL_KEYWORDS}
-				PATH_VAR cache_path
-			)
-			IF(cache_path)
-				STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
-				MESSAGE(FATAL_ERROR "The cache under keywords '${original_keywords_string}' already exist for different remote")
-			ENDIF()
-		ENDIF()
-		FILE(WRITE "${control_file_path}" "${file_content}")
-		RETURN()
-	ENDIF()
-
-	FILE(READ "${control_file_path}" real_file_content)
-	STRING(REGEX MATCHALL "^([0-9a-zA-Z${keywords_delim}]*);(.+)$" matched "${real_file_content}")
-	IF(NOT matched)
-		MESSAGE(FATAL_ERROR "Cannot match control file! Invalid format - '${real_file_content}'")
-	ENDIF()
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("_CMLIB_DEPENDENCY_CONTROL_FILE_CHECK control real file content: '${real_file_content}'")
-	SET(cached_keywords "${CMAKE_MATCH_1}")
-
-	IF(NOT "${file_content}" STREQUAL "${real_file_content}")
-		IF(NOT cached_keywords)
-			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created without keywords"
-				" but keywords provided '${__ORIGINAL_KEYWORDS}'")
-		ELSEIF(NOT DEFINED __ORIGINAL_KEYWORDS)
-			MESSAGE(FATAL_ERROR "DEPENDENCY hash mishmash - cache created with keywords ${cached_keywords}"
-				" but no keywords provided")
-		ELSE()
-			STRING(JOIN "${keywords_delim}" original_keywords_string "${__ORIGINAL_KEYWORDS}")
-			MESSAGE(FATAL_ERROR
-				"DEPENDENCY hash mishmash - cached keywords '${cached_keywords}'"
-				" are not same as required keywords '${original_keywords_string}'"
-			)
-		ENDIF()
-	ENDIF()
+	SET(${__CONTROL_HASH_VAR} ${hash} PARENT_SCOPE)
 ENDFUNCTION()
 
 
@@ -516,7 +405,7 @@ FUNCTION(_CMLIB_DEPENDENCY_CHECK_TYPE_OUTPUT_VAR_REQUIREMENTS_INVERSE type)
 	IF("${type}" STREQUAL "DIRECTORY" OR
 			"${type}" STREQUAL "ARCHIVE" OR
 			"${type}" STREQUAL "FILE")
-		MESSAGE(FATAL_ERROR "Requirements for OUTPUT_VAR are not met!")
+		MESSAGE(FATAL_ERROR "Requirements for OUTPUT_VAR are not met! (Not defined? Invalid format?)")
 	ENDIF()
 ENDFUNCTION()
 

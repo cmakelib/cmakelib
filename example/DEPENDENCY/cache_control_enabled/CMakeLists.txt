@@ -14,10 +14,12 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
 FIND_PACKAGE(CMLIB)
 
 SET(HTTP_DOWNLOAD_URI_ZIP "https://github.com/cmakelib/cmakelib-test/archive/v1.0.0.zip")
-SET(GIT_DOWNLOAD_URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
+SET(GIT_DOWNLOAD_URI "git@gitlab.com:cmakelib/cmakelib-test.git")
 SET(GIT_TEST_BRANCH "test-branch")
 SET(GIT_CMAKE_MODULE_PATH "TEST_MODULE.cmake")
 SET(GIT_CMAKE_MODULE_NAME "TEST_MODULE")
+SET(GIT_CMAKE_SAME_FILE_PATH "cmake/same/same.zip")
+SET(GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH "cmake-test/test_branch_same/same.zip")
 
 
 
@@ -122,22 +124,23 @@ TEST_MODULE_MACRO()
 #
 # Download file as MODULE.
 # If we do not specify GIT_REVISION the master branch is taken.
+# It fails because we already have the file cached!
 #
-SET(CMAKE_MODULE_PATH "${_tmp_cmake_module_path}")
-CMLIB_DEPENDENCY(
-	KEYWORDS A B MASTERTESTMODULE
-	TYPE MODULE
-	URI        "${GIT_DOWNLOAD_URI}"
-	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
-	OUTPUT_PATH_VAR output_path
-)
-
-#
-# output_path is not modified for type "MODULE".
-#
-MESSAGE(STATUS "DEPENDENCY: ${output_path}")
-
-INCLUDE(${GIT_CMAKE_MODULE_NAME})
-TEST_MODULE_MACRO()
+#SET(CMAKE_MODULE_PATH "${_tmp_cmake_module_path}")
+#CMLIB_DEPENDENCY(
+#	KEYWORDS A B MASTERTESTMODULE
+#	TYPE MODULE
+#	URI        "${GIT_DOWNLOAD_URI}"
+#	GIT_PATH   "${GIT_CMAKE_MODULE_PATH}"
+#	OUTPUT_PATH_VAR output_path
+#)
 
 UNSET(output_path)
+CMLIB_DEPENDENCY(
+	TYPE            FILE
+	URI             "${GIT_DOWNLOAD_URI}"
+	GIT_PATH        "${GIT_CMAKE_SAME_TEST_BRANCH_FILE_PATH}"
+	GIT_REVISION    "${GIT_TEST_BRANCH}"
+	OUTPUT_PATH_VAR output_path
+)
+MESSAGE(STATUS "DEPENDENCY: ${output_path}")

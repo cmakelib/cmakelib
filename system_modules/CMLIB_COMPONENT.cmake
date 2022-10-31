@@ -1,14 +1,19 @@
-## Main
+## MAIN
 #
-#
+# CMake-lib component management
 #
 #
 
 INCLUDE_GUARD(GLOBAL)
 
+SET(CMLIB_COMPONENT_LOCAL_BASE_PATH "$ENV{CMLIB_COMPONENT_LOCAL_BASE_PATH}"
+	CACHE PATH
+	"If set the path is used to find components. If not set components are downloaded from the remote server."
+)
+
 SET(_CMLIB_COMPONENT_REPO_NAME_PREFIX "cmakelib-component-"
 	CACHE INTERNAL
-	"Filename prefix for components"
+	"Filename prefix for components."
 )
 
 SET(_CMLIB_COMPONENT_AVAILABLE_LIST cmdef storage cmutil
@@ -26,6 +31,12 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # Download and initialize given component.
 #
 # Standard FIND_PACKAGE mechanism is used after the component is downloaded.
+#
+# If the variable CMLIB_COMPONENT_LOCAL_BASE_PATH is not set or empty components are downloaded
+# from the remote repositories.
+#
+# If the variable CMLIB_COMPONENT_LOCAL_BASE_PATH is set the value is used
+# as a directory where components are searched for.
 #
 # <function> (
 #		COMPONENTS <components> M
@@ -95,16 +106,24 @@ FUNCTION(_CMLIB_COMPONENT)
 			MESSAGE(FATAL_ERROR "Component '${component}' is not registered!")
 		ENDIF()
 
-		SET(component_uri ${CMLIB_REQUIRED_ENV_REMOTE_URL}/${_CMLIB_COMPONENT_REPO_NAME_PREFIX}${component_lower})
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: ${component_uri}")
+		SET(component_dir_name ${_CMLIB_COMPONENT_REPO_NAME_PREFIX}${component_lower})
 
-		CMLIB_DEPENDENCY(
-			KEYWORDS CMLIB COMPONENT ${component_upper}
-			TYPE MODULE
-			URI "${component_uri}"
-			URI_TYPE GIT
-			OUTPUT_PATH_VAR component_path
-		)
+		SET(component_path)
+		IF(CMLIB_COMPONENT_LOCAL_BASE_PATH)
+			SET(component_path ${CMLIB_COMPONENT_LOCAL_BASE_PATH}/${component_dir_name})
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: ${component_path}")
+		ELSE()
+			SET(component_uri ${CMLIB_REQUIRED_ENV_REMOTE_URL}/${component_dir_name})
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: ${component_uri}")
+			CMLIB_DEPENDENCY(
+				KEYWORDS CMLIB COMPONENT ${component_upper}
+				TYPE MODULE
+				URI "${component_uri}"
+				URI_TYPE GIT
+				OUTPUT_PATH_VAR component_path
+			)
+		ENDIF()
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: '${component}' path: ${component_path}")
 		LIST(APPEND CMAKE_MODULE_PATH "${component_path}")
 	ENDFOREACH()
 	SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
