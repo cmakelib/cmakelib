@@ -2,6 +2,25 @@
 #
 # CACHE CONTROL which ensures that the cache is consistent.
 #
+# The main target is to ensure the system
+# - does not cache same dependency in different revisions/versions
+# - does not cache same dependency under different remotes
+# - does not cache same dependency under different keywords
+#
+# To achive cache control over dependencies cached by the system
+# the cache control file is introduced.
+#
+# cache control file is a file which contains string in form
+# "<KEYWORDS_STRING>${d}<URI>${d}<GIT_PATH>${d}<GIT_REVISION>"
+# where
+#	- 'd' represents a delimiter. It must be unique. the ',' is choosen.
+#	- KEYWORDS_STRING is a string created from cache keywords. Each keyword
+#	  is delimited by '|' from each other. KEYWORDS_STRING = <keyword>['|'KEYWORDS_STRING]
+#	- URI is valid URI of the remote resource
+#	- GIT_PATH is a path to the resource in the remote git repository
+#	- GIT_REVISION is a git revision of the resource 
+#
+#
 
 INCLUDE_GUARD(GLOBAL)
 

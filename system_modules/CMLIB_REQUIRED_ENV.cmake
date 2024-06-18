@@ -94,6 +94,11 @@ FUNCTION(_CMLIB_REQUIRED_ENV_REMOTE_URI)
 		"Name of the Git remote from which the CMLIB_REQUIRED_ENV_REMOTE_URL will be obtained"
 	)
 
+	SET(git_directory_path "${CMAKE_CURRENT_LIST_DIR}/.git")
+	IF(NOT EXISTS git_directory_path)
+		MESSAGE(FATAL_ERROR "Directory ${git_directory_path} does not exist. Did you clone CMakeLib as a repository?")
+	ENDIF()
+
 	SET(tmp_output_var)
 	EXECUTE_PROCESS(
 		COMMAND ${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE} config --get remote.${CMLIB_REQUIRED_ENV_REMOTE_NAME}.url
