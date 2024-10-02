@@ -191,6 +191,15 @@ then just clean up all intermediate files by
 
     git clean -xfd
 
+## CI/CD test runners
+
+Tests are run by github CI/CD for each PR.
+
+Docker images are stored as cmake [github packages].
+
+Dockerfiles can be found at [docker-build-images] repository.
+
+
 ## Coding style
 
 In library we use Uppercase for all CMake keywords.
@@ -216,11 +225,13 @@ Project is licensed under [BSD-3-Clause License](LICENSE)
 [CMLIB_ARCHIVE]:         ./system_modules/CMLIB_ARCHIVE.cmake
 [CMLIB_DEPENDENCY]:      ./system_modules/CMLIB_DEPENDENCY.cmake
 [CMLIB_COMPONENT]:       ./system_modules/CMLIB_COMPONENT.cmake
-[CMLIB_STORAGE]:         https://github.com/cmakelib/cmakelib-component-storage
-[CMDEF]:                 https://github.com/cmakelib/cmakelib-component-basedef
+[CMLIB_STORAGE]:         ../cmakelib-component-storage
+[CMDEF]:                 ../cmakelib-component-basedef
 [System modules]:        ./system_modules/
 [system modules]:        ./system_modules/
 [example]:               ./example/
 [example/DEPENDENCY]:    ./example/DEPENDENCY
 [buildbadge_github]:     https://github.com/cmakelib/cmakelib/workflows/Tests/badge.svg
 [example/DEPENDENCY/boost_example]: ./example/DEPENDENCY/boost_example/
+[docker-build-images]: ../docker-build-images
+[github packages]: https://github.com/orgs/cmakelib/packages

@@ -13,10 +13,16 @@ jobs:
   test_linux:
     strategy:
       matrix:
-        image: ["latest-debian-bullseye", "latest-ubuntu-2004", "latest-ubuntu-2204"]
+        image: [
+          "test_debian:bullseye",
+          "test_debian:bookworm",
+          "test_ubuntu:2004",
+          "test_ubuntu:2204",
+          "test_ubuntu:2404"
+          ]
     runs-on: ubuntu-latest
     container:
-        image: koudis/cmakelib-build-linux:${{ matrix.image }}
+        image: ghcr.io/cmakelib/${{ matrix.image }}
     steps:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -37,10 +43,16 @@ jobs:
   test_linux_script:
     strategy:
       matrix:
-        image: ["latest-debian-bullseye", "latest-ubuntu-2004", "latest-ubuntu-2204"]
+        image: [
+          "test_debian:bullseye",
+          "test_debian:bookworm",
+          "test_ubuntu:2004",
+          "test_ubuntu:2204",
+          "test_ubuntu:2404"
+          ]
     runs-on: ubuntu-latest
     container:
-        image: koudis/cmakelib-build-linux:${{ matrix.image }}
+        image: ghcr.io/cmakelib/${{ matrix.image }}
     steps:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
