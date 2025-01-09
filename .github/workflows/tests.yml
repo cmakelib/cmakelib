@@ -23,7 +23,7 @@ jobs:
           ]
     runs-on: ubuntu-latest
     container:
-        image: ghcr.io/cmakelib/docker-build-images/${{ matrix.image }}
+        image: ghcr.io/cmakelib/${{ matrix.image }}
     steps:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
@@ -54,7 +54,7 @@ jobs:
           ]
     runs-on: ubuntu-latest
     container:
-        image: ghcr.io/cmakelib/docker-build-images/${{ matrix.image }}
+        image: ghcr.io/cmakelib/${{ matrix.image }}
     steps:
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
