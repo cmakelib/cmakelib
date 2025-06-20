@@ -6,15 +6,14 @@ Linux: ![buildbadge_github], Windows: ![buildbadge_github], Mac OS: ![buildbadge
 Dependency tracking library for CMake - completely written in CMake.
 
 CMLIB Library is dependency tracking library which allows effectively track all
-needed dependencies without Worrying about consistency and project regeneration times.
+needed dependencies without worrying about consistency and project regeneration times.
 
 Main features are
 
 - No other dependencies. Only CMake and Git.
 - CMake cache regeneration - once the dependency is downloaded
    and cached it's preserved even after build directory deletion
-- Dependency cache consistency check – the only dependency
-  even if explicit keywords are specified
+- Dependency cache consistency check – cache dependency once, use multiple times.
 
 For examples look at the [example] directory
 
@@ -49,22 +48,29 @@ Full example can be found at [example/DEPENDENCY/boost_example]
 ### Library install
 
 It is intended that the user has only one global instance of library. However it is possible use `cmakelib`
-as submodule but it is not recommanded.
+as submodule and use `ADD_SUBDIRECTORY`. However it is not recommanded.
 
 #### Global install
 
-Library is stored on User computer and the global CMake variable `CMLIB_DIR`
+Library is stored on User computer and the global environment variable `CMLIB_DIR`
 must be defined.
 
-- Choose directory where cmakelib will be stored. We will call this directory
-<cmlib_root>
-- Clone repository to local computer to <cmlib_root>
-- Define System ENV var `CMLIB_DIR` as absolute path to already cloned repository
-- You may define system ENV var `CMLIB_REQUIRED_ENV_TMP_PATH` to path to existing directory.
-  This variable represents Cache directory where the cache will be stored.
-  If not set the "${CMAKE_CURRENT_LIST_DIR}/_tmp" is use instead.
-- call `FIND_PACKAGE(CMLIB REQUIRED)`
-- Everything should works fine now
+`CMLIB_DIR` variable is named as CMake requires in order to FIND_PACKAGE to find a CMLIB by a `FIND_PACKAGE(CMLIB REQUIRED)`
+
+```bash
+mkdir -p ~/cmakelib && cd ~/cmakelib
+git clone https://github.com/cmakelib/cmakelib.git
+```
+
+To make CMLIB works add following lines to your .bashrc
+
+```bash
+echo "export CMLIB_DIR=$(PWD)/cmakelib" >> .bashrc
+# If one, global cache directory is required setup
+#echo "export CMLIB_REQUIRED_ENV_TMP_PATH=$(PWD)/cmakelib_cache" >> .bashrc
+```
+
+Then in CMake project call `FIND_PACKAGE(CMLIB REQUIRED)`
 
 Examples for `CMLIB_DEPENDENCY` can be found at [example/DEPENDENCY]
 
@@ -105,6 +111,7 @@ List of CMake-lib components
 
 - [CMLIB_STORAGE] - effectively track build resources,
 - [CMDEF] - well defined built environment,
+- [CMUTIL] - utils which holds shared functionality across other components
 
 Components can be used by `FIND_PACKAGE(CMLIB REQUIRED COMPONENTS <component_list>)`
 
@@ -112,15 +119,15 @@ Components can be used by `FIND_PACKAGE(CMLIB REQUIRED COMPONENTS <component_lis
 
 Cache entries are represented by ordered, nonempty set of uppercase strings called `KEYWORDS`.
 
-If no `KEYWORDS` are specified then the set is created by the library as hash of `URI`, `GIT_PATH` etc.
+If no `KEYWORDS` are specified then the set is created by the library as a hash of `URI`, `GIT_PATH` etc.
 
-Cache mechanism is persistent across CMake binary dir instances.
+Cache mechanism is a persistent across CMake binary dir instances.
 If user deletes our CMake binary dir the cache will regenerate
 in next CMake run for the same CMakeLists.txt
 (we assume that cache is located in dir different from CMake binary dir)
 
 If the `CMLIB_REQUIRED_ENV_TMP_PATH` is set then the cache will be stored
-in the directory specified by `CMLIB_REQUIRED_ENV_TMP_PATH`.
+in the directory specified by `CMLIB_REQUIRED_ENV_TMP_PATH`. (which can be set as ENV var)
 
 If the cache reset is needed, just delete directory path stored
 in `CMLIB_REQUIRED_ENV_TMP_PATH`.
@@ -130,7 +137,7 @@ in `CMLIB_REQUIRED_ENV_TMP_PATH`.
 Dependency cache control is optional feature (enabled by default) which ensure that
 there are only one dependency cached at a time.
 
-If ON we cannot track one dependency under two different `KEYWORDS` sets.
+If ON we cannot track the same dependency under two different `KEYWORDS` sets.
 
 Mechanism can be disabled by setting `CMLIB_DEPENDENCY_CONTROL` to OFF.
 
@@ -143,14 +150,14 @@ Path to temporary directory is controlled by `CMLIB_REQUIRED_ENV_TMP_PATH`
 `CMLIB_REQUIRED_ENV_TMP_PATH` can be overridden be system ENV var named
 `CMLIB_REQUIRED_ENV_TMP_PATH`
 
-User can define global ENV var to specify one, central cache storage which will be
+User can define global ENV var to specify exactly one, central cache storage which will be
 shared across CMake project instances.
 
 ## Best practices
 
 - Each cache entry is represented by ordered set of keywords.
 It's common idiom the the first keyword is name of the project in which
-the CMLIB_DEPENDENCY/CMLIB_CACHE is written.
+the CMLIB_DEPENDENCY/CMLIB_CACHE is written. Example: OPENSSL, CURL.
 - Use CMLIB_DEPENDENCY instead of other CMLIB functions. (use other only if you known what
 you are doing)
 
@@ -164,7 +171,7 @@ you are doing)
 - `CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS` - if ON show HTTP download progress.
   If OFF do not show http download progress
 - `CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE` - if ON no `git archive` is used for downloading
-  resources from the remoe git repository.
+  resources from the remote git repository.
 - `CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY` - If ON the `git archive` functionality is required for downloading resouces
   from remote git repository. OFF value has no effect to standard workflow
 
