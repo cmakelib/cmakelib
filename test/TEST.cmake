@@ -71,6 +71,14 @@ ENDMACRO()
 
 
 
+MACRO(TEST_VAR_EQUALS_LITERAL var literal_value)
+	SET(expected_literal_value "${literal_value}")
+	TEST_VAR_EQUAL(${var} expected_literal_value)
+	UNSET(expected_literal_value)
+ENDMACRO()
+
+
+
 ##
 #
 # Run cmake in given directory and expetcts cmake error
