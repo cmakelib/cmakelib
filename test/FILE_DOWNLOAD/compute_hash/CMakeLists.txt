@@ -68,6 +68,38 @@ FUNCTION(DOWNLOAD_AND_COMPARE_DIR_FILE)
     TEST_VAR_NOT_EQUAL(hash hash2)
 ENDFUNCTION()
 
+FUNCTION(DOWNLOAD_AND_COMPARE_FILE_URI)
+    SET(source_file_path "${CMAKE_CURRENT_LIST_DIR}/../resources/test_file.txt")
+    GET_FILENAME_COMPONENT(source_file_path "${source_file_path}" ABSOLUTE)
+    SET(uri "file://${source_file_path}")
+
+    SET(output_path1 "${CMAKE_CURRENT_BINARY_DIR}/downloaded_file1.txt")
+    CMLIB_FILE_DOWNLOAD(
+        URI "${uri}"
+        OUTPUT_PATH "${output_path1}"
+        STATUS_VAR status1
+        FILE_HASH_OUTPUT_VAR hash1
+    )
+    TEST_VAR_TRUE(status1)
+    TEST_VAR_TRUE(hash1)
+
+    SET(output_path2 "${CMAKE_CURRENT_BINARY_DIR}/downloaded_file2.txt")
+    CMLIB_FILE_DOWNLOAD(
+        URI "${uri}"
+        OUTPUT_PATH "${output_path2}"
+        STATUS_VAR status2
+        FILE_HASH_OUTPUT_VAR hash2
+    )
+    TEST_VAR_TRUE(status2)
+    TEST_VAR_TRUE(hash2)
+    TEST_VAR_EQUAL(hash1 hash2)
+
+    # Verify the downloaded content matches the original
+    FILE(READ "${source_file_path}" original_content)
+    FILE(READ "${output_path1}" downloaded_content)
+    TEST_VAR_EQUAL(original_content downloaded_content)
+ENDFUNCTION()
+
 
 
 SET(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY ON
@@ -87,3 +119,5 @@ DOWNLOAD_AND_COMPARE(hash_archive_off ${VALID_GIT_URI_ARCHIVE})
 TEST_VAR_EQUAL(hash_archive_on hash_archive_off)
 
 DOWNLOAD_AND_COMPARE_DIR_FILE()
+
+DOWNLOAD_AND_COMPARE_FILE_URI()

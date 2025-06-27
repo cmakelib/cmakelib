@@ -51,15 +51,17 @@ ENDIF()
 
 ##
 #
-# Download file from GIT or HTTP server.
-# Stores data represented by "URI" to user
-# specified directory (or file path).
-# Store result of the operation to "STATUS_VAR" variable
-# Which is list (<return_code>, <error_message>)
+# It downloads file from GIT or fro any valid, supported URI.
+# - Stores data represented by "URI" to user specified directory (or file path).
+# - Stores result of the operation to "STATUS_VAR" variable
 #
-# OUTPUT_PATH must be absolute (otherwise the behaviour is not defined).
+# OUTPUT_PATH must be absolute filesystem path.
+#
 # OUTPUT_PATH can represent file or directory.
 # - If the URI_TYPE is "HTTP" the OUTPUT_PATH must represent file.
+#   If the OUTPUT_PATH will represent directory remote file will
+#   be stored under random generated name to OUTPUT_PATH.
+# - if the URI_TYPE is "FILE" the OUTPUT_PATH must represent file.
 #   If the OUTPUT_PATH will represent directory remote file will
 #   be stored under random generated name to OUTPUT_PATH.
 # - if the URI_TYPE is  "GIT" the OUTPUT_PATH can represent file
@@ -72,15 +74,16 @@ ENDIF()
 #		- if the downloaded content is a directory then
 #			- OUTPUT_PATH have to represent existing directory.
 #			  in which the content of the remote directory will be saved.
+#
 # - if the GIT_REVISION is specified then the content will be downloaded
 #   from given branch.
 # - if the GIT_REVISION is NOT specified then the content will be downloaded from
 #   branch stored in CMLIB_FILE_DOWNLOAD_DEFAULT_REVISION cache variable.
 #
-# URI_TYPE can be one of { GIT, HTTP }.
+# URI_TYPE can be set to one of { GIT, HTTP, FILE }.
 # URI_TYPE is determined automatically if not specified.
-# If URI_TYPE specified the type is not determiner nor validated.
-# (so we can set URI_TYPE whatever we want independent on URI )
+# If URI_TYPE is specified the type is not determiner automatically or validated if the URI fits the URI_TYPE.
+# (the user can set URI_TYPE whatever possible independent on URI)
 #
 # FILE_HASH_OUTPUT_VAR is a variable where the hash of the file
 # wil be stored.
@@ -91,7 +94,7 @@ ENDIF()
 #		[STATUS_VAR <status>]
 #		[GIT_PATH <git_path>]
 #		[GIT_REVISION <git_revision>]
-#		[URI_TYPE <GIT|HTTP>]
+#		[URI_TYPE <GIT|HTTP|FILE>]
 #		[FILE_HASH_OUTPUT_VAR <file_hash_output_var>]
 # )
 #
@@ -115,6 +118,10 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 	# because is required in subsequent functions
 	IF(NOT DEFINED __STATUS_VAR)
 		SET(__STATUS_VAR _cmlib_status_var)
+	ENDIF()
+
+	IF(NOT IS_ABSOLUTE "${__OUTPUT_PATH}")
+		MESSAGE(FATAL_ERROR "OUTPUT_PATH must be absolute - '${__OUTPUT_PATH}'")
 	ENDIF()
 
 	SET(uri_type)
@@ -153,9 +160,11 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 			STATUS_VAR status
 			FILE_HASH_OUTPUT_VAR file_hash
 		)
-	ELSEIF("${uri_type}" STREQUAL "HTTP")
-		_CMLIB_FILE_DOWNLOAD_FROM_HTTP(
+	ELSEIF("${uri_type}" STREQUAL "HTTP" OR
+			"${uri_type}" STREQUAL "FILE")
+		_CMLIB_FILE_DOWNLOAD_FROM_STANDARD_URI(
 			URI        "${__URI}"
+			URI_TYPE   "${uri_type}"
 			OUTPUT_VAR path
 			STATUS_VAR status
 			FILE_HASH_OUTPUT_VAR file_hash
@@ -171,7 +180,7 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 	ENDIF()
 
 	IF(NOT EXISTS "${path}")
-		MESSAGE(FATAL_ERROR "Path does not exist '${path}'")
+		MESSAGE(FATAL_ERROR "Path to download file does not exist - '${path}'")
 	ENDIF()
 
 	IF(IS_DIRECTORY "${path}")
@@ -202,28 +211,30 @@ ENDFUNCTION()
 
 ## Helper
 #
-# Download file from HTTP server.
+# Download file from HTTP or FILE URI.
 # File is downloaded into TMP directory
-# Path to the directory which contains downloaded file
-# is stored in OUTPUT_VAR variable.
-# STATUS_VAR variable holds true if download succeed, false otherwise
+# Path to the downloaded file is stored in OUTPUT_VAR variable.
+# STATUS_VAR variable holds true if download succeed, false otherwise.
 #
 # <function>(
 #		URI <uri>
+#		URI_TYPE <HTTP|FILE>
 #		OUTPUT_VAR <output_var>
 #		STATUS_VAR <status_var>
-#		FILE_HASH_OUTPUT_VAR <file_hash_output_var>
+#		[FILE_HASH_OUTPUT_VAR <file_hash_output_var>]
 # )
 #
-FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_HTTP)
+FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_STANDARD_URI)
 	CMLIB_PARSE_ARGUMENTS(
 		ONE_VALUE
 			URI
+			URI_TYPE
 			OUTPUT_VAR
 			FILE_HASH_OUTPUT_VAR
 			STATUS_VAR
 		REQUIRED
 			URI
+			URI_TYPE
 			STATUS_VAR
 			OUTPUT_VAR
 		P_ARGN ${ARGN}
@@ -233,14 +244,15 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_HTTP)
 	_CMLIB_FILE_TMP_DIR_CREATE()
 	_CMLIB_FILE_TMP_DIR_GET(tmp_dir)
 
-	_CMLIB_FILE_DETERMINE_FILENAME_FROM_URI("${__URI}" "HTTP" "" filename)
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("HTTP Download: ${__URI} --> '${tmp_dir}/${filename}'")
+	_CMLIB_FILE_DOWNLOAD_FROM_STANDARD_URI_CHECK("${__URI}" "${__URI_TYPE}")
+
+	_CMLIB_FILE_DETERMINE_FILENAME_FROM_URI("${__URI}" "${__URI_TYPE}" "" filename)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("URI Download: ${__URI} --> '${tmp_dir}/${filename}'")
 
 	SET(show_progress_arg)
 	IF(CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS)
 		SET(show_progress_arg SHOW_PROGRESS)
-	ENDIF()
-
+	ENDIF()	
 	FILE(DOWNLOAD
 		"${__URI}"
 		"${tmp_dir}/${filename}"
@@ -263,11 +275,30 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_HTTP)
 		FILE(SHA3_512 "${file_path}" file_hash)
 		_CMLIB_FILE_STRIP_FILE_HASH(file_hash_stripped ${file_hash})
 		SET(${__FILE_HASH_OUTPUT_VAR} ${file_hash_stripped} PARENT_SCOPE)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("HTTP file hash: ${file_hash_stripped}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Downloaded file hash: ${file_hash_stripped}")
 	ENDIF()
 
 	SET(${__OUTPUT_VAR} "${file_path}" PARENT_SCOPE)
 
+ENDFUNCTION()
+
+
+
+## Helper
+#
+# Check if the URI requirements are valid for given URI_TYPE.
+#
+# <function>(
+#		URI <uri>
+#		URI_TYPE <uri_type>
+# )
+#
+FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_STANDARD_URI_CHECK uri uri_type)
+	IF("${uri_type}" STREQUAL "FILE")
+		IF(NOT IS_ABSOLUTE "${uri}")
+			MESSAGE(FATAL_ERROR "Path specified by URI mut be absolute for FILE URI_TYPE. Relative path '${uri}' provided.")
+		ENDIF()
+	ENDIF()
 ENDFUNCTION()
 
 
@@ -438,7 +469,7 @@ FUNCTION(_CMLIB_FILE_DETERMINE_FILENAME_FROM_URI uri uri_type git_path output_va
 	ENDIF()
 	IF("${filename}" STREQUAL "")
 		STRING(RANDOM LENGTH 16 filename)
-		_CMLIB_LIBRARY_DEBUG_MESSAGE("Filename cannot be determined")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Filename cannot be determined from specified URI. Random name generated.")
 	ENDIF()
 	SET(${output_var} "${filename}" PARENT_SCOPE)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("Determined filename: ${filename}")
@@ -493,7 +524,18 @@ ENDFUNCTION()
 # Determine URI_TYPE.
 # <function>(
 #		<output_var> <uri>
-#)
+# )
+#
+# URI formats supported
+# - GIT
+#	- git://<uri>
+#	- git@<uri>
+#	- ssh://git@<uri>
+# - HTTP
+#	- http://<uri>
+#	- https://<uri>
+# - FILE
+#	- file://<uri>
 #
 FUNCTION(_CMLIB_FILE_DETERMINE_URI_TYPE var uri)
 	LIST(POP_FRONT ${ARGN} git_revision)
@@ -501,12 +543,17 @@ FUNCTION(_CMLIB_FILE_DETERMINE_URI_TYPE var uri)
 	STRING(REGEX MATCH "^(git://|git@).*" git_uri "${uri}")
 	STRING(REGEX MATCH "^ssh://git@.*" git_ssh_uri "${uri}")
 	STRING(REGEX MATCH "^http[s]?://.*" http_uri "${uri}")
+	STRING(REGEX MATCH "^file://.*" local_file_uri "${uri}")
 	IF(git_uri OR git_ssh_uri OR git_revision OR git_path)
 		SET(${var} "GIT" PARENT_SCOPE)
 		RETURN()
 	ENDIF()
 	IF(http_uri)
 		SET(${var} "HTTP" PARENT_SCOPE)
+		RETURN()
+	ENDIF()
+	IF(local_file_uri)
+		SET(${var} "FILE" PARENT_SCOPE)
 		RETURN()
 	ENDIF()
 	MESSAGE(FATAL_ERROR "Invalid URI. Cannot determine URI type")
@@ -545,7 +592,7 @@ ENDFUNCTION()
 
 ## Helper
 #
-# It strips the given hash to 1/5 of original length
+# It strips the given hash to 1/5 of original length.
 #
 # <function>(
 #		<output_var> <file_hash>
