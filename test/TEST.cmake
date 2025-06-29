@@ -107,13 +107,11 @@ FUNCTION(TEST_INVALID_CMAKE_RUN test)
 		ERROR_VARIABLE errout
 		OUTPUT_VARIABLE stdout
 	)
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("Invalid type result: ${result_var}")
 	TEST_VAR_TRUE(result_var)
 
 	IF(NOT expected_error_string)
 		RETURN()
 	ENDIF()
-	_CMLIB_LIBRARY_DEBUG_MESSAGE("Expected error string '${expected_error_string}'")
 	STRING(REGEX MATCH "${expected_error_string}" match_found "${errout}")
 	IF(NOT match_found)
 		MESSAGE(FATAL_ERROR "Unexpected err message '${errout}'-'${stdout}'-${result_var}")

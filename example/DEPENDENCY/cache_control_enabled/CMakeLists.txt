@@ -12,8 +12,12 @@ PROJECT(CMLIB_CACHE_TEST)
 #
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
 FIND_PACKAGE(CMLIB)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../test/transform_git_uri.cmake")
 
-SET(HTTP_DOWNLOAD_URI_ZIP "https://github.com/cmakelib/cmakelib-test/archive/v1.0.0.zip")
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test/archive/v1.0.0.zip"
+    OUTPUT_VAR HTTP_DOWNLOAD_URI_ZIP
+)
 SET(GIT_DOWNLOAD_URI "git@gitlab.com:cmakelib/cmakelib-test.git")
 SET(GIT_TEST_BRANCH "test-branch")
 SET(GIT_CMAKE_MODULE_PATH "TEST_MODULE.cmake")

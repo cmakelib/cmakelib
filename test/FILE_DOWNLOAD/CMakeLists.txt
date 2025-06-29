@@ -6,14 +6,21 @@ ENDIF()
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
 FIND_PACKAGE(CMLIB)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../transform_git_uri.cmake")
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../TEST.cmake")
 
 SET(VALID_HTTP_URI   "http://cmake.org/")
 SET(INVALID_HTTP_URI "http://cmake-does-not-exist.org/")
-SET(VALID_GIT_URI    "https://github.com/cmakelib/cmakelib-test.git")
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR VALID_GIT_URI
+)
 SET(INVALID_GIT_URI  "https://github.com/cmakelib/utils-does-not-exist.git")
-SET(VALID_GIT_URI_ARCHIVE "git@gitlab.com:cmakelib/cmakelib-test.git")
+TRANSFORM_GIT_URI(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR VALID_GIT_URI_ARCHIVE
+)
 SET(VALID_GIT_FILE_PATH   "cmake/README.txt")
 SET(INVALID_GIT_FILE_PATH "cmake/README_not_found")
 SET(VALID_GIT_REVISION_FILE_PATH      "cmake-test/test_branch_README.txt")

@@ -53,7 +53,9 @@ ENDIF()
 #
 # It downloads file from GIT or fro any valid, supported URI.
 # - Stores data represented by "URI" to user specified directory (or file path).
-# - Stores result of the operation to "STATUS_VAR" variable
+# - Stores result of the operation to "STATUS_VAR" variable.
+#
+# All download operations are done by CMLIB_FILE_DOWNLOAD function.
 #
 # OUTPUT_PATH must be absolute filesystem path.
 #
@@ -76,14 +78,26 @@ ENDIF()
 #			  in which the content of the remote directory will be saved.
 #
 # - if the GIT_REVISION is specified then the content will be downloaded
-#   from given branch.
+#   from given revidsion (tag, branch, commit id, ...).
 # - if the GIT_REVISION is NOT specified then the content will be downloaded from
 #   branch stored in CMLIB_FILE_DOWNLOAD_DEFAULT_REVISION cache variable.
 #
 # URI_TYPE can be set to one of { GIT, HTTP, FILE }.
 # URI_TYPE is determined automatically if not specified.
-# If URI_TYPE is specified the type is not determiner automatically or validated if the URI fits the URI_TYPE.
-# (the user can set URI_TYPE whatever possible independent on URI)
+# URI_TYPE is directly passed to the CMLIB_FILE_DOWNLOAD.
+# 
+# URI_TYPE can be set by user to whatever possible independent on URI until URI
+# pass prerequisity check for a set URI_TYPE.
+#
+# URI_TYPE Prerequisity Checks
+# - GIT
+#		- no explicit URI checking is done. Passed URI is used as is by 'git clone/archive' command.
+# 		- GIT_PATH must be specified.
+# - HTTP
+#		- URI must start with "http://" or "https://"
+# - FILE
+#		- URI must start with "file://"
+#		- Path specified by URI must be absolute
 #
 # FILE_HASH_OUTPUT_VAR is a variable where the hash of the file
 # wil be stored.
@@ -286,25 +300,6 @@ ENDFUNCTION()
 
 ## Helper
 #
-# Check if the URI requirements are valid for given URI_TYPE.
-#
-# <function>(
-#		URI <uri>
-#		URI_TYPE <uri_type>
-# )
-#
-FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_STANDARD_URI_CHECK uri uri_type)
-	IF("${uri_type}" STREQUAL "FILE")
-		IF(NOT IS_ABSOLUTE "${uri}")
-			MESSAGE(FATAL_ERROR "Path specified by URI mut be absolute for FILE URI_TYPE. Relative path '${uri}' provided.")
-		ENDIF()
-	ENDIF()
-ENDFUNCTION()
-
-
-
-## Helper
-#
 # Downloads files from GIT.
 #
 # Stores path to the downloaded files to OUTPUT_VAR.
@@ -451,8 +446,47 @@ ENDFUNCTION()
 
 ## Helper
 #
+# Check if the URI requirements are valid for given URI_TYPE.
+#
+# <function>(
+#		URI <uri>
+#		URI_TYPE <uri_type>
+# )
+#
+FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_STANDARD_URI_CHECK uri uri_type)
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("Checking standard URI prerequisites for URI_TYPE '${uri_type}', URI: ${uri}")
+	IF("${uri_type}" STREQUAL "FILE")
+		STRING(REGEX MATCH "^file://" file_uri "${uri}")
+		IF(NOT file_uri)
+			MESSAGE(FATAL_ERROR "URI '${uri}' is not valid for FILE URI_TYPE!")
+		ENDIF()
+
+		STRING(REGEX REPLACE "^file://(.+)$" "\\1" file_path "${uri}")
+		IF(NOT IS_ABSOLUTE "${file_path}")
+			MESSAGE(FATAL_ERROR "Path specified by URI must be absolute for FILE URI_TYPE. Relative path '${uri}' provided.")
+		ENDIF()
+		IF(IS_DIRECTORY "${file_path}")
+			MESSAGE(FATAL_ERROR "Path specified by URI must be file for FILE URI_TYPE. Directory '${uri}' provided.")
+		ENDIF()
+	ELSEIF(uri_type STREQUAL "HTTP")
+		STRING(REGEX MATCH "^https?://" http_uri "${uri}")
+		IF(NOT http_uri)
+			MESSAGE(FATAL_ERROR "URI '${uri}' is not valid for HTTP URI_TYPE!")
+		ENDIF()
+	ELSE()	
+		MESSAGE(FATAL_ERROR "Invalid URI_TYPE '${uri_type}' for URI '${uri}'")
+	ENDIF()
+	_CMLIB_LIBRARY_DEBUG_MESSAGE("Standard URI prerequisites check passed for URI_TYPE '${uri_type}', URI: ${uri}")
+ENDFUNCTION()
+
+
+
+
+## Helper
+#
 # Determine filename from URI or GIT_PATH.
 # If name cannot be determined then genrated random name.
+#
 # <function> (
 #		<uri>
 #		<uri_type>    // Standard URI type

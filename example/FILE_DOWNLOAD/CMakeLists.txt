@@ -3,10 +3,14 @@ PROJECT(CMLIB_CACHE_TEST)
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
 FIND_PACKAGE(CMLIB)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../test/transform_git_uri.cmake")
 
 SET(VALID_HTTP_URI           "http://cmake.org/")
 SET(VALID_HTTP_CMAKE_URI     "https://github.com/Kitware/CMake/releases/download/v3.18.5/cmake-3.18.5-win64-x64.zip")
-SET(VALID_GIT_URI            "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
+TRANSFORM_GIT_URI(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR VALID_GIT_URI
+)
 SET(VALID_GIT_FILE_PATH      "cmake/README.txt")
 SET(VALID_GIT_DIRECTORY_PATH "cmake/")
 

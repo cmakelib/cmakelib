@@ -9,11 +9,19 @@ ENDIF()
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
 FIND_PACKAGE(CMLIB)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../transform_git_uri.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../test_resources/test_resources.cmake")
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../TEST.cmake")
 
-SET(VALID_GIT_URI         "https://github.com/cmakelib/cmakelib-test.git")
-SET(VALID_GIT_URI_ARCHIVE "git@gitlab.com:cmakelib/cmakelib-test.git")
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR VALID_GIT_URI
+)
+TRANSFORM_GIT_URI(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR VALID_GIT_URI_ARCHIVE
+)
 SET(GIT_REVISION_PATH_ZIP "cmake-test/test_branch_same/same.zip")
 SET(GIT_REVISION_NAME     "test-branch")
 
@@ -69,9 +77,7 @@ FUNCTION(DOWNLOAD_AND_COMPARE_DIR_FILE)
 ENDFUNCTION()
 
 FUNCTION(DOWNLOAD_AND_COMPARE_FILE_URI)
-    SET(source_file_path "${CMAKE_CURRENT_LIST_DIR}/../resources/test_file.txt")
-    GET_FILENAME_COMPONENT(source_file_path "${source_file_path}" ABSOLUTE)
-    SET(uri "file://${source_file_path}")
+    TEST_RESROUCES_GET_FILE_URI("README.md" uri)
 
     SET(output_path1 "${CMAKE_CURRENT_BINARY_DIR}/downloaded_file1.txt")
     CMLIB_FILE_DOWNLOAD(
@@ -95,6 +101,7 @@ FUNCTION(DOWNLOAD_AND_COMPARE_FILE_URI)
     TEST_VAR_EQUAL(hash1 hash2)
 
     # Verify the downloaded content matches the original
+    STRING(REGEX REPLACE "^file://" "" source_file_path "${uri}")
     FILE(READ "${source_file_path}" original_content)
     FILE(READ "${output_path1}" downloaded_content)
     TEST_VAR_EQUAL(original_content downloaded_content)
