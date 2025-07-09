@@ -364,8 +364,10 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 
 	SET(file_not_found 1)
 	IF(NOT CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("git-archive download initiated")
 		EXECUTE_PROCESS(
 			COMMAND "${CMLIB_REQUIRED_ENV_GIT_EXECUTABLE}" archive
+				--format=tar
 				--remote=${__URI}
 				-o "${archive_path}"
 				${__GIT_REVISION}
@@ -425,6 +427,7 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 		RESULT_VARIABLE tar_not_valid
     )
 	IF(NOT tar_not_valid EQUAL 0)
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Cannot extract archive. Status: ${tar_not_valid}")
 		_CMLIB_FILE_TMP_DIR_CLEAN()
 		UNSET(${__STATUS_VAR} PARENT_SCOPE)
 		RETURN()
