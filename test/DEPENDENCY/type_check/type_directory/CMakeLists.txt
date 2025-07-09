@@ -22,11 +22,13 @@ TRANSFORM_GIT_URI(
 )
 
 
+
 MACRO(_TEST_GIT_DIRECTORY_DOWNLOAD)
     CMLIB_DEPENDENCY(
         TYPE DIRECTORY
         URI "${GIT_URI}"
         GIT_REVISION "master"
+        KEYWORDS TEST MODULE TEST
         OUTPUT_PATH_VAR git_downloaded_dir
     )
 
@@ -48,6 +50,7 @@ MACRO(_TEST_GIT_DIRECTORY_DOWNLOAD)
     TEST_MODULE_MACRO()
 
     CMLIB_CACHE_DELETE(KEYWORDS TEST MODULE TEST)
+    FILE(REMOVE_RECURSE "${CMLIB_REQUIRED_ENV_TMP_PATH}")
 ENDMACRO()
 
 MACRO(_TEST_GIT_SUBDIRECTORY_DOWNLOAD)
@@ -56,6 +59,7 @@ MACRO(_TEST_GIT_SUBDIRECTORY_DOWNLOAD)
         URI "${GIT_URI}"
         GIT_PATH "cmake"
         GIT_REVISION "master"
+        KEYWORDS TEST SUBDIR TEST
         OUTPUT_PATH_VAR git_subdir_downloaded_dir
     )
 
@@ -63,26 +67,28 @@ MACRO(_TEST_GIT_SUBDIRECTORY_DOWNLOAD)
         MESSAGE(FATAL_ERROR "Git subdirectory download failed - output directory does not exist: ${git_subdir_downloaded_dir}")
     ENDIF()
 
-    IF(NOT EXISTS "${git_subdir_downloaded_dir}/README.md")
-        MESSAGE(FATAL_ERROR "Git subdirectory download failed - README.md file not found")
+    SET(base_dir "${git_subdir_downloaded_dir}")
+    IF(NOT EXISTS "${base_dir}/README.txt")
+        MESSAGE(FATAL_ERROR "Git subdirectory download failed - README.txt file not found")
     ENDIF()
-    IF(NOT EXISTS "${git_subdir_downloaded_dir}/dir_a")
+    IF(NOT EXISTS "${base_dir}/dir_a")
         MESSAGE(FATAL_ERROR "Git subdirectory download failed - dir_a subdirectory not found")
     ENDIF()
-    IF(NOT EXISTS "${git_subdir_downloaded_dir}/dir_a/test.zip")
+    IF(NOT EXISTS "${base_dir}/dir_a/test.zip")
         MESSAGE(FATAL_ERROR "Git subdirectory download failed - test.zip file in dir_a not found")
     ENDIF()
-    IF(NOT EXISTS "${git_subdir_downloaded_dir}/dir_b")
+    IF(NOT EXISTS "${base_dir}/dir_b")
         MESSAGE(FATAL_ERROR "Git subdirectory download failed - dir_b subdirectory not found")
     ENDIF()
-    IF(NOT EXISTS "${git_subdir_downloaded_dir}/dir_b/TestFileWithStory")
+    IF(NOT EXISTS "${base_dir}/dir_b/TestFileWithStory")
         MESSAGE(FATAL_ERROR "Git subdirectory download failed - TestFileWithStory not found in dir_b")
     ENDIF()
-    IF(NOT EXISTS "${git_subdir_downloaded_dir}/same")
+    IF(NOT EXISTS "${base_dir}/same")
         MESSAGE(FATAL_ERROR "Git subdirectory download failed - same subdirectory not found")
     ENDIF()
 
     CMLIB_CACHE_DELETE(KEYWORDS TEST SUBDIR TEST)
+    FILE(REMOVE_RECURSE "${CMLIB_REQUIRED_ENV_TMP_PATH}")
 ENDMACRO()
 
 FUNCTION(TEST_GIT_DIRECTORY_ARCHIVE_ENABLED)

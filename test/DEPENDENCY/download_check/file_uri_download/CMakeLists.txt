@@ -24,3 +24,5 @@ CMLIB_DEPENDENCY(
 IF(NOT EXISTS "${output_path}")
     MESSAGE(FATAL_ERROR "File URI download failed - output file does not exist: ${output_path}")
 ENDIF()
+
+FILE(REMOVE_RECURSE "${CMLIB_REQUIRED_ENV_TMP_PATH}")
