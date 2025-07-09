@@ -1,3 +1,11 @@
+## 
+#
+# Functions are duplicated from CMURIL component to not need CMUTI to test CMLIB.
+# CMLIB is amain repository. Do not relay on other components to test itself.
+#
+
+
+
 ## Transform Git URI Function
 #
 # Converts HTTP(S) Git URIs to SSH format

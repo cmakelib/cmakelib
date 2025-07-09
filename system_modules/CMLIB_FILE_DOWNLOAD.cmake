@@ -197,15 +197,18 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 		MESSAGE(FATAL_ERROR "Path to download file does not exist - '${path}'")
 	ENDIF()
 
+	SET(copy_result)
 	IF(IS_DIRECTORY "${path}")
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Copy Directory '${path}' --> '${__OUTPUT_PATH}'")
 		EXECUTE_PROCESS(
+			RESULT_VARIABLE copy_result
 			COMMAND ${CMAKE_COMMAND} -E copy_directory
 			${path} "${__OUTPUT_PATH}"
 		)
 	ELSE()
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("Copy File '${path}' --> '${__OUTPUT_PATH}'")
 		EXECUTE_PROCESS(
+			RESULT_VARIABLE copy_result
 			COMMAND ${CMAKE_COMMAND} -E copy
 			${path} "${__OUTPUT_PATH}"
 		)
@@ -214,7 +217,12 @@ FUNCTION(CMLIB_FILE_DOWNLOAD)
 	IF(__FILE_HASH_OUTPUT_VAR)
 		SET(${__FILE_HASH_OUTPUT_VAR} ${file_hash} PARENT_SCOPE)
 	ENDIF()
-	SET(${__STATUS_VAR} ON PARENT_SCOPE)
+	IF(copy_result EQUAL 0)
+		SET(${__STATUS_VAR} ON PARENT_SCOPE)
+	ELSE()
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("Copy File/Directory failed '${path}' --> '${__OUTPUT_PATH}'")
+		SET(${__STATUS_VAR} OFF PARENT_SCOPE)
+	ENDIF()
 	_CMLIB_FILE_TMP_DIR_CLEAN()
 ENDFUNCTION()
 
@@ -382,7 +390,7 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_GIT)
 	IF(NOT file_not_found EQUAL 0)
 		_CMLIB_LIBRARY_DEBUG_MESSAGE("git-archive failed. Status: ${file_not_found}\n${git_stderr}")
 		IF(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY)
-			_CMLIB_LIBRARY_DEBUG_MESSAGE("Cannot download file from git!")
+			_CMLIB_LIBRARY_DEBUG_MESSAGE("Cannot download file from git! git-archive is required by CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY option!")
 			_CMLIB_FILE_TMP_DIR_CLEAN()
 			UNSET(${__STATUS_VAR} PARENT_SCOPE)
 			RETURN()

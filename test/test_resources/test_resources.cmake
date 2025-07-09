@@ -27,6 +27,10 @@ SET(_TEST_RESOURCES_DOWNLOAD_ENABLED
     CACHE INTERNAL "Test resources directory"
 )
 
+SET(_TEST_RESOURCES_ERR_MSG
+    "Test resources not downloaded! Use TEST_RESOURCES_DOWNLOAD(). Is there a possibility the test is not called from test/CMakeLists.txt?"
+    CACHE INTERNAL "Test resources error message"
+)
 
 
 ## Download Test Resources Function
@@ -43,7 +47,7 @@ FUNCTION(TEST_RESOURCES_DOWNLOAD)
     ENDIF()
     SET(test_repo_uri "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git")
     CMLIB_FILE_DOWNLOAD(
-        TYPE        GIT
+        URI_TYPE    GIT
         URI         "${test_repo_uri}"
         STATUS_VAR  download_status
         OUTPUT_PATH "${_TEST_RESOURCES_DIR}"
@@ -88,13 +92,8 @@ ENDFUNCTION()
 # )
 #
 FUNCTION(TEST_RESROUCES_GET_FILE_URI relative_path output_var)
-    IF(NOT EXISTS _TEST_RESOURCES_DIR)
-        TEST_RESOURCES_DOWNLOAD_ENABLE()
-        TEST_RESOURCES_DOWNLOAD()
-        TEST_RESOURCES_DOWNLOAD_DISABLE()
-    ENDIF()
-    IF(NOT DEFINED _TEST_RESOURCES_DIR)
-        MESSAGE(FATAL_ERROR "Test resources not downloaded!")
+    IF(NOT EXISTS "${_TEST_RESOURCES_DIR}")
+        MESSAGE(FATAL_ERROR "${_TEST_RESOURCES_ERR_MSG}")
     ENDIF()
 
     SET(full_path "${_TEST_RESOURCES_DIR}/${relative_path}")
@@ -116,10 +115,8 @@ ENDFUNCTION()
 # )
 #
 FUNCTION(TEST_RESOURCES_GET_BASE_DIR  output_var)
-    IF(NOT EXISTS _TEST_RESOURCES_DIR)
-        TEST_RESOURCES_DOWNLOAD_ENABLE()
-        TEST_RESOURCES_DOWNLOAD()
-        TEST_RESOURCES_DOWNLOAD_DISABLE()
+    IF(NOT EXISTS "${_TEST_RESOURCES_DIR}")
+        MESSAGE(FATAL_ERROR "${_TEST_RESOURCES_ERR_MSG}")
     ENDIF()
     SET(${output_var} "${_TEST_RESOURCES_BASE_DIR}" PARENT_SCOPE)
 ENDFUNCTION()

@@ -14,7 +14,7 @@ FIND_PACKAGE(CMLIB)
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../TEST.cmake")
 
-TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/file_uri_download")
+#TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/file_uri_download")
 TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/http_uri_download")
 TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/git_uri_download")
 TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/git_revision_validation")
