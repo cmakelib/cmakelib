@@ -39,7 +39,7 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 #
 # ARCHIVE_TMP Directory is cleaned (deleted) at the end of function call
 # (except one exception: If CMLIB is in debug mode, the ARCHIVE_TMP is not deleted
-# at the anf of function call)
+# at the end of function call)
 #
 # <function>(
 #		ARCHIVE_PATH     <archive_path>

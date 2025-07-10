@@ -26,7 +26,7 @@ INCLUDE_GUARD(GLOBAL)
 # Let the PatternSet is finite set of all Patterns.
 #
 # Function KeyToPattern: KeySet --> PatternSet is defined as
-# KeyToPattern(key) = '<' + key + '>'. (it'a bijection!)
+# KeyToPattern(key) = '<' + key + '>'. (it's a bijection!)
 #
 # We say that Template is divisible by pattern p from PatternSet if there are
 # string a,b from S: Template = a + p + b

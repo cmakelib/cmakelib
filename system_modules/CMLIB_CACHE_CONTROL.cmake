@@ -7,7 +7,7 @@
 # - does not cache same dependency under different remotes
 # - does not cache same dependency under different keywords
 #
-# To achive cache control over dependencies cached by the system
+# To achieve cache control over dependencies cached by the system
 # the cache control file is introduced.
 #
 # cache control file is a file which contains string in form
@@ -30,7 +30,7 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_CACHE)
 
 SET(CMLIB_CACHE_CONTROL_META_BASE_DIR "${CMLIB_REQUIRED_ENV_TMP_PATH}/cache_control"
 	CACHE INTERNAL
-	"Bas drectory for meta information for cache control"
+	"Base directory for meta information for cache control"
 )
 
 SET(CMLIB_CACHE_CONTROL_META_CONTROL_DIR "${CMLIB_REQUIRED_ENV_TMP_PATH}/keys_control"
@@ -39,7 +39,7 @@ SET(CMLIB_CACHE_CONTROL_META_CONTROL_DIR "${CMLIB_REQUIRED_ENV_TMP_PATH}/keys_co
 )
 
 # Value of the KEYDELIM var is used in Cmake regex
-# Please avaid using special regex characters
+# Please avoid using special regex characters
 SET(CMLIB_CACHE_CONTROL_KEYWORDS_KEYDELIM "|"
 	CACHE INTERNAL
 	"Delimiter for keywords in control file. Do NOT use ';'"

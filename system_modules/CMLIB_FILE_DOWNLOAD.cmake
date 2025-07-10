@@ -1,7 +1,7 @@
 ## Main
 #
 # CMLIB File Download
-# It enables to store remote files localy
+# It enables to store remote files locally
 # (Download files from remote to local filesystem)
 #
 ## Functions
@@ -25,7 +25,7 @@ SET(CMLIB_FILE_DOWNLOAD_DEFAULT_REVISION "master"
 
 SET(CMLIB_FILE_DOWNLOAD_TIMEOUT 100
 	CACHE INTERNAL
-	"Inactivity timeout for File Downlad"
+	"Inactivity timeout for File Download"
 )
 
 OPTION(CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS

@@ -215,7 +215,7 @@ Project is licensed under [BSD-3-Clause License](LICENSE)
 [CMLIB_DEPENDENCY]:      ./system_modules/CMLIB_DEPENDENCY.cmake
 [CMLIB_COMPONENT]:       ./system_modules/CMLIB_COMPONENT.cmake
 [CMLIB_STORAGE]:         ../cmakelib-component-storage
-[CMDEF]:                 ../cmakelib-component-basedef
+[CMDEF]:                 ../cmakelib-component-cmdef
 [System modules]:        ./system_modules/
 [system modules]:        ./system_modules/
 [example]:               ./example/

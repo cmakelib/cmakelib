@@ -23,7 +23,7 @@ SET(_CMLIB_COMPONENT_AVAILABLE_LIST cmdef storage cmutil
 
 #
 # Revisions to use for each respective component.
-# When CMLIB_LOCAL_BASE_PATH is set the revisions aspecified by these variables are ignored. 
+# When CMLIB_LOCAL_BASE_PATH is set the revisions as specified by these variables are ignored. 
 #
 
 SET(_CMLIB_COMPONENT_REVISION_VARANAME_PREFIX "CMLIB_COMPONENT_REVISION_"
