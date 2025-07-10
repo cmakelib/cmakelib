@@ -177,26 +177,8 @@ you are doing)
 
 ## Tests
 
-For test go to the test/ directory and run
+For test go to the [test/] and read the attached [test/README.md].
 
-Linux/Mac Os:
-
-```
-	GIT_TERMINAL_PROMPT=0 cmake .
-	GIT_TERMINAL_PROMPT=0 cmake -P ./CMakeLists.txt
-```
-
-Windows PowerShell:
-
-```
-	$env:GIT_TERMINAL_PROMPT=0
-	cmake .
-	cmake -P ./CMakeLists.txt
-```
-
-then just clean up all intermediate files by
-
-    git clean -xfd
 
 ## CI/CD test runners
 
@@ -217,7 +199,7 @@ Local variables can be named as lowercase.
 
 Just call "git pull" on repository root.
 
-In case of cmake-generation problem reset cache.
+In case of cmake-generation problem reset the cache and remove `CMLIB_REQUIRED_ENV_TMP_PATH` directory.
 
 ## License
 
@@ -239,6 +221,8 @@ Project is licensed under [BSD-3-Clause License](LICENSE)
 [example]:               ./example/
 [example/DEPENDENCY]:    ./example/DEPENDENCY
 [buildbadge_github]:     https://github.com/cmakelib/cmakelib/workflows/Tests/badge.svg
+[docker-build-images]:   ../docker-build-images
+[github packages]:       https://github.com/orgs/cmakelib/packages
+[test/]:                 ./test/
+[test/README.md]:        ./test/README.md
 [example/DEPENDENCY/boost_example]: ./example/DEPENDENCY/boost_example/
-[docker-build-images]: ../docker-build-images
-[github packages]: https://github.com/orgs/cmakelib/packages
