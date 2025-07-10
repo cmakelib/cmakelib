@@ -12,10 +12,19 @@ To use test resources in a test case, include the `test_resources.cmake` file.
 - Use TEST_RESROUCES_GET_FILE_URI() to get file:// URI for test files from downloaded repository.
 - Test reosurces are downloaded from the `cmakelib-test` repository.
 
+## Manual Download
+
+To download manually go to the `test_resources` directory and run
+
+```bash
+cd test_resources
+cmake -P ./test_resources_download.cmake
+```
+
 ### Get Resource File URI
 
 ```cmake
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../test_resources/test_resources.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/test_resources/test_resources.cmake")
 
 # Use test resources
 TEST_RESROUCES_GET_FILE_URI("relative/path/to/resource" resource_uri)

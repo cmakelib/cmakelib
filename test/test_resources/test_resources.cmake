@@ -27,8 +27,10 @@ SET(_TEST_RESOURCES_DOWNLOAD_ENABLED
     CACHE INTERNAL "Test resources directory"
 )
 
-SET(_TEST_RESOURCES_ERR_MSG
-    "Test resources not downloaded! Use TEST_RESOURCES_DOWNLOAD(). Is there a possibility the test is not called from test/CMakeLists.txt?"
+SET(_TEST_RESOURCES_ERR_MSG [[
+Test Resources are not downloaded! Use TEST_RESOURCES_DOWNLOAD(). Is there a possibility the test is not called from test/CMakeLists.txt?
+Test Resources can be downloaded manually - go to test_resources directory and run 'cmake -P ./test_resources_download.cmake'
+]]
     CACHE INTERNAL "Test resources error message"
 )
 
