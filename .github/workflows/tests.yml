@@ -16,10 +16,12 @@ jobs:
         image: [
           "test_debian:bullseye",
           "test_debian:bookworm",
+          "test_debian:trixie",
           "test_ubuntu:2004",
           "test_ubuntu:2204",
           "test_ubuntu:2404",
-          "test_fedora:41"
+          "test_fedora:41",
+          "test_fedora:42"
           ]
     runs-on: ubuntu-latest
     container:
@@ -47,10 +49,12 @@ jobs:
         image: [
           "test_debian:bullseye",
           "test_debian:bookworm",
+          "test_debian:trixie",
           "test_ubuntu:2004",
           "test_ubuntu:2204",
           "test_ubuntu:2404",
-          "test_fedora:41"
+          "test_fedora:41",
+          "test_fedora:42"
           ]
     runs-on: ubuntu-latest
     container:
