@@ -76,7 +76,7 @@ jobs:
             git remote set-url origin "${{ github.server_url }}/${{ github.repository }}"
             cd test/ && cmake -DCMLIB_DEBUG=ON -P ./CMakeLists.txt
 
-  test_macos_11:
+  test_macos:
     runs-on: macos-latest
     steps:
       - name: Install SSH key
@@ -92,7 +92,7 @@ jobs:
       - name: Run tests
         run: cd test && cmake -DCMLIB_DEBUG=ON .
 
-  test_macos_11_script:
+  test_macos_script:
     runs-on: macos-latest
     steps:
       - name: Install SSH key
