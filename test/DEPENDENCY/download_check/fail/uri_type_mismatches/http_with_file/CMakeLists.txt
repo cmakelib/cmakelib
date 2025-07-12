@@ -11,8 +11,12 @@ ENDIF()
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../../../")
 FIND_PACKAGE(CMLIB)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../../../transform_git_uri.cmake")
 
-SET(HTTP_URI "https://example.com/file.txt")
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test/archive/v1.0.0.zip"
+    OUTPUT_VAR HTTP_URI
+)
 
 CMLIB_DEPENDENCY(
     TYPE FILE

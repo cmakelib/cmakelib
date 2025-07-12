@@ -15,7 +15,10 @@ INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../transform_git_uri.cmake")
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../TEST.cmake")
 
-SET(VALID_HTTP_URI   "http://cmake.org/")
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test/archive/v1.0.0.zip"
+    OUTPUT_VAR VALID_HTTP_URI
+)
 SET(INVALID_HTTP_URI "http://cmake-does-not-exist.org/")
 SET(INVALID_GIT_URI  "https://github.com/cmakelib/utils-does-not-exist.git")
 TRANSFORM_GIT_URI_TO_HTTPS(

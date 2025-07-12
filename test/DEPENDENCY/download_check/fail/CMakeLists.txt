@@ -45,8 +45,12 @@ CMLIB_TEMPLATE_EXPAND(git_uri_unreachable_git_expected_msg DOWNLOAD_ERROR_TEMPLA
 CMLIB_TEMPLATE_EXPAND(git_uri_unreachable_ssh_expected_msg DOWNLOAD_ERROR_TEMPLATE
     uri "git@nonexistent.domain.invalid:repo.git")
 
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test/archive/v1.0.0.zip"
+    OUTPUT_VAR http_with_file_uri)
+
 CMLIB_TEMPLATE_EXPAND(http_with_file_expected_msg URI_TYPE_MISMATCH_TEMPLATE
-    uri "https://example.com/file.txt"
+    uri "${http_with_file_uri}"
     type "FILE")
 
 TRANSFORM_GIT_URI_TO_HTTPS(
@@ -65,11 +69,12 @@ CMLIB_TEMPLATE_EXPAND(file_with_http_expected_msg URI_TYPE_MISMATCH_TEMPLATE
 CMLIB_TEMPLATE_EXPAND(file_with_git_expected_msg DOWNLOAD_ERROR_TEMPLATE
     uri "${file_uri}")
 
-#
-# It is correct. It is not know from URI that it is not a valid git uri in general
-#
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test/archive/v1.0.0.zip"
+    OUTPUT_VAR http_with_git_uri)
+
 CMLIB_TEMPLATE_EXPAND(http_with_git_expected_msg DOWNLOAD_ERROR_TEMPLATE
-    uri "https://example.com/file.txt")
+    uri "${http_with_git_uri}")
 
 TEST_RESOURCES_GET_BASE_DIR(test_resources_dir)
 SET(dir_uri "file://${test_resources_dir}")
