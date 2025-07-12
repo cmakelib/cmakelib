@@ -93,7 +93,7 @@ ENDFUNCTION()
 #     <output_var>     // Variable to store the file:// URI
 # )
 #
-FUNCTION(TEST_RESROUCES_GET_FILE_URI relative_path output_var)
+FUNCTION(TEST_RESOURCES_GET_FILE_URI relative_path output_var)
     IF(NOT EXISTS "${_TEST_RESOURCES_DIR}")
         MESSAGE(FATAL_ERROR "${_TEST_RESOURCES_ERR_MSG}")
     ENDIF()

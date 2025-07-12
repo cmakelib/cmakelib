@@ -3,9 +3,9 @@
 
 Comprehensive test suite for the CMAKELIB library.
 
-CMlib is consistent and working if and only if all tests pass!
+CMLIB is consistent and functional only when all tests pass.
 
-If one test fails the CMLib does not work as expected! Even if the failure is not directly related to the needed functionality! Whole consistency is needed to be sure the system works as expected!
+Any test failure indicates CMLIB is not working as expected, even if the failure seems unrelated to required functionality. Complete system consistency is essential for reliable operation.
 
 ## Run
 

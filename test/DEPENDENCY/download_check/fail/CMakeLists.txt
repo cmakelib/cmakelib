@@ -61,7 +61,7 @@ CMLIB_TEMPLATE_EXPAND(git_with_file_expected_msg URI_TYPE_MISMATCH_TEMPLATE
     uri "${git_with_file_uri}"
     type "FILE")
 
-TEST_RESROUCES_GET_FILE_URI("README.md" file_uri)
+TEST_RESOURCES_GET_FILE_URI("README.md" file_uri)
 CMLIB_TEMPLATE_EXPAND(file_with_http_expected_msg URI_TYPE_MISMATCH_TEMPLATE
     uri "${file_uri}"
     type "HTTP")

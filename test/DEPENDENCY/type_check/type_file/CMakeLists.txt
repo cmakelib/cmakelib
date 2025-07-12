@@ -14,7 +14,7 @@ FIND_PACKAGE(CMLIB)
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../TEST.cmake")
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../test_resources/test_resources.cmake")
 
-TEST_RESROUCES_GET_FILE_URI("TEST_MODULE.cmake" FILE_URI)
+TEST_RESOURCES_GET_FILE_URI("TEST_MODULE.cmake" FILE_URI)
 
 CMLIB_DEPENDENCY(
     TYPE FILE
@@ -25,5 +25,3 @@ CMLIB_DEPENDENCY(
 IF(NOT EXISTS "${output_path}")
     MESSAGE(FATAL_ERROR "TYPE=FILE test failed - output file does not exist: ${output_path}")
 ENDIF()
-
-MESSAGE(STATUS "TYPE=FILE test successful: ${output_path}")

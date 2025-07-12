@@ -20,7 +20,7 @@ FIND_PACKAGE(CMLIB)
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../test_resources/test_resources.cmake")
 
 # Use a unique file URI to avoid cache conflicts
-TEST_RESROUCES_GET_FILE_URI("README.md" FILE_URI)
+TEST_RESOURCES_GET_FILE_URI("README.md" FILE_URI)
 
 CMLIB_DEPENDENCY(
     TYPE FILE
