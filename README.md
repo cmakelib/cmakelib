@@ -201,6 +201,10 @@ Just call "git pull" on repository root.
 
 In case of cmake-generation problem reset the cache and remove `CMLIB_REQUIRED_ENV_TMP_PATH` directory.
 
+## Release
+
+Release process is described in [doc/ReleaseProcess.md]
+
 ## License
 
 Project is licensed under [BSD-3-Clause License](LICENSE)
