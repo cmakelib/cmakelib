@@ -13,6 +13,7 @@ ENDIF()
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../../")
 FIND_PACKAGE(CMLIB)
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../../transform_git_uri.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../../cache_var.cmake")
 
 TRANSFORM_GIT_URI(
     URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
@@ -57,5 +58,12 @@ SET(testbranch_files
     "cmake-test/test_branch_README.txt"
 )
 
+CACHE_VAR_FORCE_SET(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE OFF)
 TEST_BRANCH_FILES("master"      "MASTER"     "${master_files}")
 TEST_BRANCH_FILES("test-branch" "TESTBRANCH" "${testbranch_files}")
+CACHE_VAR_RESTORE(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE)
+
+CACHE_VAR_FORCE_SET(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE ON)
+TEST_BRANCH_FILES("master"      "MASTER"     "${master_files}")
+TEST_BRANCH_FILES("test-branch" "TESTBRANCH" "${testbranch_files}")
+CACHE_VAR_RESTORE(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE)

@@ -22,7 +22,7 @@ SET(DOWNLOAD_ERROR_TEMPLATE
 
 SET(_rg "[\n]*[ \t]*")
 SET(URI_TYPE_MISMATCH_TEMPLATE
-    "URI${_rg}'<uri>'${_rg}is not valid for <type>${_rg}URI_TYPE!")
+    "URI${_rg}'<uri>'${_rg}is not${_rg}valid for <type>${_rg}URI_TYPE!")
 
 SET(FILE_URI_DIRECTORY_TEMPLATE
     "Path specified by URI must be file for FILE URI_TYPE.[ ]+Directory${_rg}'<uri>'${_rg}provided.")
