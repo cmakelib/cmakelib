@@ -22,21 +22,21 @@ For examples look at the [example] directory
 - clone directory by `git clone https://github.com/cmakelib/cmakelib.git <path_to_cmakelib_repo>`
 - export CMLIB_DIR=<path_to_cmakelib_repo>
 
-Small example for Ubuntu 20.04
+Example with nlohmann json library
 
-```
+```cmake
 FIND_PACKAGE(CMLIB REQUIRED)
 
 CMLIB_DEPENDENCY(
-	# We use koudis/boost-prebuilt-binaries
-	URI "https://bit.ly/3rQsAXd"
-	TYPE ARCHIVE
-	OUTPUT_PATH_VAR BOOST_ROOT
+    URI "https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz"
+    TYPE ARCHIVE
+    OUTPUT_PATH_VAR nlohmann_json_DIR
+    KEYWORDS NLOHMANN JSON
 )
-FIND_PACKAGE(Boost 1.76.0 COMPONENTS log_setup log REQUIRED)
+FIND_PACKAGE(nlohmann_json 3.12.0 REQUIRED)
 ```
 
-Full example can be found at [example/DEPENDENCY/boost_example]
+Full example can be found at [example/DEPENDENCY/nlohmann_json_example]
 
 ## Installation
 
@@ -48,7 +48,7 @@ Full example can be found at [example/DEPENDENCY/boost_example]
 ### Library install
 
 It is intended that the user has only one global instance of library. However it is possible use `cmakelib`
-as submodule and use `ADD_SUBDIRECTORY`. However it is not recommanded.
+as submodule and use `INCLUDE(<submodule_path>/CMLIB.cmake)`. However it is not recommanded.
 
 #### Global install
 
@@ -229,4 +229,4 @@ Project is licensed under [BSD-3-Clause License](LICENSE)
 [github packages]:       https://github.com/orgs/cmakelib/packages
 [test/]:                 ./test/
 [test/README.md]:        ./test/README.md
-[example/DEPENDENCY/boost_example]: ./example/DEPENDENCY/boost_example/
+[example/DEPENDENCY/nlohmann_json_example]: ./example/DEPENDENCY/nlohmann_json_example/
