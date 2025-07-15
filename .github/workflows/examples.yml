@@ -1,0 +1,119 @@
+name: Examples
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+
+  # Linux examples using single Docker container
+  examples-linux:
+    strategy:
+      matrix:
+        example: [
+          "example/CACHE",
+          "example/ARCHIVE", 
+          "example/DEPENDENCY/nlohmann_json_example",
+          "example/DEPENDENCY/cache_control_disabled",
+          "example/FILE_DOWNLOAD"
+        ]
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/cmakelib/test_ubuntu:2404
+    steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSHKEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          if_key_exists: fail
+      
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      - name: Run example - ${{ matrix.example }}
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git remote set-url origin "${{ github.server_url }}/${{ github.repository }}"
+          cd ${{ matrix.example }}
+          mkdir -p build
+          cd build
+          cmake .. -DCMLIB_DEBUG=ON
+          cmake --build .
+
+  # Windows examples
+  examples-windows:
+    strategy:
+      matrix:
+        example: [
+          "example/CACHE",
+          "example/ARCHIVE",
+          "example/DEPENDENCY/nlohmann_json_example",
+          "example/DEPENDENCY/cache_control_disabled",
+          "example/FILE_DOWNLOAD"
+        ]
+    runs-on: windows-latest
+    steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSHKEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          if_key_exists: fail
+      
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      - name: Run example - ${{ matrix.example }}
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git remote set-url origin "${{ github.server_url }}/${{ github.repository }}"
+          cd ${{ matrix.example }}
+          mkdir build -ErrorAction SilentlyContinue
+          cd build
+          cmake .. -DCMLIB_DEBUG=ON
+          cmake --build . --config Release
+
+  # macOS examples
+  examples-macos:
+    strategy:
+      matrix:
+        example: [
+          "example/CACHE",
+          "example/ARCHIVE", 
+          "example/DEPENDENCY/nlohmann_json_example",
+          "example/DEPENDENCY/cache_control_disabled",
+          "example/FILE_DOWNLOAD"
+        ]
+    runs-on: macos-latest
+    steps:
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSHKEY }}
+          name: id_rsa
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+          if_key_exists: fail
+      
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      
+      - name: Run example - ${{ matrix.example }}
+        run: |
+          git config --global --add safe.directory "$(pwd)"
+          git remote set-url origin "${{ github.server_url }}/${{ github.repository }}"
+          cd ${{ matrix.example }}
+          mkdir -p build
+          cd build
+          cmake .. -DCMLIB_DEBUG=ON
+          cmake --build .
