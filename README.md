@@ -62,12 +62,12 @@ mkdir -p ~/cmakelib && cd ~/cmakelib
 git clone https://github.com/cmakelib/cmakelib.git
 ```
 
-To make CMLIB works add following lines to your .bashrc
+To make CMLIB work add following lines to your .bashrc
 
 ```bash
-echo "export CMLIB_DIR=$(PWD)/cmakelib" >> .bashrc
+echo "export CMLIB_DIR=$PWD/cmakelib" >> .bashrc
 # If one, global cache directory is required setup
-#echo "export CMLIB_REQUIRED_ENV_TMP_PATH=$(PWD)/cmakelib_cache" >> .bashrc
+#echo "export CMLIB_REQUIRED_ENV_TMP_PATH=$PWD/cmakelib_cache" >> .bashrc
 ```
 
 Then in CMake project call `FIND_PACKAGE(CMLIB REQUIRED)`

@@ -65,8 +65,8 @@ ENDIF()
 #   be stored under random generated name to OUTPUT_PATH.
 # - if the URI_TYPE is "FILE" the OUTPUT_PATH must represent file.
 #   If the OUTPUT_PATH will represent directory remote file will
-#   be stored under random generated name to OUTPUT_PATH.
-# - if the URI_TYPE is  "GIT" the OUTPUT_PATH can represent file
+#   be stored under the same name as referenced by URI to OUTPUT_PATH.
+# - if the URI_TYPE is "GIT" the OUTPUT_PATH can represent file
 # or directory. Result is dependent on what is downloaded from given GIT URI.
 #		- if the downloaded content is not a directory then
 #			- if OUTPUT_PATH is directory -> the file downloaded from given GIT
