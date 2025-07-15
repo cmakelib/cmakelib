@@ -32,16 +32,21 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # If you try to add same dependency with same REMOTE_ID_SET but under two different KEYWORDS set
 # then the error occure.
 #
+# By design the function proceeds in two steps
+# - Download files from remote to temporary directory.
+# - Cache downloaded files.
+# These two steps are isolated by a well defined interface thus simplify testing and debugging.
+#
 # [Arguments]
+#
 # KEYWORDS are optional and can be empty.
 # Represents ordered set of keywords.
 # There is set of reserved keywords RK = { CMLIB }. Do not use this keywords
-# unless you known what you are doing.
+# unless you know what you are doing.
 #
 # TYPE must be specified.
 # Represents resource type (the resource which will be downloaded from remote)
 # Must be one of <MODULE|ARCHIVE|FILE|DIRECTORY>.
-# Type does not 
 # Note that for DIRECTORY type only the GIT uri can be used.
 #
 # URI standard HTTP URI or GIT uri supported by 'git clone' command.
@@ -168,13 +173,19 @@ FUNCTION(CMLIB_DEPENDENCY)
 			FILE(GLOB glob "${download_tmp_dir}/*")
 			LIST(LENGTH glob downloaded_files_size)
 			IF((downloaded_files_size EQUAL 0))
-				MESSAGE(FATAL_ERROR "Download directory problem ${__URI}")
+				MESSAGE(FATAL_ERROR "Download directory problem. URI is unreachable, connection was interrupted or timeout occurred.\n"
+					"Check combination of URI, URI_TYPE and other arguments and try again\n"
+					"URI: ${__URI}\n"
+				)
 			ENDIF()
 		ELSE()
 			FILE(GLOB downloaded_files "${download_tmp_dir}/*")
 			LIST(LENGTH downloaded_files downloaded_files_size)
 			IF(NOT (downloaded_files_size EQUAL 1))
-				MESSAGE(FATAL_ERROR "Download files problem - ${__URI}")
+				MESSAGE(FATAL_ERROR "Download files problem. URI is unreachable, connection was interrupted or timeout occurred.\n"
+					"Check combination of URI, URI_TYPE and other arguments and try again\n"
+					"URI: ${__URI}\n"
+				)
 			ENDIF()
 		ENDIF()
 

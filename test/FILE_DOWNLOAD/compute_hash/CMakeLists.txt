@@ -9,11 +9,19 @@ ENDIF()
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
 FIND_PACKAGE(CMLIB)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../transform_git_uri.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../test_resources/test_resources.cmake")
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../TEST.cmake")
 
-SET(VALID_GIT_URI         "https://github.com/cmakelib/cmakelib-test.git")
-SET(VALID_GIT_URI_ARCHIVE "git@gitlab.com:cmakelib/cmakelib-test.git")
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR VALID_GIT_URI
+)
+TRANSFORM_GIT_URI(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR VALID_GIT_URI_ARCHIVE
+)
 SET(GIT_REVISION_PATH_ZIP "cmake-test/test_branch_same/same.zip")
 SET(GIT_REVISION_NAME     "test-branch")
 
@@ -68,6 +76,37 @@ FUNCTION(DOWNLOAD_AND_COMPARE_DIR_FILE)
     TEST_VAR_NOT_EQUAL(hash hash2)
 ENDFUNCTION()
 
+FUNCTION(DOWNLOAD_AND_COMPARE_FILE_URI)
+    TEST_RESOURCES_GET_FILE_URI("README.md" uri)
+
+    SET(output_path1 "${CMAKE_CURRENT_BINARY_DIR}/downloaded_file1.txt")
+    CMLIB_FILE_DOWNLOAD(
+        URI "${uri}"
+        OUTPUT_PATH "${output_path1}"
+        STATUS_VAR status1
+        FILE_HASH_OUTPUT_VAR hash1
+    )
+    TEST_VAR_TRUE(status1)
+    TEST_VAR_TRUE(hash1)
+
+    SET(output_path2 "${CMAKE_CURRENT_BINARY_DIR}/downloaded_file2.txt")
+    CMLIB_FILE_DOWNLOAD(
+        URI "${uri}"
+        OUTPUT_PATH "${output_path2}"
+        STATUS_VAR status2
+        FILE_HASH_OUTPUT_VAR hash2
+    )
+    TEST_VAR_TRUE(status2)
+    TEST_VAR_TRUE(hash2)
+    TEST_VAR_EQUAL(hash1 hash2)
+
+    # Verify the downloaded content matches the original
+    STRING(REGEX REPLACE "^file://" "" source_file_path "${uri}")
+    FILE(READ "${source_file_path}" original_content)
+    FILE(READ "${output_path1}" downloaded_content)
+    TEST_VAR_EQUAL(original_content downloaded_content)
+ENDFUNCTION()
+
 
 
 SET(CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY ON
@@ -87,3 +126,5 @@ DOWNLOAD_AND_COMPARE(hash_archive_off ${VALID_GIT_URI_ARCHIVE})
 TEST_VAR_EQUAL(hash_archive_on hash_archive_off)
 
 DOWNLOAD_AND_COMPARE_DIR_FILE()
+
+DOWNLOAD_AND_COMPARE_FILE_URI()

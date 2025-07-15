@@ -5,9 +5,9 @@
 # and retrieve them if needed.
 #
 # Each cache entry is identified by
-# - ordered set of keywords refered as cache id.
+# - ordered set of keywords referred as cache id.
 #   Keywords order is done by user (so under in which keywords are listed)
-# - file system repsentation --> we can reconstruct cache if we lost
+# - file system representation --> we can reconstruct cache if we lost
 #   cache entries in CMake cache.
 #
 # Cache entry is represented by CMake Cache variable.
@@ -44,7 +44,7 @@
 # Cache distincts between files and directories.
 #
 ## Cache type constraints
-# If the file under PATH is directory then folowwing constraints
+# If the file under PATH is directory then following constraints
 # for Keywords must be met:
 #	Let KS is set of all already cached keywords set (keywords set which already has a cache entry)
 #	and _k_ is keywords set, _k_ not in KS.

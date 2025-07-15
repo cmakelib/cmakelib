@@ -4,6 +4,8 @@
 # try to add same file with different URI
 # under explicit diffirent keyword sets.
 #
+# TEST must FAIL
+#
 
 IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
 	CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
@@ -12,9 +14,16 @@ ENDIF()
 
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../")
 FIND_PACKAGE(CMLIB)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../transform_git_uri.cmake")
 
-SET(GIT_DOWNLOAD_URI  "git@github.com:cmakelib/cmakelib-test.git")
-SET(GIT_DOWNLOAD_URI2 "https://github.com/cmakelib/cmakelib-test.git")
+TRANSFORM_GIT_URI(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR GIT_DOWNLOAD_URI
+)
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR GIT_DOWNLOAD_URI2
+)
 
 
 

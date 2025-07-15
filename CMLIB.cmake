@@ -6,8 +6,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
 
 ##
-# Compatibility version is na integer positive number.
-# Each instance if CMakeLib has one Compatibility version.
+# Compatibility version is an integer positive number.
+# Each instance of CMakeLib has one Compatibility version.
 # Let A, B be an instances of CMakeLib. Let COMP_VER(A) is Compatibility version for A and
 # COMP_VER(B) is compatibility version for B.
 # We say that A is compatible with  B if and only if COMP_VER(A) == COMP_VER(B)
@@ -16,7 +16,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
 SET(_CMLIB_COMPATIBILITY_VERSION 1)
 IF(DEFINED CMLIB_COMPATIBILITY_VERSION)
 	IF(NOT CMLIB_COMPATIBILITY_VERSION EQUAL _CMLIB_COMPATIBILITY_VERSION)
-		MESSAGE(FATAL_ERROR "Sorry, you have two incopatibility CMake-lib instances!")
+		MESSAGE(FATAL_ERROR "Sorry, you have two incompatible CMake-lib instances!")
 	ENDIF()
 ENDIF()
 
@@ -64,7 +64,7 @@ ENDMACRO()
 # Include system module.
 # Module is included only first time.
 # System module must define varible <system_module_name>_INCLUDED
-# which indecates that the module is already included
+# which indicates that the module is already included
 # <function>(
 #	"<system_module_name>" // Name of the required system module. Without extension
 # )

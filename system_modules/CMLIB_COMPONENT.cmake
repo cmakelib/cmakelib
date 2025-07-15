@@ -21,6 +21,31 @@ SET(_CMLIB_COMPONENT_AVAILABLE_LIST cmdef storage cmutil
 	"List of available components."
 )
 
+#
+# Revisions to use for each respective component.
+# When CMLIB_LOCAL_BASE_PATH is set the revisions as specified by these variables are ignored. 
+#
+
+SET(_CMLIB_COMPONENT_REVISION_VARANAME_PREFIX "CMLIB_COMPONENT_REVISION_"
+	CACHE INTERNAL
+	"Prefix for component revision variable name."
+)
+
+SET(CMLIB_COMPONENT_REVISION_CMDEF "v0.2.1"
+	CACHE STRING
+	"Revision of CMDEF component to use"
+)
+
+SET(CMLIB_COMPONENT_REVISION_STORAGE "master"
+	CACHE STRING
+	"Revision of STORAGE component to use"
+)
+
+SET(CMLIB_COMPONENT_REVISION_CMUTIL "master"
+	CACHE STRING
+	"Revision of CMUTIL component to use"
+)
+
 _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
 _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 
@@ -36,7 +61,8 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 # from the remote repositories.
 #
 # If the variable CMLIB_COMPONENT_LOCAL_BASE_PATH is set the value is used
-# as a directory where components are searched for.
+# as a directory where components are searched for and revisions specified by
+# CMLIB_COMPONENT_REVISION_<component> are ignored.
 #
 # <function> (
 #		COMPONENTS <components> M
@@ -113,6 +139,7 @@ FUNCTION(_CMLIB_COMPONENT)
 			SET(component_path ${CMLIB_COMPONENT_LOCAL_BASE_PATH}/${component_dir_name})
 			_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: ${component_path}")
 		ELSE()
+			_CMLIB_COMPONENT_GET_REVISION(component_revision ${component_upper})
 			SET(component_uri ${CMLIB_REQUIRED_ENV_REMOTE_URL}/${component_dir_name})
 			_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: ${component_uri}")
 			CMLIB_DEPENDENCY(
@@ -120,6 +147,7 @@ FUNCTION(_CMLIB_COMPONENT)
 				TYPE MODULE
 				URI "${component_uri}"
 				URI_TYPE GIT
+				REVISION ${component_revision}
 				OUTPUT_PATH_VAR component_path
 			)
 		ENDIF()
@@ -127,4 +155,21 @@ FUNCTION(_CMLIB_COMPONENT)
 		LIST(APPEND CMAKE_MODULE_PATH "${component_path}")
 	ENDFOREACH()
 	SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
+ENDFUNCTION()
+
+
+
+## Helper
+#
+# <function> (
+#		<output_var>     // output variable where to revision will be stored
+#		<component_name>
+# )
+#
+FUNCTION(_CMLIB_COMPONENT_GET_REVISION output_var component_name)
+	set(varname ${_CMLIB_COMPONENT_REVISION_VARANAME_PREFIX}${component_name})
+	IF(NOT DEFINED ${varname})
+		MESSAGE(FATAL_ERROR "Component REVISION variable '${varname}' is not defined!")
+	ENDIF()
+	SET(${output_var} ${${varname}} PARENT_SCOPE)
 ENDFUNCTION()

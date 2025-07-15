@@ -4,24 +4,25 @@ INCLUDE_GUARD(GLOBAL)
 
 
 ##
-#
-# Same behavior as CMAKE_PARSE_ARGUMENTS, but with "required" addon :)..
+# CMLIB_PARSE_ARGUMENTS - Enhanced argument parser with REQUIRED validation
 #
 # <function>(
-#		[PREFIX <prefix>]
-#		[OPTIONS <options>]     M
-#		[MULTI_VALUE <mva>]     M
-#		[ONE_VALUE <ova>]       M
-#		[REQUIRED <required>]   M
-#		P_ARGN <p_argn>         M
-# 	)
-# If we do not specify PREFIX, the prefix is se to "__".
+#   [PREFIX <prefix>]                      // Variable prefix for parsed arguments, results in "<prefix>_" var prefix
+#                                          // (default: "_", results in "__" prefix)
+#   [OPTIONS <option>...]                  // Boolean arguments that require ON/OFF/TRUE/FALSE values
+#   [ONE_VALUE <one_value_keyword>...]     // Single-value arguments (takes first value if multiple provided)
+#   [MULTI_VALUE <multi_value_keyword>...] // Multi-value arguments that accept a list of values
+#   [REQUIRED <required_keyword>...]       // Arguments that must be provided (FATAL_ERROR if missing)
+#   P_ARGN <argument>...                   // Argument list to parse (ARGN of the calling function)
+# )
 #
-# If we do not specify argument listed in MULTI_VALUE, ONE_VALUE
-# the arguments is UNDEFINED. So we can use IF(DEFINED) statement.
-#
-# If we do not specify argument listed in OPTIONS - arguments
-# are false!
+# BEHAVIOR:
+#   - Default prefix: "__" (underscore + underscore)
+#   - Custom prefix: "<prefix>_" (custom + underscore)
+#   - OPTIONS default to FALSE, set to TRUE with ON/TRUE values
+#   - Undefined ONE_VALUE/MULTI_VALUE arguments are not defined
+#     (use IF(DEFINED) to check if argument was provided)
+#   - Empty string values may result in undefined variables
 #
 MACRO(CMLIB_PARSE_ARGUMENTS)
 	SET(options)
@@ -61,21 +62,28 @@ ENDMACRO()
 
 
 ##
+# CMLIB_PARSE_ARGUMENTS_CLEANUP - Clean up internal variables created by CMLIB_PARSE_ARGUMENTS macro
 #
-# Cleanup context after CMLIB_PARSE_ARGUMENTS call.
+# <function>()
 #
-# Because the CMLIB_PARSE_ARGUMENTS is a macro and use variables it can
-# mess up the context in which the function is called.
-# This function just clean up all local variables from CMLIB_PARSE_ARGUMENTS
+# Required when CMLIB_PARSE_ARGUMENTS is called within a MACRO
+# Optional in FUNCTION contexts (automatic cleanup)
 #
-# Usable if CMLIB_PARSE_ARGUMENTS is called in MACRO.
-#
-# <function>(
-# )
+# VARIABLES CLEANED:
+#   All internal variables created by CMLIB_PARSE_ARGUMENTS including:
+#   options, multi_value_args, one_value_args, _tmp_*, opt, req
 #
 MACRO(CMLIB_PARSE_ARGUMENTS_CLEANUP)
 	UNSET(options)
 	UNSET(multi_value_args)
 	UNSET(one_value_args)
 	UNSET(_tmp)
+	UNSET(_tmp_PREFIX)
+	UNSET(_tmp_P_ARGN)
+	UNSET(_tmp_REQUIRED)
+	UNSET(_tmp_OPTIONS)
+	UNSET(_tmp_ONE_VALUE)
+	UNSET(_tmp_MULTI_VALUE)
+	UNSET(opt)
+	UNSET(req)
 ENDMACRO()

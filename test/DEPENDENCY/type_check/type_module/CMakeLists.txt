@@ -1,0 +1,36 @@
+## TYPE=MODULE Test
+#
+# Test DEPENDENCY with TYPE=MODULE and validate function availability
+#
+
+IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+    CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
+    PROJECT(CMLIB_DEPENDENCY_TYPE_MODULE_TEST)
+ENDIF()
+
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../")
+FIND_PACKAGE(CMLIB)
+
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../TEST.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../test_resources/test_resources.cmake")
+
+# Pre-checks: Verify functions are NOT already declared
+IF(COMMAND TEST_MODULE_MACRO)
+    MESSAGE(FATAL_ERROR "TEST_MODULE_MACRO already declared before DEPENDENCY")
+ENDIF()
+
+TEST_RESOURCES_GET_FILE_URI("TEST_MODULE.cmake" FILE_URI)
+
+CMLIB_DEPENDENCY(
+    TYPE MODULE
+    URI "${FILE_URI}"
+)
+INCLUDE(TEST_MODULE)
+
+# Post-checks: Verify functions ARE now available
+IF(NOT COMMAND TEST_MODULE_MACRO)
+    MESSAGE(FATAL_ERROR "TEST_MODULE_MACRO not available after MODULE dependency")
+ENDIF()
+
+# Test that the functions work correctly
+TEST_MODULE_MACRO()

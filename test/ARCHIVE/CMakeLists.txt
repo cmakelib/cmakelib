@@ -76,13 +76,17 @@ TEST_INVALID_OUTPUT_ARG()
 TEST_EXTRACT(archive.zip "")
 TEST_EXTRACT(archive.bz2 "")
 TEST_EXTRACT(archive.gz "")
+TEST_EXTRACT(archive.xz "")
 TEST_EXTRACT(archive_tar.tar "")
 TEST_EXTRACT(archive_tar.tar.bz2 "")
+TEST_EXTRACT(archive.tar.xz "")
 
 TEST_EXTRACT(archive_tar_bz2 TAR.BZ2)
 TEST_EXTRACT(archive_tar_gz TAR.GZ)
+TEST_EXTRACT(archive_tar_xz TAR.XZ)
 TEST_EXTRACT(archive_zip ZIP)
 TEST_EXTRACT(archive_tar TAR)
+TEST_EXTRACT(archive_xz XZ)
 
 # Under windowswe do not want to use symlinks in tar
 CMAKE_HOST_SYSTEM_INFORMATION(RESULT system_name QUERY OS_NAME)

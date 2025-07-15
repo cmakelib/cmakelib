@@ -4,16 +4,39 @@ IF(NOT  DEFINED CMAKE_SCRIPT_MODE_FILE)
 	PROJECT(CMLIB_CACHE_TEST)
 ENDIF()
 
+SET(_CMLIB_TEST_GIT_ARCHIVE ON
+	CACHE BOOL
+	"Test git archive functionality. Set to OFF if you do not have SSH key added to the test repository."
+)
+
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
 FIND_PACKAGE(CMLIB)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../transform_git_uri.cmake")
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../TEST.cmake")
 
-SET(VALID_HTTP_URI   "http://cmake.org/")
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test/archive/v1.0.0.zip"
+    OUTPUT_VAR VALID_HTTP_URI
+)
 SET(INVALID_HTTP_URI "http://cmake-does-not-exist.org/")
-SET(VALID_GIT_URI    "https://github.com/cmakelib/cmakelib-test.git")
 SET(INVALID_GIT_URI  "https://github.com/cmakelib/utils-does-not-exist.git")
-SET(VALID_GIT_URI_ARCHIVE "git@gitlab.com:cmakelib/cmakelib-test.git")
+TRANSFORM_GIT_URI_TO_HTTPS(
+    URI        "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+    OUTPUT_VAR VALID_GIT_URI
+)
+
+IF(_CMLIB_TEST_GIT_ARCHIVE)
+	# Explicitly set the URI to the one which supports 'git archive'.
+	# Unfortunately Github does not support 'git archive' so lets use gitlab fork of cmakelib-test
+	SET(VALID_GIT_URI_ARCHIVE "git@gitlab.com:cmakelib/cmakelib-test.git")
+ELSE()
+	TRANSFORM_GIT_URI(
+		URI        "${CMLIB_REQUIRED_ENV_REMOTE_URL}/cmakelib-test.git"
+		OUTPUT_VAR VALID_GIT_URI_ARCHIVE
+	)
+ENDIF()
+
 SET(VALID_GIT_FILE_PATH   "cmake/README.txt")
 SET(INVALID_GIT_FILE_PATH "cmake/README_not_found")
 SET(VALID_GIT_REVISION_FILE_PATH      "cmake-test/test_branch_README.txt")
@@ -48,6 +71,7 @@ FUNCTION(HTTP_DOWNLOAD)
 	)
 	TEST_VAR_TRUE(status)
 	TEST_VAR_PATH_EXISTS(output_path)
+	FILE(REMOVE "${output_path}")
 ENDFUNCTION()
 
 FUNCTION(HTTP_DOWNLOAD_URI_TYPE)
@@ -297,10 +321,14 @@ FUNCTION(GIT_DOWNLOAD_BY_ARCHIVE)
 	)
 	SET(output_path "${CMAKE_CURRENT_LIST_DIR}/git_archive_test")
 	CMLIB_FILE_DOWNLOAD(
-		URI "${VALID_GIT_URI_ARCHIVE}"
-		URI_TYPE GIT
+		URI         "${VALID_GIT_URI_ARCHIVE}"
+		URI_TYPE    GIT
+		STATUS_VAR  status
 		OUTPUT_PATH "${output_path}"
 	)
+	IF(NOT status)
+		MESSAGE(FATAL_ERROR "Download by archive failed!")
+	ENDIF()
 	FILE(GLOB_RECURSE glob "${output_path}/*")
 	LIST(LENGTH glob downloaded_files_size)
 	IF(NOT (downloaded_files_size EQUAL 9))
@@ -336,11 +364,14 @@ GIT_DOWNLOAD_DIRECTORY(ON OFF ON)
 GIT_DOWNLOAD_DIRECTORY(OFF ON OFF)
 GIT_COUNT_FILES()
 
-#
-# 'git archive' need an access thru SSH
-# Disable this test if you do not have a SSH key added to the test repo
-#
-GIT_DOWNLOAD_BY_ARCHIVE()
+IF(_CMLIB_TEST_GIT_ARCHIVE)
+	#
+	# 'git archive' need an access thru SSH
+	# Disable this test by setting _CMLIB_TEST_GIT_ARCHIVE to OFF
+	# if you do not have a SSH key added to the test repo...
+	#
+	GIT_DOWNLOAD_BY_ARCHIVE()
+ENDIF()
 
 TEST_INVALID_CMAKE_RUN(archive_requirements_test
 	"CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_ONLY AND\n +CMLIB_FILE_DOWNLOAD_GIT_ARCHIVE_DISABLE are on together! Conflict state!")

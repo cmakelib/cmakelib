@@ -39,13 +39,13 @@ _CMLIB_LIBRARY_MANAGER(CMLIB_PARSE_ARGUMENTS)
 #
 # ARCHIVE_TMP Directory is cleaned (deleted) at the end of function call
 # (except one exception: If CMLIB is in debug mode, the ARCHIVE_TMP is not deleted
-# at the anf of function call)
+# at the end of function call)
 #
 # <function>(
 #		ARCHIVE_PATH     <archive_path>
 #		OUTPUT_DIRECTORY <output_directory>
 #		OUTPUT_PATH_VAR  <output_path_var>
-#		[ARCHIVE_TYPE <ZIP|7Z|BZ2|GZ|TAR.BZ2|TAR.GZ>]
+#		[ARCHIVE_TYPE <ZIP|7Z|BZ2|GZ|XZ|TAR.BZ2|TAR.GZ|TAR.XZ>]
 # )
 #
 FUNCTION(CMLIB_ARCHIVE_EXTRACT)
@@ -143,12 +143,14 @@ ENDFUNCTION()
 # )
 #
 FUNCTION(_CMLIB_ARCHIVE_VALIDATE_ARCHIVE_TYPE archive_type)
-	IF(("${archive_type}" STREQUAL "TAR.BZ2")     OR
-			("${archive_type}" STREQUAL "TAR.GZ") OR
-			("${archive_type}" STREQUAL "BZ2")    OR
-			("${archive_type}" STREQUAL "GZ")     OR
-			("${archive_type}" STREQUAL "TAR")    OR
-			("${archive_type}" STREQUAL "ZIP")    OR
+	IF(("${archive_type}" STREQUAL "TAR.XZ")     OR
+			("${archive_type}" STREQUAL "TAR.BZ2") OR
+			("${archive_type}" STREQUAL "TAR.GZ")  OR
+			("${archive_type}" STREQUAL "XZ")      OR
+			("${archive_type}" STREQUAL "BZ2")     OR
+			("${archive_type}" STREQUAL "GZ")      OR
+			("${archive_type}" STREQUAL "TAR")     OR
+			("${archive_type}" STREQUAL "ZIP")     OR
 			("${archive_type}" STREQUAL "7Z"))
 		RETURN()
 	ENDIF()
@@ -168,7 +170,7 @@ ENDFUNCTION()
 #
 FUNCTION(_CMLIB_ARCHIVE_DETERMINE_ARCHIVE_TYPE filename archive_type_out)
 	STRING(TOUPPER "${filename}" filename_upper)
-	STRING(REGEX MATCH "((\\.TAR\\.BZ2)|(\\.TAR\\.GZ)|(\\.GZ)|(\\.BZ2)|(\\.TAR)|(\\.ZIP)|(\\.7Z))$" match_ok "${filename_upper}")
+	STRING(REGEX MATCH "((\\.TAR\\.XZ)|(\\.TAR\\.BZ2)|(\\.TAR\\.GZ)|(\\.XZ)|(\\.GZ)|(\\.BZ2)|(\\.TAR)|(\\.ZIP)|(\\.7Z))$" match_ok "${filename_upper}")
 	IF(match_ok)
 		STRING(REGEX REPLACE "^\\." "" _tmp "${CMAKE_MATCH_0}")
 		SET(${archive_type_out} ${_tmp} PARENT_SCOPE)
