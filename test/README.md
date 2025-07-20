@@ -9,7 +9,7 @@ Any test failure indicates CMLIB is not working as expected, even if the failure
 
 ## Run
 
-For test go to the `test/` directory and run
+For tests go to the `test/` directory and run
 
 Linux/Mac Os:
 
@@ -36,9 +36,15 @@ then just clean up all intermediate files in `test/` directory by
     git clean -xfd .
 ```
 
+## TEST.cmake validation
+
+The `TEST.cmake` functions are validated by the tests itself.
+
+Read the documentation in `TEST_FRAMEWORK/README.md` and `CMakeLists.txt` for details.
+
 ## Known Problems
 
-- git archive funcionality is not tested by cmakelib-test Github repository.
+- git archive functionality is not tested by cmakelib-test Github repository.
   - The gitlab [fork of cmakelib-test] repo is used instead as a resource for testing `git archive`.
   - The git uri to the gitlab repo is hardcoded in the `FILE_DOWNLOAD/CMakeLists.txt` test.
   - To disable the test set `_CMLIB_TEST_GIT_ARCHIVE` to `OFF` manually in the `FILE_DOWNLOAD/CMakeLists.txt` before running the test.

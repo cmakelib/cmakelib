@@ -1,0 +1,7 @@
+## Test TEST_VAR_PATH_NOT_EXISTS failure case - existing directory
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../")
+FIND_PACKAGE(CMLIB REQUIRED)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../TEST.cmake")
+
+SET(test_existing_dir "${CMAKE_CURRENT_LIST_DIR}")
+TEST_VAR_PATH_NOT_EXISTS(test_existing_dir)

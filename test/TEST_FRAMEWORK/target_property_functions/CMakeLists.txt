@@ -1,0 +1,36 @@
+## Test Target Property Functions
+#
+#
+
+IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+	CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
+	PROJECT(TEST_TARGET_PROPERTY_FUNCTIONS)
+ENDIF()
+
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
+FIND_PACKAGE(CMLIB REQUIRED)
+
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../TEST.cmake")
+
+# Target property functions require project mode (not script mode)
+IF(DEFINED CMAKE_SCRIPT_MODE_FILE)
+	RETURN()
+ENDIF()
+
+ADD_CUSTOM_TARGET(test_target_with_props)
+SET_TARGET_PROPERTIES(test_target_with_props PROPERTIES
+	CUSTOM_PROP_EXACT "exact_test_value"
+	CUSTOM_PROP_PATTERN "this_contains_pattern_match"
+)
+
+ADD_CUSTOM_TARGET(test_target_no_props)
+
+TEST_CHECK_TARGET_HAS_PROPERTY(test_target_with_props CUSTOM_PROP_EXACT)
+TEST_CHECK_TARGET_LACKS_PROPERTY(test_target_no_props CUSTOM_PROP_EXACT)
+TEST_CHECK_TARGET_PROPERTY(test_target_with_props CUSTOM_PROP_EXACT "exact_test_value")
+TEST_CHECK_TARGET_PROPERTY_CONTAINS(test_target_with_props CUSTOM_PROP_PATTERN "pattern")
+
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/fail_target_has_property")
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/fail_target_lacks_property")
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/fail_target_property")
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/fail_target_property_contains")
