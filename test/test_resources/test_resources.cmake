@@ -27,11 +27,12 @@ SET(_TEST_RESOURCES_DOWNLOAD_ENABLED
     CACHE INTERNAL "Test resources directory"
 )
 
+# Do not cache the error message otherwise CMakeCache.txt will contain newlines
+# --> cmake will stip the new line.
 SET(_TEST_RESOURCES_ERR_MSG [[
 Test Resources are not downloaded! Use TEST_RESOURCES_DOWNLOAD(). Is there a possibility the test is not called from test/CMakeLists.txt?
 Test Resources can be downloaded manually - go to test_resources directory and run 'cmake -P ./test_resources_download.cmake'
 ]]
-    CACHE INTERNAL "Test resources error message"
 )
 
 

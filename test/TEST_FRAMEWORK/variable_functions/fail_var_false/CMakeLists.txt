@@ -1,0 +1,7 @@
+## Test TEST_VAR_FALSE failure case
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../")
+FIND_PACKAGE(CMLIB REQUIRED)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../TEST.cmake")
+
+SET(test_var_true "ON")
+TEST_VAR_FALSE(test_var_true)

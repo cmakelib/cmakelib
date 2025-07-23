@@ -1,0 +1,19 @@
+## Main
+#
+# Tests the core TEST execution functions: TEST_RUN, TEST_INVALID_CMAKE_RUN, TEST_RUN_AND_CHECK_OUTPUT
+# This ensures the testing framework itself is reliable and trustworthy.
+#
+
+IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+	CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
+	PROJECT(TEST_FRAMEWORK_EXECUTION_FUNCTIONS)
+ENDIF()
+
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../")
+FIND_PACKAGE(CMLIB REQUIRED)
+
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../TEST.cmake")
+
+TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/test_invalid_cmake_run")
+TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/test_run")
+TEST_RUN("${CMAKE_CURRENT_LIST_DIR}/test_run_and_check_output")

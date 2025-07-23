@@ -1,0 +1,36 @@
+## Test CACHE_VAR_RESTORE when originally_defined=FALSE
+
+IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
+	CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
+	PROJECT(TEST_CACHE_VAR_RESTORE_ORIGINALLY_UNDEFINED)
+ENDIF()
+
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../../")
+FIND_PACKAGE(CMLIB REQUIRED)
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../TEST.cmake")
+INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../cache_var.cmake")
+
+MACRO(TEST_CACHE_VAR_NOT_DEFINED var_name)
+	GET_PROPERTY(is_defined CACHE ${var_name} PROPERTY VALUE SET)
+	IF(is_defined)
+		MESSAGE(FATAL_ERROR "Cache variable ${var_name} is defined")
+	ENDIF()
+ENDMACRO()
+
+MACRO(TEST_GLOBAL_PROPERTY_NOT_DEFINED property_name)
+	GET_PROPERTY(is_defined GLOBAL PROPERTY ${property_name} SET)
+	IF(is_defined)
+		MESSAGE(FATAL_ERROR "Global property ${property_name} is defined")
+	ENDIF()
+ENDMACRO()
+
+SET(test_var_name "TEST_RESTORE_ORIGINALLY_UNDEFINED_VAR")
+
+# Manually set up the global properties as if CACHE_VAR_FORCE_SET was called on an undefined variable
+SET_PROPERTY(GLOBAL PROPERTY "CACHE_VAR_WAS_DEFINED_${test_var_name}" FALSE)
+
+CACHE_VAR_RESTORE(${test_var_name})
+
+TEST_CACHE_VAR_NOT_DEFINED(${test_var_name})
+TEST_GLOBAL_PROPERTY_NOT_DEFINED("CACHE_VAR_WAS_DEFINED_${test_var_name}")
+TEST_GLOBAL_PROPERTY_NOT_DEFINED("CACHE_VAR_ORIGINAL_${test_var_name}")
