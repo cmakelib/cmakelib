@@ -220,10 +220,10 @@ ENDFUNCTION()
 #     FATAL_ERROR_MESSAGE <fatal_message_str>    # Check fatal error in stderr
 # )
 FUNCTION(TEST_RUN_AND_CHECK_OUTPUT test_name)
-	MESSAGE(STATUS "TEST FAIL AND CHECK OUTPUT ${test_name}")
+	MESSAGE(STATUS "TEST_RUN_AND_CHECK_OUTPUT ${test_name}")
     CMLIB_PARSE_ARGUMENTS(
         PREFIX TEST_RUN
-        ONE_VALUE WARNING_MESSAGE WARNING_ERROR_MESSAGE FATAL_ERROR_MESSAGE
+        ONE_VALUE WARNING_MESSAGE FATAL_ERROR_MESSAGE
         P_ARGN ${ARGN}
     )
 	GET_FILENAME_COMPONENT(_file_name "${test_name}" NAME)
@@ -232,10 +232,20 @@ FUNCTION(TEST_RUN_AND_CHECK_OUTPUT test_name)
 		MESSAGE(FATAL_ERROR "Only name of the test could be there!")
 	ENDIF()
 
+	IF(IS_ABSOLUTE "${test_name}")
+		MESSAGE(FATAL_ERROR "Only relative path could be there!")
+	ENDIF()
+
+	SET(script_mode)
+	IF(DEFINED CMAKE_SCRIPT_MODE_FILE)
+		SET(test_name "${test_name}/CMakeLists.txt")
+		SET(script_mode "-P")
+	ENDIF()
+
 	SET(working_dir "${CMAKE_CURRENT_LIST_DIR}")
     FILE(MAKE_DIRECTORY "${working_dir}/build")
     EXECUTE_PROCESS(
-        COMMAND ${CMAKE_COMMAND} "../${test_name}"
+        COMMAND ${CMAKE_COMMAND} ${script_mode} "../${test_name}"
         WORKING_DIRECTORY "${working_dir}/build"
         OUTPUT_VARIABLE output
         ERROR_VARIABLE error
