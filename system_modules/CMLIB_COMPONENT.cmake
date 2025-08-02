@@ -16,7 +16,7 @@ SET(_CMLIB_COMPONENT_REPO_NAME_PREFIX "cmakelib-component-"
 	"Filename prefix for components."
 )
 
-SET(_CMLIB_COMPONENT_AVAILABLE_LIST cmdef storage cmutil
+SET(_CMLIB_COMPONENT_AVAILABLE_LIST cmdef storage cmutil cmconf
 	CACHE INTERNAL
 	"List of available components."
 )
@@ -44,6 +44,11 @@ SET(CMLIB_COMPONENT_REVISION_STORAGE "v1.0.0"
 SET(CMLIB_COMPONENT_REVISION_CMUTIL "v1.1.0"
 	CACHE STRING
 	"Revision of CMUTIL component to use"
+)
+
+SET(CMLIB_COMPONENT_REVISION_CMCONF "v1.0.0"
+	CACHE STRING
+	"Revision of CMCONF component to use"
 )
 
 _CMLIB_LIBRARY_MANAGER(CMLIB_REQUIRED_ENV)
