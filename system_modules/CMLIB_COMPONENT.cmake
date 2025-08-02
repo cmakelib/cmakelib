@@ -147,12 +147,13 @@ FUNCTION(_CMLIB_COMPONENT)
 			_CMLIB_COMPONENT_GET_REVISION(component_revision ${component_upper})
 			SET(component_uri ${CMLIB_REQUIRED_ENV_REMOTE_URL}/${component_dir_name})
 			_CMLIB_LIBRARY_DEBUG_MESSAGE("CMLIB_COMPONENT: ${component_uri}")
+			# TODO test are needed to check if the GIT_REVISION is taken in place!
 			CMLIB_DEPENDENCY(
 				KEYWORDS CMLIB COMPONENT ${component_upper}
 				TYPE MODULE
 				URI "${component_uri}"
 				URI_TYPE GIT
-				REVISION ${component_revision}
+				GIT_REVISION ${component_revision}
 				OUTPUT_PATH_VAR component_path
 			)
 		ENDIF()
