@@ -23,6 +23,17 @@ SET(CMLIB_FILE_DOWNLOAD_DEFAULT_REVISION "master"
 	"Git repository default branch"
 )
 
+#
+# In most cases HTTP HEADER needs to be set
+# once pre project and are shared across all download operations.
+# Therefore it does not make sense to set it per download operation
+# And mess up parameter set for CMLIB_FILE_DOWNLOAD.
+#
+SET(CMLIB_FILE_DOWNLOAD_HTTP_HEADER ""
+	CACHE STRING
+	"HTTP header for File Download. Exactly one headerline can be specified! Example: Authorization: Bearer <token>"
+)
+
 SET(CMLIB_FILE_DOWNLOAD_TIMEOUT 100
 	CACHE INTERNAL
 	"Inactivity timeout for File Download"
@@ -271,6 +282,12 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_STANDARD_URI)
 	_CMLIB_FILE_DETERMINE_FILENAME_FROM_URI("${__URI}" "${__URI_TYPE}" "" filename)
 	_CMLIB_LIBRARY_DEBUG_MESSAGE("URI Download: ${__URI} --> '${tmp_dir}/${filename}'")
 
+	SET(http_header)
+	IF(CMLIB_FILE_DOWNLOAD_HTTP_HEADER)
+		SET(http_header HTTPHEADER "${CMLIB_FILE_DOWNLOAD_HTTP_HEADERS}")
+		_CMLIB_LIBRARY_DEBUG_MESSAGE("HTTP Header: ${CMLIB_FILE_DOWNLOAD_HTTP_HEADER}'")
+	ENDIF()
+
 	SET(show_progress_arg)
 	IF(CMLIB_FILE_DOWNLOAD_SHOW_PROGRESS)
 		SET(show_progress_arg SHOW_PROGRESS)
@@ -281,6 +298,7 @@ FUNCTION(_CMLIB_FILE_DOWNLOAD_FROM_STANDARD_URI)
 		${show_progress_arg}
 		INACTIVITY_TIMEOUT ${CMLIB_FILE_DOWNLOAD_TIMEOUT}
 		STATUS download_status_list
+		${http_header}
 	)
 	LIST(GET download_status_list 0 status)
 	IF(status)
