@@ -205,6 +205,7 @@ FUNCTION(TEST_RUN test)
 			ERROR_VARIABLE error_variable
 			OUTPUT_VARIABLE output_variable
 		)
+		FILE(REMOVE_RECURSE "${working_dir}/build")
 	ENDIF()
 
 	IF(result_variable GREATER 0)
