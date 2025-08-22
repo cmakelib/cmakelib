@@ -9,5 +9,5 @@ FIND_PACKAGE(CMLIB REQUIRED)
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../TEST.cmake")
 
-TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/test_invalid_cmake_run_should_fail" 
+TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/should_fail"
                        "some error")

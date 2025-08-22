@@ -9,5 +9,5 @@ FIND_PACKAGE(CMLIB REQUIRED)
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../../TEST.cmake")
 
-TEST_RUN_AND_CHECK_OUTPUT("test_output_fatal_should_fail_missing"
+TEST_RUN_AND_CHECK_OUTPUT("should_fail_missing"
 	FATAL_ERROR_MESSAGE "Test fatal error message")

@@ -10,5 +10,5 @@ FIND_PACKAGE(CMLIB REQUIRED)
 
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../../TEST.cmake")
 
-TEST_RUN_AND_CHECK_OUTPUT("test_output_warning_should_fail_project_fails"
+TEST_RUN_AND_CHECK_OUTPUT("should_fail_project_fails"
 	WARNING_MESSAGE "Test warning message")

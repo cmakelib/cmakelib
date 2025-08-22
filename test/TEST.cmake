@@ -216,14 +216,19 @@ ENDFUNCTION()
 # Function to run a test and check its output
 # Usage:
 # <function>(<test>
-#     WARNING_MESSAGE <wrn_message_str>          # Check warning in stdout
-#     FATAL_ERROR_MESSAGE <fatal_message_str>    # Check fatal error in stderr
+#     WARNING_MESSAGE <wrn_message_str>         # Check warning in stdout
+#     FATAL_ERROR_MESSAGE <fatal_message_str>   # Check fatal error in stderr
+#     ALWAYS_SCRIPT_MODE  <ON|OFF>              # Run test in script mode even if not in script mode
 # )
 FUNCTION(TEST_RUN_AND_CHECK_OUTPUT test_name)
 	MESSAGE(STATUS "TEST_RUN_AND_CHECK_OUTPUT ${test_name}")
     CMLIB_PARSE_ARGUMENTS(
-        PREFIX TEST_RUN
-        ONE_VALUE WARNING_MESSAGE FATAL_ERROR_MESSAGE
+        PREFIX
+			TEST_RUN
+        ONE_VALUE
+			WARNING_MESSAGE FATAL_ERROR_MESSAGE
+		OPTIONS
+			ALWAYS_SCRIPT_MODE
         P_ARGN ${ARGN}
     )
 	GET_FILENAME_COMPONENT(_file_name "${test_name}" NAME)
@@ -237,7 +242,7 @@ FUNCTION(TEST_RUN_AND_CHECK_OUTPUT test_name)
 	ENDIF()
 
 	SET(script_mode)
-	IF(DEFINED CMAKE_SCRIPT_MODE_FILE)
+	IF(DEFINED CMAKE_SCRIPT_MODE_FILE OR TEST_RUN_ALWAYS_SCRIPT_MODE)
 		SET(test_name "${test_name}/CMakeLists.txt")
 		SET(script_mode "-P")
 	ENDIF()

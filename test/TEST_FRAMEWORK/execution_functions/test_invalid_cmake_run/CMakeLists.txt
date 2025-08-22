@@ -37,7 +37,7 @@ ENDFUNCTION()
 # We call TEST_INVALID_CMAKE_RUN directly because we expect it to pass
 #
 FUNCTION(TEST_INVALID_CMAKE_RUN_CASE_2_SHOULD_PASS)
-	TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/test_invalid_cmake_run_should_pass_match" 
+	TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/should_pass_match"
 	                       "Variable.*is not defined")
 	MESSAGE(STATUS "TEST_INVALID_CMAKE_RUN case 2 (should pass): PASSED")
 ENDFUNCTION()

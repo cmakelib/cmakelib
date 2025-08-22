@@ -16,9 +16,34 @@ INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../../../../TEST.cmake")
 # We call TEST_RUN_AND_CHECK_OUTPUT directly because we expect it to pass
 #
 FUNCTION(TEST_WARNING_CASE_1_SHOULD_PASS)
-	TEST_RUN_AND_CHECK_OUTPUT("test_output_warning_should_pass"
+	TEST_RUN_AND_CHECK_OUTPUT("should_pass"
 		WARNING_MESSAGE "Test warning message")
 	MESSAGE(STATUS "TEST_RUN_AND_CHECK_OUTPUT warning case 1 (should pass): PASSED")
+ENDFUNCTION()
+
+##
+#
+# Test Case 1: Should PASS (warning present and matches) in script mode
+#
+FUNCTION(TEST_WARNING_CASE_1_SCRIPT_MODE_SHOULD_PASS)
+	TEST_RUN_AND_CHECK_OUTPUT("should_pass"
+		WARNING_MESSAGE "Test warning message[^\n]*Mode=SCRIPT"
+		ALWAYS_SCRIPT_MODE ON)
+ENDFUNCTION()
+
+##
+#
+# Test Case 1: Should PASS (warning present and matches) in project mode
+#
+FUNCTION(TEST_WARNING_CASE_1_PROJECT_MODE_SHOULD_PASS)
+	IF(DEFINED CMAKE_SCRIPT_MODE_FILE)
+		SET(mode "SCRIPT")
+	ELSE()
+		SET(mode "PROJECT")
+	ENDIF()
+	TEST_RUN_AND_CHECK_OUTPUT("should_pass"
+		WARNING_MESSAGE "Test warning message[^\n]*Mode=${mode}"
+		ALWAYS_SCRIPT_MODE OFF)
 ENDFUNCTION()
 
 ##
@@ -33,16 +58,14 @@ FUNCTION(TEST_WARNING_CASE_2_SHOULD_FAIL)
 		ERROR_VARIABLE error_output
 		OUTPUT_VARIABLE output
 	)
-	
+
 	IF(result EQUAL 0)
 		MESSAGE(FATAL_ERROR "TEST_RUN_AND_CHECK_OUTPUT should have failed when warning missing but didn't")
 	ENDIF()
-	
+
 	IF(NOT error_output MATCHES "Expected WARNING message not found")
 		MESSAGE(FATAL_ERROR "TEST_RUN_AND_CHECK_OUTPUT failed for wrong reason: ${error_output}")
 	ENDIF()
-	
-	MESSAGE(STATUS "TEST_RUN_AND_CHECK_OUTPUT warning case 2 (should fail): PASSED")
 ENDFUNCTION()
 
 ##
@@ -57,16 +80,14 @@ FUNCTION(TEST_WARNING_CASE_3_SHOULD_FAIL)
 		ERROR_VARIABLE error_output
 		OUTPUT_VARIABLE output
 	)
-	
+
 	IF(result EQUAL 0)
 		MESSAGE(FATAL_ERROR "TEST_RUN_AND_CHECK_OUTPUT should have failed when warning doesn't match but didn't")
 	ENDIF()
-	
+
 	IF(NOT error_output MATCHES "Expected WARNING message not found")
 		MESSAGE(FATAL_ERROR "TEST_RUN_AND_CHECK_OUTPUT failed for wrong reason: ${error_output}")
 	ENDIF()
-	
-	MESSAGE(STATUS "TEST_RUN_AND_CHECK_OUTPUT warning case 3 (should fail): PASSED")
 ENDFUNCTION()
 
 ##
@@ -81,21 +102,21 @@ FUNCTION(TEST_WARNING_CASE_4_SHOULD_FAIL)
 		ERROR_VARIABLE error_output
 		OUTPUT_VARIABLE output
 	)
-	
+
 	IF(result EQUAL 0)
 		MESSAGE(FATAL_ERROR "TEST_RUN_AND_CHECK_OUTPUT should have failed when project fails but didn't")
 	ENDIF()
-	
+
 	IF(NOT error_output MATCHES "Expected process to succeed but it failed")
 		MESSAGE(FATAL_ERROR "TEST_RUN_AND_CHECK_OUTPUT failed for wrong reason: ${error_output}")
 	ENDIF()
-	
-	MESSAGE(STATUS "TEST_RUN_AND_CHECK_OUTPUT warning case 4 (should fail): PASSED")
 ENDFUNCTION()
 
 
 
 TEST_WARNING_CASE_1_SHOULD_PASS()
+TEST_WARNING_CASE_1_SCRIPT_MODE_SHOULD_PASS()
+TEST_WARNING_CASE_1_PROJECT_MODE_SHOULD_PASS()
 TEST_WARNING_CASE_2_SHOULD_FAIL()
 TEST_WARNING_CASE_3_SHOULD_FAIL()
 TEST_WARNING_CASE_4_SHOULD_FAIL()
