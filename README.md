@@ -229,4 +229,5 @@ Project is licensed under [BSD-3-Clause License](LICENSE)
 [github packages]:       https://github.com/orgs/cmakelib/packages
 [test/]:                 ./test/
 [test/README.md]:        ./test/README.md
+[doc/ReleaseProcess.md]: ./doc/ReleaseProcess.md
 [example/DEPENDENCY/nlohmann_json_example]: ./example/DEPENDENCY/nlohmann_json_example/
