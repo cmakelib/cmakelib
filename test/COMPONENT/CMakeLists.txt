@@ -4,8 +4,8 @@
 #
 
 #
-# Some components are not able top run in script mode
-# Lets skip the test then.
+# Some components require different setup in script mode.
+# Skip CMAKE_MINIMUM_REQUIRED and PROJECT declarations when in script mode.
 #
 IF(NOT DEFINED CMAKE_SCRIPT_MODE_FILE)
 	CMAKE_MINIMUM_REQUIRED(VERSION 3.18)
