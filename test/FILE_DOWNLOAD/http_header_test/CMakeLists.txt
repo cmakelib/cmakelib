@@ -23,7 +23,7 @@ FOREACH(header_value IN ITEMS "${test_header_value}" "")
     EXECUTE_PROCESS(
         COMMAND "${CMAKE_COMMAND}"
             --trace-expand
-            --trace-source=${CMLIB_PATH}/system_modules/CMLIB_FILE_DOWNLOAD.cmake
+            "--trace-source=${CMLIB_PATH}/system_modules/CMLIB_FILE_DOWNLOAD.cmake"
             ${header_arg}
             -P "${CMAKE_CURRENT_LIST_DIR}/http_header_download.cmake"
         RESULT_VARIABLE result
@@ -41,8 +41,8 @@ FOREACH(header_value IN ITEMS "${test_header_value}" "")
         MESSAGE(FATAL_ERROR "Expected exactly 1 FILE(DOWNLOAD) call, found ${_download_count}.\nTrace output:\n${trace_output}")
     ENDIF()
 
-    STRING(REPLACE "\n"   " " trace_oneline "${trace_output}")
-    STRING(REPLACE "\n\r" " " trace_oneline "${trace_output}")
+    STRING(REPLACE "\r\n" " " trace_oneline "${trace_output}")
+    STRING(REPLACE "\n"   " " trace_oneline "${trace_oneline}")
     IF(header_value)
         STRING(REGEX MATCH "FILE\\(DOWNLOAD .+HTTPHEADER.+${header_value}" _match "${trace_oneline}")
         IF(NOT _match)
