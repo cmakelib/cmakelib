@@ -33,13 +33,12 @@ FUNCTION(TEST_INVALID_CMAKE_RUN_CASE_1_SHOULD_FAIL)
 ENDFUNCTION()
 
 ##
-# Test Case 2: Should PASS (project fails with matching error)
-# We call TEST_INVALID_CMAKE_RUN directly because we expect it to pass
+# Test Case 2: Should PASS (absolute path, project fails with matching error)
 #
-FUNCTION(TEST_INVALID_CMAKE_RUN_CASE_2_SHOULD_PASS)
+FUNCTION(TEST_INVALID_CMAKE_RUN_CASE_2_SHOULD_PASS_ABSOLUTE)
 	TEST_INVALID_CMAKE_RUN("${CMAKE_CURRENT_LIST_DIR}/should_pass_match"
 	                       "Variable.*is not defined")
-	MESSAGE(STATUS "TEST_INVALID_CMAKE_RUN case 2 (should pass): PASSED")
+	MESSAGE(STATUS "TEST_INVALID_CMAKE_RUN case 2 (should pass, absolute path): PASSED")
 ENDFUNCTION()
 
 ##
@@ -66,6 +65,17 @@ FUNCTION(TEST_INVALID_CMAKE_RUN_CASE_3_SHOULD_FAIL)
 	MESSAGE(STATUS "TEST_INVALID_CMAKE_RUN case 3 (should fail): PASSED")
 ENDFUNCTION()
 
+##
+# Test Case 4: Should PASS (relative path, project fails with matching error)
+# Same as Case 2 but uses a relative path instead of absolute
+#
+FUNCTION(TEST_INVALID_CMAKE_RUN_CASE_4_SHOULD_PASS_RELATIVE)
+	TEST_INVALID_CMAKE_RUN("should_pass_match"
+	                       "Variable.*is not defined")
+	MESSAGE(STATUS "TEST_INVALID_CMAKE_RUN case 4 (should pass, relative path): PASSED")
+ENDFUNCTION()
+
 TEST_INVALID_CMAKE_RUN_CASE_1_SHOULD_FAIL()
-TEST_INVALID_CMAKE_RUN_CASE_2_SHOULD_PASS()
+TEST_INVALID_CMAKE_RUN_CASE_2_SHOULD_PASS_ABSOLUTE()
 TEST_INVALID_CMAKE_RUN_CASE_3_SHOULD_FAIL()
+TEST_INVALID_CMAKE_RUN_CASE_4_SHOULD_PASS_RELATIVE()
